@@ -1,0 +1,59 @@
+---
+title: "`r params$title`"
+output: html_document
+date: "`r Sys.Date()`"
+params:
+  title: title
+  result: result
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(gt)
+```
+
+## Result overview
+
+```{r}
+summary(result)
+```
+
+```{r}
+omopgenerics::settings(result)
+```
+
+# Index event breakdown
+```{r}
+if(any("cohort_code_use" == omopgenerics::settings(result) |> 
+   dplyr::pull("result_type")) == TRUE){
+CodelistGenerator::tableCohortCodeUse(result = result)
+}
+```
+
+# Cohort overlap
+
+```{r}
+if(any("cohort_overlap" == omopgenerics::settings(result) |> 
+   dplyr::pull("result_type")) == TRUE){
+CohortCharacteristics::plotCohortOverlap(result)
+}
+```
+
+
+```{r}
+if(any("cohort_timing" == omopgenerics::settings(result) |> 
+   dplyr::pull("result_type")) == TRUE){
+CohortCharacteristics::plotCohortTiming(result)
+}
+```
+
+# Demographics
+
+```{r}
+CohortCharacteristics::tableCharacteristics(result)
+```
+
+
