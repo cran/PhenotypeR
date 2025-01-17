@@ -16,24 +16,13 @@
 #'
 #' @examples
 #' \donttest{
-#' cdm_local <- omock::mockCdmReference() |>
-#'   omock::mockPerson(nPerson = 100) |>
-#'   omock::mockObservationPeriod() |>
-#'   omock::mockConditionOccurrence() |>
-#'   omock::mockDrugExposure() |>
-#'   omock::mockObservation() |>
-#'   omock::mockMeasurement() |>
-#'   omock::mockVisitOccurrence() |>
-#'   omock::mockProcedureOccurrence() |>
-#'   omock::mockCohort(name = "my_cohort")
-#'  db <- DBI::dbConnect(duckdb::duckdb())
-#'  cdm <- CDMConnector::copyCdmTo(con = db,
-#'                                 cdm = cdm_local,
-#'                                 schema ="main",
-#'                                 overwrite = TRUE)
+#' library(PhenotypeR)
 #'
-#'  cdm$my_cohort |> cohortDiagnostics()
-#'  CDMConnector::cdmDisconnect(cdm = cdm)
+#' cdm <- mockPhenotypeR()
+#'
+#' result <- cohortDiagnostics(cdm$my_cohort)
+#'
+#' CDMConnector::cdmDisconnect(cdm = cdm)
 #' }
 
 cohortDiagnostics <- function(cohort){
@@ -49,9 +38,16 @@ cohortDiagnostics <- function(cohort){
   results <- list()
 
   cdm[[tempCohortName]]  <- cdm[[cohortName]] |>
-    PatientProfiles::addAge(ageGroup = list(c(0, 17), c(18, 64), c(65, 150))) |>
-    PatientProfiles::addSex() |>
-    dplyr::compute(name = tempCohortName, temporary = FALSE)
+    PatientProfiles::addDemographics(age = TRUE,
+      ageGroup = list(c(0, 17), c(18, 64), c(65, 150)),
+      sex = TRUE,
+      priorObservation = FALSE,
+      futureObservation = FALSE,
+      dateOfBirth = FALSE,
+      name = tempCohortName)
+
+  cli::cli_bullets(c("*" = "Index cohort table"))
+  cdm[[tempCohortName]] <- CohortConstructor::addCohortTableIndex(cdm[[tempCohortName]])
 
   cli::cli_bullets(c("*" = "Getting cohort summary"))
   results[["cohort_summary"]] <- cdm[[tempCohortName]] |>
@@ -67,9 +63,12 @@ cohortDiagnostics <- function(cohort){
 
   cli::cli_bullets(c("*" = "Getting age density"))
   results[["cohort_density"]] <- cdm[[tempCohortName]] |>
+    PatientProfiles::addCohortName() |>
     PatientProfiles::summariseResult(
       strata    = "sex",
       includeOverallStrata = FALSE,
+      group     = "cohort_name",
+      includeOverallGroup  = FALSE,
       variables = "age",
       estimates = "density") |>
     suppressMessages()

@@ -19,12 +19,12 @@ library(dplyr)
 library(ggplot2)
 
 con <- DBI::dbConnect(duckdb::duckdb(),
-  dbdir = CDMConnector::eunomia_dir()
+  dbdir = CDMConnector::eunomiaDir()
 )
-cdm <- CDMConnector::cdm_from_con(con,
-  cdm_schem = "main",
-  write_schema = "main",
-  cdm_name = "Eunomia"
+cdm <- CDMConnector::cdmFromCon(con,
+  cdmSchema = "main",
+  writeSchema = "main",
+  cdmName = "Eunomia"
 )
 
 cdm$injuries <- conceptCohort(cdm = cdm,
@@ -40,5 +40,5 @@ cdm$injuries |>
 
 ## -----------------------------------------------------------------------------
 code_diag <- codelistDiagnostics(cdm$injuries)
-tableCohortCodeUse(code_diag)
+#tableCohortCodeUse(code_diag)
 

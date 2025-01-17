@@ -21,24 +21,13 @@
 #'
 #' @examples
 #' \donttest{
-#' cdm_local <- omock::mockCdmReference() |>
-#'   omock::mockPerson(nPerson = 100) |>
-#'   omock::mockObservationPeriod() |>
-#'   omock::mockConditionOccurrence() |>
-#'   omock::mockDrugExposure() |>
-#'   omock::mockObservation() |>
-#'   omock::mockMeasurement() |>
-#'   omock::mockVisitOccurrence() |>
-#'   omock::mockProcedureOccurrence() |>
-#'   omock::mockCohort(name = "my_cohort")
+#' library(PhenotypeR)
 #'
-#'  db <- DBI::dbConnect(duckdb::duckdb())
-#'  cdm <- CDMConnector::copyCdmTo(con = db,
-#'                                 cdm = cdm_local,
-#'                                 schema ="main",
-#'                                 overwrite = TRUE)
-#'  result <- cdm$my_cohort |> matchedDiagnostics()
-#'  CDMConnector::cdm_disconnect(cdm)
+#' cdm <- mockPhenotypeR()
+#'
+#' result <- matchedDiagnostics(cdm$my_cohort)
+#'
+#' CDMConnector::cdmDisconnect(cdm = cdm)
 #' }
 matchedDiagnostics <- function(cohort,
                                matchedSample = 1000){
@@ -56,7 +45,7 @@ matchedDiagnostics <- function(cohort,
                                "_matched")
 
   if(!is.null(matchedSample)){
-  cli::cli_bullets(c("*" = "{.strong Taking {matchedSample} person sample of cohorts}"))
+  cli::cli_bullets(c("*" = "{.strong Sampling cohorts}"))
   cdm[[matchedCohortTable]] <- CohortConstructor::sampleCohorts(cdm[[cohortName]],
                                    n = matchedSample,
                                    name = matchedCohortTable)
@@ -97,7 +86,8 @@ matchedDiagnostics <- function(cohort,
                       "observation"),
     episodeInWindow = c("drug_exposure"),
     minimumFrequency = 0.0005,
-    includeSource = TRUE
+    includeSource = TRUE,
+    excludedCodes = NULL
   )
 
   results <- results |>

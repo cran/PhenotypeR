@@ -18,10 +18,14 @@
 #'
 #' @examples
 #' \donttest{
-#' library(IncidencePrevalence)
-#' cdm <- mockIncidencePrevalenceRef(sampleSize = 1000)
-#' cohort <- addCodelistAttribute(cohort = cdm$outcome, codelist = list("cohort_1" = 1L))
-#' CDMConnector::cdm_disconnect(cdm)
+#' library(PhenotypeR)
+#'
+#' cdm <- mockPhenotypeR()
+#'
+#' cohort <- addCodelistAttribute(cohort = cdm$my_cohort, codelist = list("cohort_1" = 1L))
+#' attr(cohort, "cohort_codelist")
+#'
+#' CDMConnector::cdmDisconnect(cdm)
 #' }
 
 addCodelistAttribute <- function(cohort,
