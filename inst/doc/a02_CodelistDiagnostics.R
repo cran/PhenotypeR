@@ -8,7 +8,7 @@ knitr::opts_chunk$set(
 library(CDMConnector)
 if (Sys.getenv("EUNOMIA_DATA_FOLDER") == "") Sys.setenv("EUNOMIA_DATA_FOLDER" = tempdir())
 if (!dir.exists(Sys.getenv("EUNOMIA_DATA_FOLDER"))) dir.create(Sys.getenv("EUNOMIA_DATA_FOLDER"))
-if (!eunomia_is_available()) downloadEunomiaData()
+if (!eunomia_is_available()) downloadEunomiaData(datasetName = "synpuf-1k")
 
 ## -----------------------------------------------------------------------------
 library(CDMConnector)
@@ -18,14 +18,13 @@ library(PhenotypeR)
 library(dplyr)
 library(ggplot2)
 
-con <- DBI::dbConnect(duckdb::duckdb(),
-  dbdir = CDMConnector::eunomiaDir()
-)
-cdm <- CDMConnector::cdmFromCon(con,
-  cdmSchema = "main",
-  writeSchema = "main",
-  cdmName = "Eunomia"
-)
+con <- DBI::dbConnect(duckdb::duckdb(), 
+                      CDMConnector::eunomiaDir("synpuf-1k", "5.3"))
+cdm <- CDMConnector::cdmFromCon(con = con, 
+                                cdmName = "Eunomia Synpuf",
+                                cdmSchema   = "main",
+                                writeSchema = "main", 
+                                achillesSchema = "main")
 
 cdm$injuries <- conceptCohort(cdm = cdm,
   conceptSet = list(
@@ -40,5 +39,10 @@ cdm$injuries |>
 
 ## -----------------------------------------------------------------------------
 code_diag <- codelistDiagnostics(cdm$injuries)
-#tableCohortCodeUse(code_diag)
+
+## -----------------------------------------------------------------------------
+tableAchillesCodeUse(code_diag)
+
+## -----------------------------------------------------------------------------
+tableOrphanCodes(code_diag)
 

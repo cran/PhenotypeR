@@ -42,52 +42,98 @@ set of cohorts we have defined. This assessment includes:
 
 ## Installation
 
-You can install PhenotypeR from GitHub:
+You can install PhenotypeR from CRAN:
+
+``` r
+install.packages("PhenotypeR")
+```
+
+Or you can install the development version from GitHub:
 
 ``` r
 # install.packages("remotes")
-remotes::install_github("ohdsi/PhenotypeR")
+remotes::install_github("OHDSI/PhenotypeR")
 ```
 
 ## Example usage
 
+To illustrate the functionality of PhenotypeR, let’s create a cohort
+using the Eunomia Synpuf dataset. We’ll first load the required packages
+and create the cdm reference for the data.
+
 ``` r
-library(omopgenerics)
-library(CDMConnector)
-library(PhenotypeR)
-library(CohortConstructor)
 library(dplyr)
-
-con <- DBI::dbConnect(duckdb::duckdb(dbdir = CDMConnector::eunomiaDir()))
-cdm <- CDMConnector::cdmFromCon(con = con,
-                      cdmSchema = "main",
-                      writeSchema = "main")
-
-cdm$gibleed <- conceptCohort(cdm = cdm,
-                                   conceptSet = list(gibleed = 192671L),
-                                   name = "gibleed")
-
-result <- cdm$gibleed |>
-   phenotypeDiagnostics()
+library(CohortConstructor)
+library(PhenotypeR)
 ```
 
 ``` r
-summary(result)
-#> A summarised_result object with 22475 rows, 43 different result_id, 1 different
-#> cdm names, and 26 settings.
-#> CDM names: An OMOP CDM database.
-#> Settings: result_type, package_name, package_version, group, strata,
-#> additional, min_cell_count, analysis, analysis_complete_database_intervals,
-#> analysis_full_contribution, analysis_outcome_washout, analysis_repeated_events,
-#> analysis_type, cdm_version, cohort_definition_id, denominator_age_group,
-#> denominator_days_prior_observation, denominator_end_date, …, type, and
-#> vocabulary_version.
+# Connect to the database and create the cdm object
+con <- DBI::dbConnect(duckdb::duckdb(), 
+                      CDMConnector::eunomiaDir("synpuf-1k", "5.3"))
+cdm <- CDMConnector::cdmFromCon(con = con, 
+                                cdmName = "Eunomia Synpuf",
+                                cdmSchema   = "main",
+                                writeSchema = "main", 
+                                achillesSchema = "main")
+```
+
+Note that we’ve included achilles results in our cdm reference. Where we
+can we’ll use these precomputed counts to speed up our analysis.
+
+``` r
+cdm
+#> 
+#> ── # OMOP CDM reference (duckdb) of Eunomia Synpuf ─────────────────────────────
+#> • omop tables: person, observation_period, visit_occurrence, visit_detail,
+#> condition_occurrence, drug_exposure, procedure_occurrence, device_exposure,
+#> measurement, observation, death, note, note_nlp, specimen, fact_relationship,
+#> location, care_site, provider, payer_plan_period, cost, drug_era, dose_era,
+#> condition_era, metadata, cdm_source, concept, vocabulary, domain,
+#> concept_class, concept_relationship, relationship, concept_synonym,
+#> concept_ancestor, source_to_concept_map, drug_strength, cohort_definition,
+#> attribute_definition
+#> • cohort tables: -
+#> • achilles tables: achilles_analysis, achilles_results, achilles_results_dist
+#> • other tables: -
+```
+
+``` r
+# Create a code lists
+codes <- list("warfarin" = c(1310149, 40163554),
+              "acetaminophen" = c(1125315, 1127078, 1127433, 40229134, 40231925, 40162522, 19133768),
+              "morphine" = c(1110410, 35605858, 40169988))
+
+# Instantiate cohorts with CohortConstructor
+cdm$my_cohort <- conceptCohort(cdm = cdm,
+                               conceptSet = codes, 
+                               exit = "event_end_date",
+                               overlap = "merge",
+                               name = "my_cohort")
+```
+
+We can easily run all the analyses explained above (**database
+diagnostics**, **codelist diagnostics**, **cohort diagnostics**,
+**matched diagnostics**, and **population diagnostics**) using
+`phenotypeDiagnostics()`:
+
+``` r
+result <- phenotypeDiagnostics(cdm$my_cohort)
 ```
 
 Once we have our results we can quickly view them in an interactive
-application. This shiny app will be saved in a new directory and can be
-further customised.
+application. Here we’ll apply a minimum cell count of 10 to our results
+and save our shiny app to a temporary directory, but you will likely
+want to save this shiny app to a local directory of your choice.
 
 ``` r
-shinyDiagnostics(result = result, directory = tempdir())
+shinyDiagnostics(result = result, minCellCount = 10, directory = tempdir())
 ```
+
+See the shiny app generated from the example cohort in
+[here](https://dpa-pde-oxford.shinyapps.io/Readme_PhenotypeR/).
+
+### More information
+
+To see more details regarding each one of the analyses, please refer to
+the package vignettes.

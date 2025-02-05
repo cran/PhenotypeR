@@ -12,7 +12,7 @@
 
 
 
-<title>a04_MatchedDiagnostics</title>
+<title>Matched diagnostics</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -49,7 +49,7 @@ overflow: visible;
 </style>
 <style type="text/css" data-origin="pandoc">
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -336,11 +336,49 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 
 
-<h1 class="title toc-ignore">a04_MatchedDiagnostics</h1>
+<h1 class="title toc-ignore">Matched diagnostics</h1>
 
 
 
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(PhenotypeR)</span></code></pre></div>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>In this example we’re going to again create cohorts of individuals
+with an ankle sprain, ankle fracture, forearm fracture, or a hip
+fracture using the Eunomia synthetic data.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(CDMConnector)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(CohortConstructor)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">library</span>(CodelistGenerator)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">library</span>(PatientProfiles)</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="fu">library</span>(CohortCharacteristics)</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="fu">library</span>(PhenotypeR)</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>con <span class="ot">&lt;-</span> DBI<span class="sc">::</span><span class="fu">dbConnect</span>(duckdb<span class="sc">::</span><span class="fu">duckdb</span>(), </span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>                      CDMConnector<span class="sc">::</span><span class="fu">eunomiaDir</span>(<span class="st">&quot;synpuf-1k&quot;</span>, <span class="st">&quot;5.3&quot;</span>))</span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>cdm <span class="ot">&lt;-</span> CDMConnector<span class="sc">::</span><span class="fu">cdmFromCon</span>(<span class="at">con =</span> con, </span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a>                                <span class="at">cdmName =</span> <span class="st">&quot;Eunomia Synpuf&quot;</span>,</span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a>                                <span class="at">cdmSchema   =</span> <span class="st">&quot;main&quot;</span>,</span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a>                                <span class="at">writeSchema =</span> <span class="st">&quot;main&quot;</span>, </span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a>                                <span class="at">achillesSchema =</span> <span class="st">&quot;main&quot;</span>)</span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a>cdm<span class="sc">$</span>injuries <span class="ot">&lt;-</span> <span class="fu">conceptCohort</span>(<span class="at">cdm =</span> cdm,</span>
+<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a>  <span class="at">conceptSet =</span> <span class="fu">list</span>(</span>
+<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a>    <span class="st">&quot;ankle_sprain&quot;</span> <span class="ot">=</span> <span class="dv">81151</span>,</span>
+<span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a>    <span class="st">&quot;ankle_fracture&quot;</span> <span class="ot">=</span> <span class="dv">4059173</span>,</span>
+<span id="cb1-22"><a href="#cb1-22" tabindex="-1"></a>    <span class="st">&quot;forearm_fracture&quot;</span> <span class="ot">=</span> <span class="dv">4278672</span>,</span>
+<span id="cb1-23"><a href="#cb1-23" tabindex="-1"></a>    <span class="st">&quot;hip_fracture&quot;</span> <span class="ot">=</span> <span class="dv">4230399</span></span>
+<span id="cb1-24"><a href="#cb1-24" tabindex="-1"></a>  ),</span>
+<span id="cb1-25"><a href="#cb1-25" tabindex="-1"></a>  <span class="at">name =</span> <span class="st">&quot;injuries&quot;</span>)</span></code></pre></div>
+</div>
+<div id="matched-diagnostics" class="section level2">
+<h2>Matched diagnostics</h2>
+<p>Running the <code>matchedDiagnostics()</code> will compare the
+individuals in our cohorts with age and sex matched controls from the
+data source. This helps us to find features of our cohort that are
+particularly distinctive.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>matched_diag <span class="ot">&lt;-</span> <span class="fu">matchedDiagnostics</span>(cdm<span class="sc">$</span>injuries)</span></code></pre></div>
+</div>
 
 
 

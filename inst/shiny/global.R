@@ -19,14 +19,17 @@ library(shinyWidgets)
 library(plotly)
 library(tidyr)
 library(patchwork)
+library(webshot2)
+library(chromote)
+library(reactable)
 
 # ensure minimum versions
 rlang::check_installed("omopgenerics", version = "0.4")
 rlang::check_installed("visOmopResults", version = "0.5.0")
-rlang::check_installed("CodelistGenerator", version = "3.3.1")
+rlang::check_installed("CodelistGenerator", version = "3.3.2")
 rlang::check_installed("CohortCharacteristics", version = "0.4.0")
-rlang::check_installed("IncidencePrevalence", version = "0.9.0")
-rlang::check_installed("OmopSketch", version = "0.1.2")
+rlang::check_installed("IncidencePrevalence", version = "1.0.0")
+rlang::check_installed("OmopSketch", version = "0.2.1")
 
 source(here::here("scripts", "functions.R"))
 
@@ -43,8 +46,7 @@ if(file.exists(here::here("data", "appData.RData"))){
 plotComparedLsc <- function(lsc, cohorts, imputeMissings, colour = NULL, facet = NULL){
 
   plot_data <- lsc |>
-    filter(group_level %in% c(cohorts
-    )) |>
+    filter(group_level %in% c(cohorts)) |>
     filter(estimate_name == "percentage") |>
     omopgenerics::addSettings() |>
     select(database = cdm_name,
@@ -64,13 +66,16 @@ plotComparedLsc <- function(lsc, cohorts, imputeMissings, colour = NULL, facet =
     plot_data <- plot_data |>
       mutate(across(c(cohorts[1], cohorts[2]), ~if_else(is.na(.x), 0, .x)))
   }
-  
+
   plot <- plot_data |>
+    mutate(smd = (!!sym(cohorts[1]) - !!sym(cohorts[2]))/sqrt((!!sym(cohorts[1])*(1-!!sym(cohorts[1])) + !!sym(cohorts[2])*(1-!!sym(cohorts[2])))/2)) |>
+    mutate(smd = round(smd, 2)) |>
     mutate("Details" = paste("<br>Database:", database,
                              "<br>Concept:", variable_name,
                              "<br>Concept ID:", concept_id,
                              "<br>Time window:", time_window,
                              "<br>Table:", table,
+                             "<br>SMD:", smd,
                              "<br>Cohorts: ",
                              "<br> - ", cohorts[1],": ", !!sym(cohorts[1]),
                              "<br> - ", cohorts[2],": ", !!sym(cohorts[2]))) |>
@@ -80,60 +85,67 @@ plotComparedLsc <- function(lsc, cohorts, imputeMissings, colour = NULL, facet =
                                 facet  = facet,
                                 ribbon = FALSE,
                                 line   = FALSE,
-                                point  = TRUE, 
+                                point  = TRUE,
                                 label  = "Details") +
     geom_abline(slope = 1, intercept = 0,
                 color = "red", linetype = "dashed") +
-    theme_bw()
-    
-  ggplotly(plot, tooltip = "Details")
-
+    theme_bw() +
+    xlab(paste0(stringr::str_to_sentence(gsub("_"," ", cohorts[1])), " (%)")) +
+    ylab(paste0(stringr::str_to_sentence(gsub("_"," ", cohorts[2])), " (%)"))
+  
+  return(plot)
 }
 
-plotAgeDistribution <- function(summarise_table, summarise_characteristics){
-  
+
+plotAgeDensity <- function(summarise_table, summarise_characteristics, show_interquantile_range){
+
   data <- summarise_table |>
     filter(variable_name == "age") |>
     pivot_wider(names_from = "estimate_name", values_from = "estimate_value") |>
     mutate(density_x = as.numeric(density_x),
            density_y = as.numeric(density_y)) |>
     splitStrata() |>
-    mutate(density_y = if_else(sex == "Female", -density_y, density_y)) 
-  
+    mutate(density_y = if_else(sex == "Female", -density_y, density_y)) |>
+    filter(!is.na(density_x),
+           !is.na(density_y))
+
+  if (nrow(data) == 0) {
+    validate("No results found for age density")
+  }
+
   max_density <- max(data$density_y, na.rm = TRUE)
-  min_age <- (floor((data$density_x |> min())/5))*5
-  max_age <- (ceiling((data$density_x |> max())/5))*5
-  
-  iqr <- dataFiltered$summarise_characteristics |>
+  min_age <- (floor((data$density_x |> min(na.rm = TRUE))/5))*5
+  max_age <- (ceiling((data$density_x |> max(na.rm = TRUE))/5))*5
+
+  iqr <- summarise_characteristics |>
     filter(variable_name == "Age",
            strata_level %in% c("Female","Male"),
            estimate_name %in% c("q25", "median", "q75")) |>
-    mutate(estimate_value = as.numeric(estimate_value)) |>
+    mutate(estimate_value_round = as.numeric(estimate_value)) |>
+    select(-"estimate_value") |>
     left_join(
-      data |> 
-        select("cdm_name", "strata_level" = "sex", "estimate_value" = "density_x", "density_y") |>
-        arrange(strata_level, estimate_value, density_y) |>
+      data |>
+        select("cdm_name", "group_level", "strata_level" = "sex", "estimate_value" = "density_x", "density_y") |>
+        arrange(cdm_name, strata_level, estimate_value, density_y) |>
         mutate(estimate_value_round = round(estimate_value)) |>
         mutate(estimate_value_diff = estimate_value - estimate_value_round) |>
-        group_by(strata_level, estimate_value_round) |>
+        group_by(cdm_name, group_level, strata_level, estimate_value_round) |>
         filter(estimate_value_diff == min(estimate_value_diff)) |>
-        select("cdm_name", "estimate_value" = "estimate_value_round", "density_y", "strata_level"),
-      by = c("estimate_value", "strata_level", "cdm_name")
-    ) |> 
+        ungroup(),
+      by = c("cdm_name", "group_level", "strata_level", "estimate_value_round")
+    ) |>
     rename("sex" = "strata_level")
-  
-  ggplot(data, aes(x = density_x, y = density_y, fill = sex)) +
+
+  # keep only estimates for cohorts with density
+  iqr <- iqr |>
+    inner_join(data |>
+                 select(group_level) |> distinct())
+
+  plot <- ggplot2::ggplot(data, ggplot2::aes(x = density_x, y = density_y, fill = sex)) +
     geom_polygon() +
-    geom_segment(data = iqr[iqr$estimate_name == "median", ], 
-                 aes(x = estimate_value, y = 0, xend = estimate_value, yend = density_y),
-                 linewidth = 1) +
-    geom_segment(data = iqr[iqr$estimate_name != "median", ], 
-                 aes(x = estimate_value, y = 0, xend = estimate_value, yend = density_y), 
-                 linetype = 2, 
-                 linewidth = 1) +
     scale_y_continuous(labels = function(x) scales::label_percent()(abs(x)),
-                       limits = c(-max_percentage*1.1, max_percentage*1.1)) +
-    theme_bw() +
+                       limits = c(-max_density*1.1, max_density*1.1)) +
+    themeVisOmop() +
     theme(
       axis.text.x = element_text(),
       axis.title.x = ggplot2::element_blank(),
@@ -146,10 +158,53 @@ plotAgeDistribution <- function(summarise_table, summarise_characteristics){
       panel.background = ggplot2::element_blank()
     ) +
     scale_x_continuous(labels = c(as.character(seq(min_age,max_age-5,5)), paste0(max_age,"+")),
-                       breaks = c(seq(min_age,max_age-5,5), max_age)) +
-    scale_fill_manual(values = list("Male" = "#4682B4","Female" = "#003153")) +
+                       breaks = c(seq(min_age, max_age-5,5), max_age)) +
+    scale_fill_manual(values = list("Male" = "#77A9B4","Female" = "#E1B12D")) +
     facet_wrap(c("cdm_name", "group_level")) +
-    coord_flip(clip = "off") +
-    labs(subtitle = "The solid line represents the median, while the dotted lines indicate the interquartile range.")
+    coord_flip(clip = "off")
+
+  if(show_interquantile_range){
+    plot <- plot +
+      geom_segment(data = iqr[iqr$estimate_name == "median", ],
+                   aes(x = estimate_value, y = 0, xend = estimate_value, yend = density_y),
+                   linewidth = 0.75) +
+      geom_segment(data = iqr[iqr$estimate_name != "median", ],
+                   aes(x = estimate_value, y = 0, xend = estimate_value, yend = density_y),
+                   linetype = 2,
+                   linewidth = 0.75) +
+      labs(subtitle = "The solid line represents the median, while the dotted lines indicate the interquartile range.") +
+      facet_wrap(c("cdm_name", "group_level"))
+  }
+
+  return(plot)
 }
 
+getColsForTbl <- function(tbl, sortNALast = TRUE, names = c("Standard concept ID")){
+
+  cols <- list()
+  for(i in seq_along(names(tbl))){
+    working_col <- names(tbl)[i]
+
+    if(working_col %in% c(names)){
+
+      cols[[working_col]] <- colDef(name = working_col,
+                                    sortNALast = sortNALast,
+                                    cell = function(value){
+                                      if(!is.na(value) && !grepl("^NA$", value)) {
+                                        url <- sprintf("https://athena.ohdsi.org/search-terms/terms/%s", value)
+                                        htmltools::tags$a(href = url, target = "_blank", as.character(value))
+                                      }else{
+                                        "-"
+                                      }
+                                    }
+      )
+
+    }else{
+      cols[[working_col]] <- colDef(name = working_col,
+                                    sortNALast = sortNALast,
+                                    format = colFormat(separators = TRUE))
+    }
+  }
+
+  return(cols)
+}

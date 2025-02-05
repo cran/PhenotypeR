@@ -24,6 +24,13 @@ if(nrow(data) == 0){
   cli::cli_warn("No data found in data/raw")
   choices <- list()
 } else{
+  
+  if(any(grepl("^matched_to", data$group_level))){
+    data <- data |>
+      mutate(group_level = gsub("_matched$","_sampled",group_level)) |>
+      mutate(group_level = if_else(grepl("matched_to", group_level), paste0(gsub("^matched_to_","",group_level),"_matched"), group_level))
+  }
+  
   cli::cli_inform("Getting input choices for shiny UI")
   choices <- getChoices(data, flatten = TRUE)
 }
@@ -44,6 +51,9 @@ for(i in seq_along(settingsUsed)){
 
 selected <- choices
 
+choices$cohort_code_use_grouping_source_concept_value <- NULL
+selected$cohort_code_use_grouping_source_concept_value <- NULL
+
 if(!is.null(dataFiltered$cohort_code_use)){
   if(nrow(dataFiltered$cohort_code_use)>0){
     codeUseCohorts <- unique(dataFiltered$cohort_code_use |>
@@ -56,10 +66,11 @@ if(!is.null(dataFiltered$cohort_code_use)){
   }
 }
 
-
+selected$achilles_code_use_grouping_codelist_name <- selected$achilles_code_use_grouping_codelist_name[1]
 
 selected$summarise_characteristics_grouping_cohort_name <- selected$summarise_characteristics_grouping_cohort_name[1]
-selected$summarise_large_scale_characteristics_grouping_cohort_name <- selected$summarise_large_scale_characteristics_grouping_cohort_name[1]
+selected$summarise_large_scale_characteristics_grouping_cohort_name <- c(gsub("_matched","_sampled",selected$summarise_large_scale_characteristics_grouping_cohort_name[1]),
+                                                                         gsub("_sampled","_matched",selected$summarise_large_scale_characteristics_grouping_cohort_name[1]))
 
 choices$compare_large_scale_characteristics_grouping_cdm_name <- choices$summarise_large_scale_characteristics_grouping_cdm_name
 choices$compare_large_scale_characteristics_grouping_cohort <- choices$summarise_large_scale_characteristics_grouping_cohort_name
@@ -70,15 +81,18 @@ choices$compare_large_scale_characteristics_grouping_cohort_2 <- choices$summari
 choices$compare_large_scale_characteristics_grouping_domain <- choices$summarise_large_scale_characteristics_grouping_domain
 # choices$compare_large_scale_characteristics_grouping_time_window <- choices$summarise_large_scale_characteristics_grouping_time_window
 
+selected$summarise_large_scale_characteristics_grouping_cohort_name <- selected$summarise_large_scale_characteristics_grouping_cohort_name[1]
 selected$compare_large_scale_characteristics_grouping_cdm_name <- choices$compare_large_scale_characteristics_grouping_cdm_name
 selected$compare_large_scale_characteristics_grouping_cohort <- choices$compare_large_scale_characteristics_grouping_cohort[1]
-selected$compare_large_scale_characteristics_grouping_cohort_1 <- choices$compare_large_scale_characteristics_grouping_cohort_1[1]
-selected$compare_large_scale_characteristics_grouping_cohort_2 <- choices$compare_large_scale_characteristics_grouping_cohort_1[2]
+selected$compare_large_scale_characteristics_grouping_cohort_1 <- gsub("_matched", "_sampled",choices$compare_large_scale_characteristics_grouping_cohort_1[1])
+selected$compare_large_scale_characteristics_grouping_cohort_2 <- gsub("_sampled", "_matched",choices$compare_large_scale_characteristics_grouping_cohort_1[2])
 selected$compare_large_scale_characteristics_grouping_domain <- choices$compare_large_scale_characteristics_grouping_domain[1]
 # selected$compare_large_scale_characteristics_grouping_time_window <- choices$compare_large_scale_characteristics_grouping_time_window[1]
 
 if(!is.null(dataFiltered$summarise_large_scale_characteristics)){
   if(nrow(dataFiltered$summarise_large_scale_characteristics)>0){
+    dataFiltered$summarise_large_scale_characteristics <- dataFiltered$summarise_large_scale_characteristics |>
+      mutate(variable_name = iconv(variable_name, from = "latin1", to = "UTF-8"))
     choices$summarise_large_scale_characteristics_grouping_domain <- unique(settings(dataFiltered$summarise_large_scale_characteristics) |>
       pull("table_name"))
     selected$summarise_large_scale_characteristics_grouping_domain <- choices$summarise_large_scale_characteristics_grouping_domain
@@ -115,11 +129,12 @@ selected$incidence_grouping_outcome_cohort_name <- selected$incidence_grouping_o
 selected$incidence_settings_analysis_interval <- "overall"
 selected$incidence_settings_denominator_age_group <- selected$incidence_settings_denominator_age_group[1]
 selected$incidence_settings_denominator_sex <- "Both"
+selected$incidence_settings_denominator_days_prior_observation <-  selected$incidence_settings_denominator_days_prior_observation[1]
 
 choices$incidence_settings_denominator_age_group <- c(
   "0 to 150",
-  "0 to 17", 
-  "18 to 64", 
+  "0 to 17",
+  "18 to 64",
   "65 to 150"
 )
 selected$incidence_settings_denominator_age_group <- c("0 to 150")
@@ -132,13 +147,14 @@ selected$incidence_settings_analysis_interval <- "years"
 
 choices$prevalence_settings_analysis_interval <- c("overall", "years")
 selected$prevalence_settings_analysis_interval <- "years"
+selected$prevalence_settings_denominator_days_prior_observation <-  selected$prevalence_settings_denominator_days_prior_observation[1]
 
 selected$prevalence_grouping_outcome_cohort_name <- selected$prevalence_grouping_outcome_cohort_name[1]
 
 choices$prevalence_settings_denominator_age_group <- c(
   "0 to 150",
-  "0 to 17", 
-  "18 to 64", 
+  "0 to 17",
+  "18 to 64",
   "65 to 150"
 )
 selected$prevalence_settings_denominator_age_group <- c("0 to 150")
@@ -169,12 +185,12 @@ choices <- purrr::map(choices, sort)
 selected <- purrr::map(selected, sort)
 
 choices$summarise_large_scale_characteristics_grouping_time_window <- c(
-  "-inf to -1",  
+  "-inf to -1",
   "-inf to -366",
-  "-365 to -31", 
+  "-365 to -31",
   "-30 to -1",
-  "0 to 0", 
-  "1 to 30",     
+  "0 to 0",
+  "1 to 30",
   "1 to inf",
   "31 to 365",
   "366 to inf"
@@ -182,18 +198,17 @@ choices$summarise_large_scale_characteristics_grouping_time_window <- c(
 selected$summarise_large_scale_characteristics_grouping_time_window <-choices$summarise_large_scale_characteristics_grouping_time_window[1]
 
 choices$compare_large_scale_characteristics_grouping_time_window <- c(
-  "-inf to -1",  
+  "-inf to -1",
   "-inf to -366",
-  "-365 to -31", 
+  "-365 to -31",
   "-30 to -1",
-  "0 to 0", 
-  "1 to 30",     
+  "0 to 0",
+  "1 to 30",
   "1 to inf",
   "31 to 365",
   "366 to inf"
 )
 selected$compare_large_scale_characteristics_grouping_time_window <- choices$compare_large_scale_characteristics_grouping_time_window[1]
-
 
 
 cli::cli_inform("Saving data for shiny")
