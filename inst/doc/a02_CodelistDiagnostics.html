@@ -60,7 +60,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
 { counter-reset: source-line 0; }
@@ -373,11 +373,11 @@ hip fracture using the Eunomia synthetic data.</p>
 <span id="cb1-25"><a href="#cb1-25" tabindex="-1"></a>  <span class="fu">glimpse</span>()</span>
 <span id="cb1-26"><a href="#cb1-26" tabindex="-1"></a><span class="co">#&gt; Rows: ??</span></span>
 <span id="cb1-27"><a href="#cb1-27" tabindex="-1"></a><span class="co">#&gt; Columns: 4</span></span>
-<span id="cb1-28"><a href="#cb1-28" tabindex="-1"></a><span class="co">#&gt; Database: DuckDB v1.1.3 [eburn@Windows 10 x64:R 4.4.0/C:\Users\eburn\AppData\Local\Temp\RtmpaWdrUA\file35c477541cde.duckdb]</span></span>
+<span id="cb1-28"><a href="#cb1-28" tabindex="-1"></a><span class="co">#&gt; Database: DuckDB v1.1.3 [eburn@Windows 10 x64:R 4.4.0/C:\Users\eburn\AppData\Local\Temp\RtmpK6OAfy\file339065cdd82.duckdb]</span></span>
 <span id="cb1-29"><a href="#cb1-29" tabindex="-1"></a><span class="co">#&gt; $ cohort_definition_id &lt;int&gt; 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2…</span></span>
-<span id="cb1-30"><a href="#cb1-30" tabindex="-1"></a><span class="co">#&gt; $ subject_id           &lt;int&gt; 743, 429, 245, 119, 894, 805, 225, 295, 466, 328,…</span></span>
-<span id="cb1-31"><a href="#cb1-31" tabindex="-1"></a><span class="co">#&gt; $ cohort_start_date    &lt;date&gt; 2010-04-02, 2009-07-02, 2008-12-02, 2009-01-19, …</span></span>
-<span id="cb1-32"><a href="#cb1-32" tabindex="-1"></a><span class="co">#&gt; $ cohort_end_date      &lt;date&gt; 2010-04-02, 2009-07-02, 2008-12-04, 2009-01-19, …</span></span></code></pre></div>
+<span id="cb1-30"><a href="#cb1-30" tabindex="-1"></a><span class="co">#&gt; $ subject_id           &lt;int&gt; 519, 1212, 347, 328, 466, 435, 245, 429, 1272, 45…</span></span>
+<span id="cb1-31"><a href="#cb1-31" tabindex="-1"></a><span class="co">#&gt; $ cohort_start_date    &lt;date&gt; 2008-03-21, 2010-04-17, 2009-01-03, 2008-01-10, …</span></span>
+<span id="cb1-32"><a href="#cb1-32" tabindex="-1"></a><span class="co">#&gt; $ cohort_end_date      &lt;date&gt; 2008-03-21, 2010-04-17, 2009-01-03, 2008-01-10, …</span></span></code></pre></div>
 </div>
 <div id="summarising-code-use" class="section level2">
 <h2>Summarising code use</h2>
@@ -387,20 +387,20 @@ cohorts we can use the <code>codelistDiagnostics()</code> function.</p>
 <p>From our results we can see a table of counts of our codes in our
 database based on the achilles results.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">tableAchillesCodeUse</span>(code_diag)</span></code></pre></div>
-<div id="pujqxpshie" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#pujqxpshie table {
+<div id="cwmjjmxssm" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#cwmjjmxssm table {
 font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 -webkit-font-smoothing: antialiased;
 -moz-osx-font-smoothing: grayscale;
 }
-#pujqxpshie thead, #pujqxpshie tbody, #pujqxpshie tfoot, #pujqxpshie tr, #pujqxpshie td, #pujqxpshie th {
+#cwmjjmxssm thead, #cwmjjmxssm tbody, #cwmjjmxssm tfoot, #cwmjjmxssm tr, #cwmjjmxssm td, #cwmjjmxssm th {
 border-style: none;
 }
-#pujqxpshie p {
+#cwmjjmxssm p {
 margin: 0;
 padding: 0;
 }
-#pujqxpshie .gt_table {
+#cwmjjmxssm .gt_table {
 display: table;
 border-collapse: collapse;
 line-height: normal;
@@ -425,11 +425,11 @@ border-left-style: none;
 border-left-width: 2px;
 border-left-color: #D3D3D3;
 }
-#pujqxpshie .gt_caption {
+#cwmjjmxssm .gt_caption {
 padding-top: 4px;
 padding-bottom: 4px;
 }
-#pujqxpshie .gt_title {
+#cwmjjmxssm .gt_title {
 color: #333333;
 font-size: 125%;
 font-weight: initial;
@@ -440,7 +440,7 @@ padding-right: 5px;
 border-bottom-color: #FFFFFF;
 border-bottom-width: 0;
 }
-#pujqxpshie .gt_subtitle {
+#cwmjjmxssm .gt_subtitle {
 color: #333333;
 font-size: 85%;
 font-weight: initial;
@@ -451,7 +451,7 @@ padding-right: 5px;
 border-top-color: #FFFFFF;
 border-top-width: 0;
 }
-#pujqxpshie .gt_heading {
+#cwmjjmxssm .gt_heading {
 background-color: #FFFFFF;
 text-align: center;
 border-bottom-color: #FFFFFF;
@@ -462,12 +462,12 @@ border-right-style: none;
 border-right-width: 1px;
 border-right-color: #D3D3D3;
 }
-#pujqxpshie .gt_bottom_border {
+#cwmjjmxssm .gt_bottom_border {
 border-bottom-style: solid;
 border-bottom-width: 2px;
 border-bottom-color: #D3D3D3;
 }
-#pujqxpshie .gt_col_headings {
+#cwmjjmxssm .gt_col_headings {
 border-top-style: solid;
 border-top-width: 2px;
 border-top-color: #D3D3D3;
@@ -481,7 +481,7 @@ border-right-style: none;
 border-right-width: 1px;
 border-right-color: #D3D3D3;
 }
-#pujqxpshie .gt_col_heading {
+#cwmjjmxssm .gt_col_heading {
 color: #333333;
 background-color: #FFFFFF;
 font-size: 100%;
@@ -500,7 +500,7 @@ padding-left: 5px;
 padding-right: 5px;
 overflow-x: hidden;
 }
-#pujqxpshie .gt_column_spanner_outer {
+#cwmjjmxssm .gt_column_spanner_outer {
 color: #333333;
 background-color: #FFFFFF;
 font-size: 100%;
@@ -511,13 +511,13 @@ padding-bottom: 0;
 padding-left: 4px;
 padding-right: 4px;
 }
-#pujqxpshie .gt_column_spanner_outer:first-child {
+#cwmjjmxssm .gt_column_spanner_outer:first-child {
 padding-left: 0;
 }
-#pujqxpshie .gt_column_spanner_outer:last-child {
+#cwmjjmxssm .gt_column_spanner_outer:last-child {
 padding-right: 0;
 }
-#pujqxpshie .gt_column_spanner {
+#cwmjjmxssm .gt_column_spanner {
 border-bottom-style: solid;
 border-bottom-width: 2px;
 border-bottom-color: #D3D3D3;
@@ -528,10 +528,10 @@ overflow-x: hidden;
 display: inline-block;
 width: 100%;
 }
-#pujqxpshie .gt_spanner_row {
+#cwmjjmxssm .gt_spanner_row {
 border-bottom-style: hidden;
 }
-#pujqxpshie .gt_group_heading {
+#cwmjjmxssm .gt_group_heading {
 padding-top: 8px;
 padding-bottom: 8px;
 padding-left: 5px;
@@ -556,7 +556,7 @@ border-right-color: #D3D3D3;
 vertical-align: middle;
 text-align: left;
 }
-#pujqxpshie .gt_empty_group_heading {
+#cwmjjmxssm .gt_empty_group_heading {
 padding: 0.5px;
 color: #333333;
 background-color: #FFFFFF;
@@ -570,13 +570,13 @@ border-bottom-width: 2px;
 border-bottom-color: #D3D3D3;
 vertical-align: middle;
 }
-#pujqxpshie .gt_from_md > :first-child {
+#cwmjjmxssm .gt_from_md > :first-child {
 margin-top: 0;
 }
-#pujqxpshie .gt_from_md > :last-child {
+#cwmjjmxssm .gt_from_md > :last-child {
 margin-bottom: 0;
 }
-#pujqxpshie .gt_row {
+#cwmjjmxssm .gt_row {
 padding-top: 8px;
 padding-bottom: 8px;
 padding-left: 5px;
@@ -594,7 +594,7 @@ border-right-color: #D3D3D3;
 vertical-align: middle;
 overflow-x: hidden;
 }
-#pujqxpshie .gt_stub {
+#cwmjjmxssm .gt_stub {
 color: #333333;
 background-color: #FFFFFF;
 font-size: 100%;
@@ -606,7 +606,7 @@ border-right-color: #D3D3D3;
 padding-left: 5px;
 padding-right: 5px;
 }
-#pujqxpshie .gt_stub_row_group {
+#cwmjjmxssm .gt_stub_row_group {
 color: #333333;
 background-color: #FFFFFF;
 font-size: 100%;
@@ -619,13 +619,13 @@ padding-left: 5px;
 padding-right: 5px;
 vertical-align: top;
 }
-#pujqxpshie .gt_row_group_first td {
+#cwmjjmxssm .gt_row_group_first td {
 border-top-width: 2px;
 }
-#pujqxpshie .gt_row_group_first th {
+#cwmjjmxssm .gt_row_group_first th {
 border-top-width: 2px;
 }
-#pujqxpshie .gt_summary_row {
+#cwmjjmxssm .gt_summary_row {
 color: #333333;
 background-color: #FFFFFF;
 text-transform: inherit;
@@ -634,14 +634,14 @@ padding-bottom: 8px;
 padding-left: 5px;
 padding-right: 5px;
 }
-#pujqxpshie .gt_first_summary_row {
+#cwmjjmxssm .gt_first_summary_row {
 border-top-style: solid;
 border-top-color: #D3D3D3;
 }
-#pujqxpshie .gt_first_summary_row.thick {
+#cwmjjmxssm .gt_first_summary_row.thick {
 border-top-width: 2px;
 }
-#pujqxpshie .gt_last_summary_row {
+#cwmjjmxssm .gt_last_summary_row {
 padding-top: 8px;
 padding-bottom: 8px;
 padding-left: 5px;
@@ -650,7 +650,7 @@ border-bottom-style: solid;
 border-bottom-width: 2px;
 border-bottom-color: #D3D3D3;
 }
-#pujqxpshie .gt_grand_summary_row {
+#cwmjjmxssm .gt_grand_summary_row {
 color: #333333;
 background-color: #FFFFFF;
 text-transform: inherit;
@@ -659,7 +659,7 @@ padding-bottom: 8px;
 padding-left: 5px;
 padding-right: 5px;
 }
-#pujqxpshie .gt_first_grand_summary_row {
+#cwmjjmxssm .gt_first_grand_summary_row {
 padding-top: 8px;
 padding-bottom: 8px;
 padding-left: 5px;
@@ -668,7 +668,7 @@ border-top-style: double;
 border-top-width: 6px;
 border-top-color: #D3D3D3;
 }
-#pujqxpshie .gt_last_grand_summary_row_top {
+#cwmjjmxssm .gt_last_grand_summary_row_top {
 padding-top: 8px;
 padding-bottom: 8px;
 padding-left: 5px;
@@ -677,10 +677,10 @@ border-bottom-style: double;
 border-bottom-width: 6px;
 border-bottom-color: #D3D3D3;
 }
-#pujqxpshie .gt_striped {
+#cwmjjmxssm .gt_striped {
 background-color: rgba(128, 128, 128, 0.05);
 }
-#pujqxpshie .gt_table_body {
+#cwmjjmxssm .gt_table_body {
 border-top-style: solid;
 border-top-width: 2px;
 border-top-color: #D3D3D3;
@@ -688,7 +688,7 @@ border-bottom-style: solid;
 border-bottom-width: 2px;
 border-bottom-color: #D3D3D3;
 }
-#pujqxpshie .gt_footnotes {
+#cwmjjmxssm .gt_footnotes {
 color: #333333;
 background-color: #FFFFFF;
 border-bottom-style: none;
@@ -701,7 +701,7 @@ border-right-style: none;
 border-right-width: 2px;
 border-right-color: #D3D3D3;
 }
-#pujqxpshie .gt_footnote {
+#cwmjjmxssm .gt_footnote {
 margin: 0px;
 font-size: 90%;
 padding-top: 4px;
@@ -709,7 +709,7 @@ padding-bottom: 4px;
 padding-left: 5px;
 padding-right: 5px;
 }
-#pujqxpshie .gt_sourcenotes {
+#cwmjjmxssm .gt_sourcenotes {
 color: #333333;
 background-color: #FFFFFF;
 border-bottom-style: none;
@@ -722,64 +722,64 @@ border-right-style: none;
 border-right-width: 2px;
 border-right-color: #D3D3D3;
 }
-#pujqxpshie .gt_sourcenote {
+#cwmjjmxssm .gt_sourcenote {
 font-size: 90%;
 padding-top: 4px;
 padding-bottom: 4px;
 padding-left: 5px;
 padding-right: 5px;
 }
-#pujqxpshie .gt_left {
+#cwmjjmxssm .gt_left {
 text-align: left;
 }
-#pujqxpshie .gt_center {
+#cwmjjmxssm .gt_center {
 text-align: center;
 }
-#pujqxpshie .gt_right {
+#cwmjjmxssm .gt_right {
 text-align: right;
 font-variant-numeric: tabular-nums;
 }
-#pujqxpshie .gt_font_normal {
+#cwmjjmxssm .gt_font_normal {
 font-weight: normal;
 }
-#pujqxpshie .gt_font_bold {
+#cwmjjmxssm .gt_font_bold {
 font-weight: bold;
 }
-#pujqxpshie .gt_font_italic {
+#cwmjjmxssm .gt_font_italic {
 font-style: italic;
 }
-#pujqxpshie .gt_super {
+#cwmjjmxssm .gt_super {
 font-size: 65%;
 }
-#pujqxpshie .gt_footnote_marks {
+#cwmjjmxssm .gt_footnote_marks {
 font-size: 75%;
 vertical-align: 0.4em;
 position: initial;
 }
-#pujqxpshie .gt_asterisk {
+#cwmjjmxssm .gt_asterisk {
 font-size: 100%;
 vertical-align: 0;
 }
-#pujqxpshie .gt_indent_1 {
+#cwmjjmxssm .gt_indent_1 {
 text-indent: 5px;
 }
-#pujqxpshie .gt_indent_2 {
+#cwmjjmxssm .gt_indent_2 {
 text-indent: 10px;
 }
-#pujqxpshie .gt_indent_3 {
+#cwmjjmxssm .gt_indent_3 {
 text-indent: 15px;
 }
-#pujqxpshie .gt_indent_4 {
+#cwmjjmxssm .gt_indent_4 {
 text-indent: 20px;
 }
-#pujqxpshie .gt_indent_5 {
+#cwmjjmxssm .gt_indent_5 {
 text-indent: 25px;
 }
-#pujqxpshie .katex-display {
+#cwmjjmxssm .katex-display {
 display: inline-flex !important;
 margin-bottom: 0.75em !important;
 }
-#pujqxpshie div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#cwmjjmxssm div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
 height: 0px !important;
 }
 </style>
@@ -845,20 +845,20 @@ being used in the database that are associated with codes we included in
 our definition. So although many can be false positives, we may identify
 some codes that we may want to our cohort definitions.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">tableOrphanCodes</span>(code_diag)</span></code></pre></div>
-<div id="qtptgpcyfz" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#qtptgpcyfz table {
+<div id="ldhwnujooh" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#ldhwnujooh table {
 font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 -webkit-font-smoothing: antialiased;
 -moz-osx-font-smoothing: grayscale;
 }
-#qtptgpcyfz thead, #qtptgpcyfz tbody, #qtptgpcyfz tfoot, #qtptgpcyfz tr, #qtptgpcyfz td, #qtptgpcyfz th {
+#ldhwnujooh thead, #ldhwnujooh tbody, #ldhwnujooh tfoot, #ldhwnujooh tr, #ldhwnujooh td, #ldhwnujooh th {
 border-style: none;
 }
-#qtptgpcyfz p {
+#ldhwnujooh p {
 margin: 0;
 padding: 0;
 }
-#qtptgpcyfz .gt_table {
+#ldhwnujooh .gt_table {
 display: table;
 border-collapse: collapse;
 line-height: normal;
@@ -883,11 +883,11 @@ border-left-style: none;
 border-left-width: 2px;
 border-left-color: #D3D3D3;
 }
-#qtptgpcyfz .gt_caption {
+#ldhwnujooh .gt_caption {
 padding-top: 4px;
 padding-bottom: 4px;
 }
-#qtptgpcyfz .gt_title {
+#ldhwnujooh .gt_title {
 color: #333333;
 font-size: 125%;
 font-weight: initial;
@@ -898,7 +898,7 @@ padding-right: 5px;
 border-bottom-color: #FFFFFF;
 border-bottom-width: 0;
 }
-#qtptgpcyfz .gt_subtitle {
+#ldhwnujooh .gt_subtitle {
 color: #333333;
 font-size: 85%;
 font-weight: initial;
@@ -909,7 +909,7 @@ padding-right: 5px;
 border-top-color: #FFFFFF;
 border-top-width: 0;
 }
-#qtptgpcyfz .gt_heading {
+#ldhwnujooh .gt_heading {
 background-color: #FFFFFF;
 text-align: center;
 border-bottom-color: #FFFFFF;
@@ -920,12 +920,12 @@ border-right-style: none;
 border-right-width: 1px;
 border-right-color: #D3D3D3;
 }
-#qtptgpcyfz .gt_bottom_border {
+#ldhwnujooh .gt_bottom_border {
 border-bottom-style: solid;
 border-bottom-width: 2px;
 border-bottom-color: #D3D3D3;
 }
-#qtptgpcyfz .gt_col_headings {
+#ldhwnujooh .gt_col_headings {
 border-top-style: solid;
 border-top-width: 2px;
 border-top-color: #D3D3D3;
@@ -939,7 +939,7 @@ border-right-style: none;
 border-right-width: 1px;
 border-right-color: #D3D3D3;
 }
-#qtptgpcyfz .gt_col_heading {
+#ldhwnujooh .gt_col_heading {
 color: #333333;
 background-color: #FFFFFF;
 font-size: 100%;
@@ -958,7 +958,7 @@ padding-left: 5px;
 padding-right: 5px;
 overflow-x: hidden;
 }
-#qtptgpcyfz .gt_column_spanner_outer {
+#ldhwnujooh .gt_column_spanner_outer {
 color: #333333;
 background-color: #FFFFFF;
 font-size: 100%;
@@ -969,13 +969,13 @@ padding-bottom: 0;
 padding-left: 4px;
 padding-right: 4px;
 }
-#qtptgpcyfz .gt_column_spanner_outer:first-child {
+#ldhwnujooh .gt_column_spanner_outer:first-child {
 padding-left: 0;
 }
-#qtptgpcyfz .gt_column_spanner_outer:last-child {
+#ldhwnujooh .gt_column_spanner_outer:last-child {
 padding-right: 0;
 }
-#qtptgpcyfz .gt_column_spanner {
+#ldhwnujooh .gt_column_spanner {
 border-bottom-style: solid;
 border-bottom-width: 2px;
 border-bottom-color: #D3D3D3;
@@ -986,10 +986,10 @@ overflow-x: hidden;
 display: inline-block;
 width: 100%;
 }
-#qtptgpcyfz .gt_spanner_row {
+#ldhwnujooh .gt_spanner_row {
 border-bottom-style: hidden;
 }
-#qtptgpcyfz .gt_group_heading {
+#ldhwnujooh .gt_group_heading {
 padding-top: 8px;
 padding-bottom: 8px;
 padding-left: 5px;
@@ -1014,7 +1014,7 @@ border-right-color: #D3D3D3;
 vertical-align: middle;
 text-align: left;
 }
-#qtptgpcyfz .gt_empty_group_heading {
+#ldhwnujooh .gt_empty_group_heading {
 padding: 0.5px;
 color: #333333;
 background-color: #FFFFFF;
@@ -1028,13 +1028,13 @@ border-bottom-width: 2px;
 border-bottom-color: #D3D3D3;
 vertical-align: middle;
 }
-#qtptgpcyfz .gt_from_md > :first-child {
+#ldhwnujooh .gt_from_md > :first-child {
 margin-top: 0;
 }
-#qtptgpcyfz .gt_from_md > :last-child {
+#ldhwnujooh .gt_from_md > :last-child {
 margin-bottom: 0;
 }
-#qtptgpcyfz .gt_row {
+#ldhwnujooh .gt_row {
 padding-top: 8px;
 padding-bottom: 8px;
 padding-left: 5px;
@@ -1052,7 +1052,7 @@ border-right-color: #D3D3D3;
 vertical-align: middle;
 overflow-x: hidden;
 }
-#qtptgpcyfz .gt_stub {
+#ldhwnujooh .gt_stub {
 color: #333333;
 background-color: #FFFFFF;
 font-size: 100%;
@@ -1064,7 +1064,7 @@ border-right-color: #D3D3D3;
 padding-left: 5px;
 padding-right: 5px;
 }
-#qtptgpcyfz .gt_stub_row_group {
+#ldhwnujooh .gt_stub_row_group {
 color: #333333;
 background-color: #FFFFFF;
 font-size: 100%;
@@ -1077,13 +1077,13 @@ padding-left: 5px;
 padding-right: 5px;
 vertical-align: top;
 }
-#qtptgpcyfz .gt_row_group_first td {
+#ldhwnujooh .gt_row_group_first td {
 border-top-width: 2px;
 }
-#qtptgpcyfz .gt_row_group_first th {
+#ldhwnujooh .gt_row_group_first th {
 border-top-width: 2px;
 }
-#qtptgpcyfz .gt_summary_row {
+#ldhwnujooh .gt_summary_row {
 color: #333333;
 background-color: #FFFFFF;
 text-transform: inherit;
@@ -1092,14 +1092,14 @@ padding-bottom: 8px;
 padding-left: 5px;
 padding-right: 5px;
 }
-#qtptgpcyfz .gt_first_summary_row {
+#ldhwnujooh .gt_first_summary_row {
 border-top-style: solid;
 border-top-color: #D3D3D3;
 }
-#qtptgpcyfz .gt_first_summary_row.thick {
+#ldhwnujooh .gt_first_summary_row.thick {
 border-top-width: 2px;
 }
-#qtptgpcyfz .gt_last_summary_row {
+#ldhwnujooh .gt_last_summary_row {
 padding-top: 8px;
 padding-bottom: 8px;
 padding-left: 5px;
@@ -1108,7 +1108,7 @@ border-bottom-style: solid;
 border-bottom-width: 2px;
 border-bottom-color: #D3D3D3;
 }
-#qtptgpcyfz .gt_grand_summary_row {
+#ldhwnujooh .gt_grand_summary_row {
 color: #333333;
 background-color: #FFFFFF;
 text-transform: inherit;
@@ -1117,7 +1117,7 @@ padding-bottom: 8px;
 padding-left: 5px;
 padding-right: 5px;
 }
-#qtptgpcyfz .gt_first_grand_summary_row {
+#ldhwnujooh .gt_first_grand_summary_row {
 padding-top: 8px;
 padding-bottom: 8px;
 padding-left: 5px;
@@ -1126,7 +1126,7 @@ border-top-style: double;
 border-top-width: 6px;
 border-top-color: #D3D3D3;
 }
-#qtptgpcyfz .gt_last_grand_summary_row_top {
+#ldhwnujooh .gt_last_grand_summary_row_top {
 padding-top: 8px;
 padding-bottom: 8px;
 padding-left: 5px;
@@ -1135,10 +1135,10 @@ border-bottom-style: double;
 border-bottom-width: 6px;
 border-bottom-color: #D3D3D3;
 }
-#qtptgpcyfz .gt_striped {
+#ldhwnujooh .gt_striped {
 background-color: rgba(128, 128, 128, 0.05);
 }
-#qtptgpcyfz .gt_table_body {
+#ldhwnujooh .gt_table_body {
 border-top-style: solid;
 border-top-width: 2px;
 border-top-color: #D3D3D3;
@@ -1146,7 +1146,7 @@ border-bottom-style: solid;
 border-bottom-width: 2px;
 border-bottom-color: #D3D3D3;
 }
-#qtptgpcyfz .gt_footnotes {
+#ldhwnujooh .gt_footnotes {
 color: #333333;
 background-color: #FFFFFF;
 border-bottom-style: none;
@@ -1159,7 +1159,7 @@ border-right-style: none;
 border-right-width: 2px;
 border-right-color: #D3D3D3;
 }
-#qtptgpcyfz .gt_footnote {
+#ldhwnujooh .gt_footnote {
 margin: 0px;
 font-size: 90%;
 padding-top: 4px;
@@ -1167,7 +1167,7 @@ padding-bottom: 4px;
 padding-left: 5px;
 padding-right: 5px;
 }
-#qtptgpcyfz .gt_sourcenotes {
+#ldhwnujooh .gt_sourcenotes {
 color: #333333;
 background-color: #FFFFFF;
 border-bottom-style: none;
@@ -1180,64 +1180,64 @@ border-right-style: none;
 border-right-width: 2px;
 border-right-color: #D3D3D3;
 }
-#qtptgpcyfz .gt_sourcenote {
+#ldhwnujooh .gt_sourcenote {
 font-size: 90%;
 padding-top: 4px;
 padding-bottom: 4px;
 padding-left: 5px;
 padding-right: 5px;
 }
-#qtptgpcyfz .gt_left {
+#ldhwnujooh .gt_left {
 text-align: left;
 }
-#qtptgpcyfz .gt_center {
+#ldhwnujooh .gt_center {
 text-align: center;
 }
-#qtptgpcyfz .gt_right {
+#ldhwnujooh .gt_right {
 text-align: right;
 font-variant-numeric: tabular-nums;
 }
-#qtptgpcyfz .gt_font_normal {
+#ldhwnujooh .gt_font_normal {
 font-weight: normal;
 }
-#qtptgpcyfz .gt_font_bold {
+#ldhwnujooh .gt_font_bold {
 font-weight: bold;
 }
-#qtptgpcyfz .gt_font_italic {
+#ldhwnujooh .gt_font_italic {
 font-style: italic;
 }
-#qtptgpcyfz .gt_super {
+#ldhwnujooh .gt_super {
 font-size: 65%;
 }
-#qtptgpcyfz .gt_footnote_marks {
+#ldhwnujooh .gt_footnote_marks {
 font-size: 75%;
 vertical-align: 0.4em;
 position: initial;
 }
-#qtptgpcyfz .gt_asterisk {
+#ldhwnujooh .gt_asterisk {
 font-size: 100%;
 vertical-align: 0;
 }
-#qtptgpcyfz .gt_indent_1 {
+#ldhwnujooh .gt_indent_1 {
 text-indent: 5px;
 }
-#qtptgpcyfz .gt_indent_2 {
+#ldhwnujooh .gt_indent_2 {
 text-indent: 10px;
 }
-#qtptgpcyfz .gt_indent_3 {
+#ldhwnujooh .gt_indent_3 {
 text-indent: 15px;
 }
-#qtptgpcyfz .gt_indent_4 {
+#ldhwnujooh .gt_indent_4 {
 text-indent: 20px;
 }
-#qtptgpcyfz .gt_indent_5 {
+#ldhwnujooh .gt_indent_5 {
 text-indent: 25px;
 }
-#qtptgpcyfz .katex-display {
+#ldhwnujooh .katex-display {
 display: inline-flex !important;
 margin-bottom: 0.75em !important;
 }
-#qtptgpcyfz div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#ldhwnujooh div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
 height: 0px !important;
 }
 </style>
@@ -2137,6 +2137,21 @@ height: 0px !important;
   
 </table>
 </div>
+</div>
+<div id="addcodelistattribute" class="section level2">
+<h2>addCodelistAttribute</h2>
+<p>Some cohorts that may be created manually may not have the codelists
+recorded in the <code>cohort_codelist</code> attribute. The package has
+a utility function to record a codelist in a <code>cohort_table</code>
+object:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">cohortCodelist</span>(cdm<span class="sc">$</span>injuries, <span class="at">cohortId =</span> <span class="dv">1</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co">#&gt; - ankle_fracture (1 codes)</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>cdm<span class="sc">$</span>injuries <span class="ot">&lt;-</span> cdm<span class="sc">$</span>injuries <span class="sc">|&gt;</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>  <span class="fu">addCodelistAttribute</span>(<span class="at">codelist =</span> <span class="fu">list</span>(<span class="at">new_codelist =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="dt">L</span>, <span class="dv">2</span><span class="dt">L</span>)), <span class="at">cohortName =</span> <span class="st">&quot;ankle_fracture&quot;</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="fu">cohortCodelist</span>(cdm<span class="sc">$</span>injuries, <span class="at">cohortId =</span> <span class="dv">1</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co">#&gt; - new_codelist (2 codes)</span></span></code></pre></div>
 </div>
 
 

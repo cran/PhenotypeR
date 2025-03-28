@@ -33,6 +33,7 @@
 #' }
 codelistDiagnostics <- function(cohort){
 
+  cohort <- omopgenerics::validateCohortArgument(cohort = cohort)
   cdm <- omopgenerics::cdmReference(cohort)
   cohortName <- omopgenerics::tableName(cohort)
   cohortIds <- omopgenerics::settings(cohort) |>
@@ -44,46 +45,70 @@ codelistDiagnostics <- function(cohort){
     dplyr::select("cohort_definition_id") |>
     dplyr::pull()
 
-  if(is.null(attr(cdm[[cohortTable]], "cohort_codelist"))){
-    cli::cli_warn(message =
-                    c("cohort_codelist attribute for cohort not found",
-                      "i" = "Returning an empty summarised result"))
+  addAttribute <- c("i" = "You can add a codelist to a cohort with `addCodelistAttribute()`.")
+  notPresentCodelist <- is.null(attr(cdm[[cohortTable]], "cohort_codelist"))
+  if (!notPresentCodelist) {
+    notPresentCodelist <- attr(cdm[[cohortTable]], "cohort_codelist") |>
+      omopgenerics::isTableEmpty()
+    if(notPresentCodelist){
+      cli::cli_warn(message = c(
+        "!" = "cohort_codelist attribute for cohort is empty",
+        "i" = "Returning an empty summarised result",
+        addAttribute
+      ))
+      return(omopgenerics::emptySummarisedResult())
+    }
+  }
+  if (notPresentCodelist) {
+    cli::cli_warn(message = c(
+      "!" = "cohort_codelist attribute for cohort not found",
+      "i" = "Returning an empty summarised result",
+      addAttribute
+    ))
     return(omopgenerics::emptySummarisedResult())
   }
 
   cli::cli_bullets(c("*" = "Getting codelists from cohorts"))
 
-   # get all cohort codelists
-  all_codelists <- omopgenerics::emptyCodelist()
-  for(i in seq_along(cohortIds)){
-    all_codelists <- purrr::flatten(list(
-      all_codelists,
-      omopgenerics::cohortCodelist(cdm[[cohortTable]], cohortIds[[i]])
-    )) |>
-      omopgenerics::newCodelist()
-  }
+  # get all cohort codelists
+  all_codelists <- purrr::map(cohortIds, \(x) {
+    omopgenerics::cohortCodelist(cohortTable = cdm[[cohortTable]], cohortId = x)
+  }) |>
+    duplicatedCodelists()
 
   if(length(all_codelists) == 0){
-    cli::cli_warn(message =
-                    c("Empty cohort_codelist attribute for cohort",
-                      "i" = "Returning an empty summarised result"))
+    cli::cli_warn(message = c(
+      "!" = "Empty cohort_codelist attribute for cohort",
+      "i" = "Returning an empty summarised result",
+      addAttribute
+    ))
     return(omopgenerics::emptySummarisedResult())
   }
 
   results <- list()
   results[[1]] <- omopgenerics::emptySummarisedResult()
 
+  # Check empty cohorts
+  ids <- CDMConnector::cohortCount(cdm[[cohortName]]) |>
+    dplyr::filter(.data$number_subjects == 0) |>
+    dplyr::pull("cohort_definition_id")
+
   cli::cli_bullets(c("*" = "Getting index event breakdown"))
   for(i in seq_along(cohortIds)){
-    results[[paste0("index_event_", i)]] <- CodelistGenerator::summariseCohortCodeUse(
-      x = omopgenerics::cohortCodelist(cdm[[cohortName]], cohortIds[[i]]),
-      cdm = cdm,
-      cohortTable = cohortName,
-      cohortId = cohortIds[[i]],
-      timing = "entry",
-      countBy = c("record", "person"),
-      byConcept = TRUE
-    )
+    if(i %in% ids){
+      cli::cli_warn(message = c("!" = paste0("cohort_definition_id ", i, " is empty. Skipping code use for this cohort.")))
+      results[[paste0("index_event_", i)]] <- omopgenerics::emptySummarisedResult()
+    }else{
+      results[[paste0("index_event_", i)]] <- CodelistGenerator::summariseCohortCodeUse(
+        x = omopgenerics::cohortCodelist(cdm[[cohortName]], cohortIds[[i]]),
+        cdm = cdm,
+        cohortTable = cohortName,
+        cohortId = cohortIds[[i]],
+        timing = "entry",
+        countBy = c("record", "person"),
+        byConcept = TRUE
+      )
+    }
   }
 
   # all other analyses require achilles, so return if not available
@@ -96,9 +121,9 @@ codelistDiagnostics <- function(cohort){
       vctrs::list_drop_empty() |>
       omopgenerics::bind()
 
-   if(is.null(results)){
-     results <- omopgenerics::emptySummarisedResult()
-   }
+    if(is.null(results)){
+      results <- omopgenerics::emptySummarisedResult()
+    }
 
     return(results)
   }
@@ -115,13 +140,42 @@ codelistDiagnostics <- function(cohort){
 
   cli::cli_bullets(c("*" = "Getting orphan concepts"))
   results[[paste0("orphan_codes", i)]] <- CodelistGenerator::summariseOrphanCodes(
-      x = all_codelists,
-      cdm = cdm
-    )
+    x = all_codelists,
+    cdm = cdm
+  )
 
   results <- results |>
     vctrs::list_drop_empty() |>
     omopgenerics::bind()
 
   results
+}
+
+duplicatedCodelists <- function(codelists) {
+  # check names
+  codelist <- codelists |>
+    purrr::map(names) |>
+    purrr::flatten_chr() |>
+    unique() |>
+    rlang::set_names() |>
+    purrr::map(\(nm) {
+      codelists |>
+        purrr::map(\(x) x[[nm]]) |>
+        purrr::compact() |>
+        # this will ensure that if the duplicated codelist is the same there is no error
+        unique()
+    })
+  dupl <- purrr::keep(lengths(codelist), \(x) x > 1)
+  if (length(dupl)) {
+    dupl <- dupl |>
+      purrr::imap_chr(\(x, nm) paste0("Codelist {.pkg ", nm, "}: ", x, " definitions."))
+    cli::cli_abort(c(
+      x = "There are codelists with multiple definitions in cohort: ",
+      dupl,
+      i = "Please provide unique definitions for each codelist"
+    ))
+  }
+  codelist |>
+    purrr::flatten() |>
+    omopgenerics::newCodelist()
 }

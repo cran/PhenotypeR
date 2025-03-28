@@ -46,3 +46,9 @@ tableAchillesCodeUse(code_diag)
 ## -----------------------------------------------------------------------------
 tableOrphanCodes(code_diag)
 
+## -----------------------------------------------------------------------------
+cohortCodelist(cdm$injuries, cohortId = 1)
+cdm$injuries <- cdm$injuries |>
+  addCodelistAttribute(codelist = list(new_codelist = c(1L, 2L)), cohortName = "ankle_fracture")
+cohortCodelist(cdm$injuries, cohortId = 1)
+
