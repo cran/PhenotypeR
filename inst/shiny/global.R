@@ -24,12 +24,12 @@ library(chromote)
 library(reactable)
 
 # ensure minimum versions
-rlang::check_installed("omopgenerics", version = "0.4")
+rlang::check_installed("omopgenerics", version = "1.2.0")
 rlang::check_installed("visOmopResults", version = "0.5.0")
-rlang::check_installed("CodelistGenerator", version = "3.3.2")
-rlang::check_installed("CohortCharacteristics", version = "0.4.0")
-rlang::check_installed("IncidencePrevalence", version = "1.0.0")
-rlang::check_installed("OmopSketch", version = "0.2.1")
+rlang::check_installed("CodelistGenerator", version = "3.4.0")
+rlang::check_installed("CohortCharacteristics", version = "1.0.0")
+rlang::check_installed("IncidencePrevalence", version = "1.2.0")
+rlang::check_installed("OmopSketch", version = "0.3.1")
 
 source(here::here("scripts", "functions.R"))
 
@@ -44,21 +44,23 @@ if(file.exists(here::here("data", "appData.RData"))){
 }
 
 plotComparedLsc <- function(lsc, cohorts, imputeMissings, colour = NULL, facet = NULL){
-
   plot_data <- lsc |>
     filter(group_level %in% c(cohorts)) |>
     filter(estimate_name == "percentage") |>
-    omopgenerics::addSettings() |>
-    select(database = cdm_name,
-           cohort_name = group_level,
-           variable_name,
-           time_window = variable_level,
-           concept_id = additional_level,
-           table = table_name,
-           percentage = estimate_value) |>
+    tidy() |> 
+    select(dplyr::any_of(c(
+      "database" = "cdm_name",
+           "cohort_name",
+           "variable_name",
+           "time_window" = "variable_level",
+           "concept_id", 
+         "source_concept_name",
+           "source_concept_id",
+           "table" = "table_name",
+           "percentage"))) |>
     mutate(percentage = if_else(percentage == "-",
                                 NA, percentage)) |>
-    mutate(percentage = as.numeric(percentage)) |>
+    mutate(percentage = as.numeric(percentage)/100) |>
     pivot_wider(names_from = cohort_name,
                 values_from = percentage)
 
@@ -67,18 +69,37 @@ plotComparedLsc <- function(lsc, cohorts, imputeMissings, colour = NULL, facet =
       mutate(across(c(cohorts[1], cohorts[2]), ~if_else(is.na(.x), 0, .x)))
   }
 
-  plot <- plot_data |>
+ plot_data <- plot_data |>
     mutate(smd = (!!sym(cohorts[1]) - !!sym(cohorts[2]))/sqrt((!!sym(cohorts[1])*(1-!!sym(cohorts[1])) + !!sym(cohorts[2])*(1-!!sym(cohorts[2])))/2)) |>
-    mutate(smd = round(smd, 2)) |>
-    mutate("Details" = paste("<br>Database:", database,
+    mutate(smd = round(smd, 2))
+  if("source_concept_id" %in% colnames(plot_data)){
+    plot_data <- plot_data |>
+     mutate("Details" = paste("<br>Database:", database,
                              "<br>Concept:", variable_name,
                              "<br>Concept ID:", concept_id,
+                             "<br>Source concept:", source_concept_name,
+                             "<br>Source concept ID:", source_concept_id,
                              "<br>Time window:", time_window,
                              "<br>Table:", table,
                              "<br>SMD:", smd,
                              "<br>Cohorts: ",
                              "<br> - ", cohorts[1],": ", !!sym(cohorts[1]),
-                             "<br> - ", cohorts[2],": ", !!sym(cohorts[2]))) |>
+                             "<br> - ", cohorts[2],": ", !!sym(cohorts[2]))) 
+  } else {
+    plot_data <- plot_data |>
+      mutate("Details" = paste("<br>Database:", database,
+                               "<br>Concept:", variable_name,
+                               "<br>Concept ID:", concept_id,
+                               "<br>Time window:", time_window,
+                               "<br>Table:", table,
+                               "<br>SMD:", smd,
+                               "<br>Cohorts: ",
+                               "<br> - ", cohorts[1],": ", !!sym(cohorts[1]),
+                               "<br> - ", cohorts[2],": ", !!sym(cohorts[2])))   
+    }
+    
+    
+ plot <- plot_data |>
     visOmopResults::scatterPlot(x = cohorts[1],
                                 y = cohorts[2],
                                 colour = colour,
@@ -92,7 +113,7 @@ plotComparedLsc <- function(lsc, cohorts, imputeMissings, colour = NULL, facet =
     theme_bw() +
     xlab(paste0(stringr::str_to_sentence(gsub("_"," ", cohorts[1])), " (%)")) +
     ylab(paste0(stringr::str_to_sentence(gsub("_"," ", cohorts[2])), " (%)"))
-  
+
   return(plot)
 }
 
@@ -144,7 +165,7 @@ plotAgeDensity <- function(summarise_table, summarise_characteristics, show_inte
   plot <- ggplot2::ggplot(data, ggplot2::aes(x = density_x, y = density_y, fill = sex)) +
     geom_polygon() +
     scale_y_continuous(labels = function(x) scales::label_percent()(abs(x)),
-                       limits = c(-max_density*1.1, max_density*1.1)) +
+                       limits = c(-max_density*1.2, max_density*1.2)) +
     themeVisOmop() +
     theme(
       axis.text.x = element_text(),

@@ -2,7 +2,7 @@
 title: "Matched diagnostics"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{a04_MatchedDiagnostics}
+  %\VignetteIndexEntry{a06_MatchedDiagnostics}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -63,4 +63,3 @@ Running the `matchedDiagnostics()` will compare the individuals in our cohorts w
 ```{r, eval=FALSE}
 matched_diag <- matchedDiagnostics(cdm$injuries)
 ```
-

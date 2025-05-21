@@ -1,7 +1,7 @@
 Package: PhenotypeR
 Type: Package
 Title: Assess Study Cohorts Using a Common Data Model
-Version: 0.1.4
+Version: 0.1.5
 Authors@R: c(
     person("Edward", "Burn", , "edward.burn@ndorms.ox.ac.uk", 
     role = c("aut", "cre"), comment = c(ORCID = "0000-0002-9286-1128")),
@@ -25,22 +25,24 @@ Suggests: CDMConnector (>= 1.6.1), duckdb, DBI, gt, omock, testthat (>=
         PatientProfiles (>= 1.2.2), ggplot2, ggpubr, stringr, shiny,
         DiagrammeR, DiagrammeRsvg, reactable, reactablefmtr, rsvg,
         sortable, shinycssloaders, here, DT, bslib, shinyWidgets,
-        plotly, tidyr, scales, usethis
+        plotly, tidyr, scales, usethis, rmarkdown
 Config/testthat/edition: 3
 RoxygenNote: 7.3.2
 Imports: CodelistGenerator (>= 3.4.0), CohortCharacteristics (>=
-        0.5.1), CohortConstructor (>= 0.3.5), cli, dplyr,
-        IncidencePrevalence (>= 1.2.0), omopgenerics (>= 1.1.1),
+        1.0.0), CohortConstructor (>= 0.4.0), cli, dplyr,
+        IncidencePrevalence (>= 1.2.0), omopgenerics (>= 1.2.0),
         OmopSketch (>= 0.3.1), magrittr, purrr, rlang, vctrs
 URL: https://ohdsi.github.io/PhenotypeR/
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2025-03-28 08:02:52 UTC; eburn
-Author: Edward Burn [aut, cre] (<https://orcid.org/0000-0002-9286-1128>),
-  Marti Catala [aut] (<https://orcid.org/0000-0003-3308-9905>),
-  Xihang Chen [aut] (<https://orcid.org/0009-0001-8112-8959>),
-  Marta Alcalde-Herraiz [aut] (<https://orcid.org/0009-0002-4405-1814>),
-  Albert Prats-Uribe [aut] (<https://orcid.org/0000-0003-1202-9153>)
+Packaged: 2025-05-21 22:40:36 UTC; eburn
+Author: Edward Burn [aut, cre] (ORCID: <https://orcid.org/0000-0002-9286-1128>),
+  Marti Catala [aut] (ORCID: <https://orcid.org/0000-0003-3308-9905>),
+  Xihang Chen [aut] (ORCID: <https://orcid.org/0009-0001-8112-8959>),
+  Marta Alcalde-Herraiz [aut] (ORCID:
+    <https://orcid.org/0009-0002-4405-1814>),
+  Albert Prats-Uribe [aut] (ORCID:
+    <https://orcid.org/0000-0003-1202-9153>)
 Maintainer: Edward Burn <edward.burn@ndorms.ox.ac.uk>
 Repository: CRAN
-Date/Publication: 2025-03-28 08:20:02 UTC
+Date/Publication: 2025-05-21 23:00:02 UTC
