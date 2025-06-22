@@ -373,11 +373,11 @@ hip fracture using the Eunomia synthetic data.</p>
 <span id="cb1-25"><a href="#cb1-25" tabindex="-1"></a>  <span class="fu">glimpse</span>()</span>
 <span id="cb1-26"><a href="#cb1-26" tabindex="-1"></a><span class="co">#&gt; Rows: ??</span></span>
 <span id="cb1-27"><a href="#cb1-27" tabindex="-1"></a><span class="co">#&gt; Columns: 4</span></span>
-<span id="cb1-28"><a href="#cb1-28" tabindex="-1"></a><span class="co">#&gt; Database: DuckDB v1.0.0 [eburn@Windows 10 x64:R 4.2.1/C:\Users\eburn\AppData\Local\Temp\RtmpcLJKLa\file8eb44a3774cd.duckdb]</span></span>
+<span id="cb1-28"><a href="#cb1-28" tabindex="-1"></a><span class="co">#&gt; Database: DuckDB v1.0.0 [eburn@Windows 10 x64:R 4.2.1/C:\Users\eburn\AppData\Local\Temp\RtmpIPfR5i\file3cdc1b5b3b4f.duckdb]</span></span>
 <span id="cb1-29"><a href="#cb1-29" tabindex="-1"></a><span class="co">#&gt; $ cohort_definition_id &lt;int&gt; 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2…</span></span>
-<span id="cb1-30"><a href="#cb1-30" tabindex="-1"></a><span class="co">#&gt; $ subject_id           &lt;int&gt; 229, 347, 451, 147, 304, 93, 119, 894, 805, 225, …</span></span>
-<span id="cb1-31"><a href="#cb1-31" tabindex="-1"></a><span class="co">#&gt; $ cohort_start_date    &lt;date&gt; 2010-06-19, 2008-11-01, 2009-12-07, 2008-03-29, …</span></span>
-<span id="cb1-32"><a href="#cb1-32" tabindex="-1"></a><span class="co">#&gt; $ cohort_end_date      &lt;date&gt; 2010-06-19, 2008-11-01, 2009-12-07, 2008-03-29, …</span></span></code></pre></div>
+<span id="cb1-30"><a href="#cb1-30" tabindex="-1"></a><span class="co">#&gt; $ subject_id           &lt;int&gt; 435, 328, 466, 347, 519, 1212, 229, 347, 245, 429…</span></span>
+<span id="cb1-31"><a href="#cb1-31" tabindex="-1"></a><span class="co">#&gt; $ cohort_start_date    &lt;date&gt; 2008-12-19, 2008-01-10, 2008-03-30, 2009-01-03, …</span></span>
+<span id="cb1-32"><a href="#cb1-32" tabindex="-1"></a><span class="co">#&gt; $ cohort_end_date      &lt;date&gt; 2008-12-19, 2008-01-10, 2008-03-30, 2009-01-03, …</span></span></code></pre></div>
 </div>
 <div id="summarising-code-use" class="section level2">
 <h2>Summarising code use</h2>
@@ -387,20 +387,20 @@ cohorts we can use the <code>codelistDiagnostics()</code> function.</p>
 <p>From our results we can see a table of counts of our codes in our
 database based on the achilles results.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">tableAchillesCodeUse</span>(code_diag)</span></code></pre></div>
-<div id="pazzooropf" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#pazzooropf table {
+<div id="dkbbmwgpzj" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#dkbbmwgpzj table {
 font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 -webkit-font-smoothing: antialiased;
 -moz-osx-font-smoothing: grayscale;
 }
-#pazzooropf thead, #pazzooropf tbody, #pazzooropf tfoot, #pazzooropf tr, #pazzooropf td, #pazzooropf th {
+#dkbbmwgpzj thead, #dkbbmwgpzj tbody, #dkbbmwgpzj tfoot, #dkbbmwgpzj tr, #dkbbmwgpzj td, #dkbbmwgpzj th {
 border-style: none;
 }
-#pazzooropf p {
+#dkbbmwgpzj p {
 margin: 0;
 padding: 0;
 }
-#pazzooropf .gt_table {
+#dkbbmwgpzj .gt_table {
 display: table;
 border-collapse: collapse;
 line-height: normal;
@@ -413,23 +413,23 @@ font-style: normal;
 background-color: #FFFFFF;
 width: auto;
 border-top-style: solid;
-border-top-width: 2px;
-border-top-color: #A8A8A8;
-border-right-style: none;
-border-right-width: 2px;
-border-right-color: #D3D3D3;
+border-top-width: 3px;
+border-top-color: #D9D9D9;
+border-right-style: solid;
+border-right-width: 3px;
+border-right-color: #D9D9D9;
 border-bottom-style: solid;
-border-bottom-width: 2px;
-border-bottom-color: #A8A8A8;
-border-left-style: none;
-border-left-width: 2px;
-border-left-color: #D3D3D3;
+border-bottom-width: 3px;
+border-bottom-color: #D9D9D9;
+border-left-style: solid;
+border-left-width: 3px;
+border-left-color: #D9D9D9;
 }
-#pazzooropf .gt_caption {
+#dkbbmwgpzj .gt_caption {
 padding-top: 4px;
 padding-bottom: 4px;
 }
-#pazzooropf .gt_title {
+#dkbbmwgpzj .gt_title {
 color: #333333;
 font-size: 125%;
 font-weight: initial;
@@ -440,7 +440,7 @@ padding-right: 5px;
 border-bottom-color: #FFFFFF;
 border-bottom-width: 0;
 }
-#pazzooropf .gt_subtitle {
+#dkbbmwgpzj .gt_subtitle {
 color: #333333;
 font-size: 85%;
 font-weight: initial;
@@ -451,7 +451,7 @@ padding-right: 5px;
 border-top-color: #FFFFFF;
 border-top-width: 0;
 }
-#pazzooropf .gt_heading {
+#dkbbmwgpzj .gt_heading {
 background-color: #FFFFFF;
 text-align: center;
 border-bottom-color: #FFFFFF;
@@ -462,12 +462,12 @@ border-right-style: none;
 border-right-width: 1px;
 border-right-color: #D3D3D3;
 }
-#pazzooropf .gt_bottom_border {
+#dkbbmwgpzj .gt_bottom_border {
 border-bottom-style: solid;
 border-bottom-width: 2px;
 border-bottom-color: #D3D3D3;
 }
-#pazzooropf .gt_col_headings {
+#dkbbmwgpzj .gt_col_headings {
 border-top-style: solid;
 border-top-width: 2px;
 border-top-color: #D3D3D3;
@@ -481,7 +481,7 @@ border-right-style: none;
 border-right-width: 1px;
 border-right-color: #D3D3D3;
 }
-#pazzooropf .gt_col_heading {
+#dkbbmwgpzj .gt_col_heading {
 color: #333333;
 background-color: #FFFFFF;
 font-size: 100%;
@@ -500,7 +500,7 @@ padding-left: 5px;
 padding-right: 5px;
 overflow-x: hidden;
 }
-#pazzooropf .gt_column_spanner_outer {
+#dkbbmwgpzj .gt_column_spanner_outer {
 color: #333333;
 background-color: #FFFFFF;
 font-size: 100%;
@@ -511,13 +511,13 @@ padding-bottom: 0;
 padding-left: 4px;
 padding-right: 4px;
 }
-#pazzooropf .gt_column_spanner_outer:first-child {
+#dkbbmwgpzj .gt_column_spanner_outer:first-child {
 padding-left: 0;
 }
-#pazzooropf .gt_column_spanner_outer:last-child {
+#dkbbmwgpzj .gt_column_spanner_outer:last-child {
 padding-right: 0;
 }
-#pazzooropf .gt_column_spanner {
+#dkbbmwgpzj .gt_column_spanner {
 border-bottom-style: solid;
 border-bottom-width: 2px;
 border-bottom-color: #D3D3D3;
@@ -528,10 +528,10 @@ overflow-x: hidden;
 display: inline-block;
 width: 100%;
 }
-#pazzooropf .gt_spanner_row {
+#dkbbmwgpzj .gt_spanner_row {
 border-bottom-style: hidden;
 }
-#pazzooropf .gt_group_heading {
+#dkbbmwgpzj .gt_group_heading {
 padding-top: 8px;
 padding-bottom: 8px;
 padding-left: 5px;
@@ -556,7 +556,7 @@ border-right-color: #D3D3D3;
 vertical-align: middle;
 text-align: left;
 }
-#pazzooropf .gt_empty_group_heading {
+#dkbbmwgpzj .gt_empty_group_heading {
 padding: 0.5px;
 color: #333333;
 background-color: #FFFFFF;
@@ -570,13 +570,13 @@ border-bottom-width: 2px;
 border-bottom-color: #D3D3D3;
 vertical-align: middle;
 }
-#pazzooropf .gt_from_md > :first-child {
+#dkbbmwgpzj .gt_from_md > :first-child {
 margin-top: 0;
 }
-#pazzooropf .gt_from_md > :last-child {
+#dkbbmwgpzj .gt_from_md > :last-child {
 margin-bottom: 0;
 }
-#pazzooropf .gt_row {
+#dkbbmwgpzj .gt_row {
 padding-top: 8px;
 padding-bottom: 8px;
 padding-left: 5px;
@@ -594,7 +594,7 @@ border-right-color: #D3D3D3;
 vertical-align: middle;
 overflow-x: hidden;
 }
-#pazzooropf .gt_stub {
+#dkbbmwgpzj .gt_stub {
 color: #333333;
 background-color: #FFFFFF;
 font-size: 100%;
@@ -606,7 +606,7 @@ border-right-color: #D3D3D3;
 padding-left: 5px;
 padding-right: 5px;
 }
-#pazzooropf .gt_stub_row_group {
+#dkbbmwgpzj .gt_stub_row_group {
 color: #333333;
 background-color: #FFFFFF;
 font-size: 100%;
@@ -619,13 +619,13 @@ padding-left: 5px;
 padding-right: 5px;
 vertical-align: top;
 }
-#pazzooropf .gt_row_group_first td {
+#dkbbmwgpzj .gt_row_group_first td {
 border-top-width: 2px;
 }
-#pazzooropf .gt_row_group_first th {
+#dkbbmwgpzj .gt_row_group_first th {
 border-top-width: 2px;
 }
-#pazzooropf .gt_summary_row {
+#dkbbmwgpzj .gt_summary_row {
 color: #333333;
 background-color: #FFFFFF;
 text-transform: inherit;
@@ -634,14 +634,14 @@ padding-bottom: 8px;
 padding-left: 5px;
 padding-right: 5px;
 }
-#pazzooropf .gt_first_summary_row {
+#dkbbmwgpzj .gt_first_summary_row {
 border-top-style: solid;
 border-top-color: #D3D3D3;
 }
-#pazzooropf .gt_first_summary_row.thick {
+#dkbbmwgpzj .gt_first_summary_row.thick {
 border-top-width: 2px;
 }
-#pazzooropf .gt_last_summary_row {
+#dkbbmwgpzj .gt_last_summary_row {
 padding-top: 8px;
 padding-bottom: 8px;
 padding-left: 5px;
@@ -650,7 +650,7 @@ border-bottom-style: solid;
 border-bottom-width: 2px;
 border-bottom-color: #D3D3D3;
 }
-#pazzooropf .gt_grand_summary_row {
+#dkbbmwgpzj .gt_grand_summary_row {
 color: #333333;
 background-color: #FFFFFF;
 text-transform: inherit;
@@ -659,7 +659,7 @@ padding-bottom: 8px;
 padding-left: 5px;
 padding-right: 5px;
 }
-#pazzooropf .gt_first_grand_summary_row {
+#dkbbmwgpzj .gt_first_grand_summary_row {
 padding-top: 8px;
 padding-bottom: 8px;
 padding-left: 5px;
@@ -668,7 +668,7 @@ border-top-style: double;
 border-top-width: 6px;
 border-top-color: #D3D3D3;
 }
-#pazzooropf .gt_last_grand_summary_row_top {
+#dkbbmwgpzj .gt_last_grand_summary_row_top {
 padding-top: 8px;
 padding-bottom: 8px;
 padding-left: 5px;
@@ -677,18 +677,18 @@ border-bottom-style: double;
 border-bottom-width: 6px;
 border-bottom-color: #D3D3D3;
 }
-#pazzooropf .gt_striped {
+#dkbbmwgpzj .gt_striped {
 background-color: rgba(128, 128, 128, 0.05);
 }
-#pazzooropf .gt_table_body {
+#dkbbmwgpzj .gt_table_body {
 border-top-style: solid;
-border-top-width: 2px;
-border-top-color: #D3D3D3;
+border-top-width: 3px;
+border-top-color: #D9D9D9;
 border-bottom-style: solid;
 border-bottom-width: 2px;
 border-bottom-color: #D3D3D3;
 }
-#pazzooropf .gt_footnotes {
+#dkbbmwgpzj .gt_footnotes {
 color: #333333;
 background-color: #FFFFFF;
 border-bottom-style: none;
@@ -701,7 +701,7 @@ border-right-style: none;
 border-right-width: 2px;
 border-right-color: #D3D3D3;
 }
-#pazzooropf .gt_footnote {
+#dkbbmwgpzj .gt_footnote {
 margin: 0px;
 font-size: 90%;
 padding-top: 4px;
@@ -709,7 +709,7 @@ padding-bottom: 4px;
 padding-left: 5px;
 padding-right: 5px;
 }
-#pazzooropf .gt_sourcenotes {
+#dkbbmwgpzj .gt_sourcenotes {
 color: #333333;
 background-color: #FFFFFF;
 border-bottom-style: none;
@@ -722,72 +722,72 @@ border-right-style: none;
 border-right-width: 2px;
 border-right-color: #D3D3D3;
 }
-#pazzooropf .gt_sourcenote {
+#dkbbmwgpzj .gt_sourcenote {
 font-size: 90%;
 padding-top: 4px;
 padding-bottom: 4px;
 padding-left: 5px;
 padding-right: 5px;
 }
-#pazzooropf .gt_left {
+#dkbbmwgpzj .gt_left {
 text-align: left;
 }
-#pazzooropf .gt_center {
+#dkbbmwgpzj .gt_center {
 text-align: center;
 }
-#pazzooropf .gt_right {
+#dkbbmwgpzj .gt_right {
 text-align: right;
 font-variant-numeric: tabular-nums;
 }
-#pazzooropf .gt_font_normal {
+#dkbbmwgpzj .gt_font_normal {
 font-weight: normal;
 }
-#pazzooropf .gt_font_bold {
+#dkbbmwgpzj .gt_font_bold {
 font-weight: bold;
 }
-#pazzooropf .gt_font_italic {
+#dkbbmwgpzj .gt_font_italic {
 font-style: italic;
 }
-#pazzooropf .gt_super {
+#dkbbmwgpzj .gt_super {
 font-size: 65%;
 }
-#pazzooropf .gt_footnote_marks {
+#dkbbmwgpzj .gt_footnote_marks {
 font-size: 75%;
 vertical-align: 0.4em;
 position: initial;
 }
-#pazzooropf .gt_asterisk {
+#dkbbmwgpzj .gt_asterisk {
 font-size: 100%;
 vertical-align: 0;
 }
-#pazzooropf .gt_indent_1 {
+#dkbbmwgpzj .gt_indent_1 {
 text-indent: 5px;
 }
-#pazzooropf .gt_indent_2 {
+#dkbbmwgpzj .gt_indent_2 {
 text-indent: 10px;
 }
-#pazzooropf .gt_indent_3 {
+#dkbbmwgpzj .gt_indent_3 {
 text-indent: 15px;
 }
-#pazzooropf .gt_indent_4 {
+#dkbbmwgpzj .gt_indent_4 {
 text-indent: 20px;
 }
-#pazzooropf .gt_indent_5 {
+#dkbbmwgpzj .gt_indent_5 {
 text-indent: 25px;
 }
-#pazzooropf .katex-display {
+#dkbbmwgpzj .katex-display {
 display: inline-flex !important;
 margin-bottom: 0.75em !important;
 }
-#pazzooropf div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#dkbbmwgpzj div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
 height: 0px !important;
 }
 </style>
 <table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
   <thead>
     <tr class="gt_col_headings gt_spanner_row">
-      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="6" style="background-color: #D9D9D9; text-align: center; font-weight: bold;" scope="colgroup"></th>
-      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="2" style="background-color: #D9D9D9; text-align: center; font-weight: bold;" scope="colgroup" id="spanner-[header_name]Database name
+      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="6" style="background-color: #D9D9D9; text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="colgroup"></th>
+      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="2" style="background-color: #D9D9D9; text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="colgroup" id="spanner-[header_name]Database name
 [header_level]Eunomia Synpuf
 [header_name]Estimate name
 [header_level]Record count">
@@ -795,28 +795,28 @@ height: 0px !important;
       </th>
     </tr>
     <tr class="gt_col_headings gt_spanner_row">
-      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="6" style="background-color: #E1E1E1; text-align: center; font-weight: bold;" scope="colgroup"></th>
-      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="2" style="background-color: #E1E1E1; text-align: center; font-weight: bold;" scope="colgroup" id="spanner-[header_level]Eunomia Synpuf
+      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="6" style="background-color: #E1E1E1; text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="colgroup"></th>
+      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="2" style="background-color: #E1E1E1; text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="colgroup" id="spanner-[header_level]Eunomia Synpuf
 [header_name]Estimate name
 [header_level]Record count">
         <div class="gt_column_spanner">Eunomia Synpuf</div>
       </th>
     </tr>
     <tr class="gt_col_headings gt_spanner_row">
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Codelist-name">Codelist name</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Domain-ID">Domain ID</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Standard-concept-name">Standard concept name</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Standard-concept-ID">Standard concept ID</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Standard-concept">Standard concept</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Vocabulary-ID">Vocabulary ID</th>
-      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="2" style="background-color: #D9D9D9; text-align: center; font-weight: bold;" scope="colgroup" id="spanner-[header_name]Estimate name
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="col" id="Codelist-name">Codelist name</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="col" id="Domain-ID">Domain ID</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="col" id="Standard-concept-name">Standard concept name</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="2" colspan="1" style="text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="col" id="Standard-concept-ID">Standard concept ID</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="col" id="Standard-concept">Standard concept</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="col" id="Vocabulary-ID">Vocabulary ID</th>
+      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="2" style="background-color: #D9D9D9; text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="colgroup" id="spanner-[header_name]Estimate name
 [header_level]Record count">
         <div class="gt_column_spanner">Estimate name</div>
       </th>
     </tr>
     <tr class="gt_col_headings">
-      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" style="background-color: #E1E1E1; text-align: center; font-weight: bold;" scope="col" id="[header_name]Database-name-[header_level]Eunomia-Synpuf-[header_name]Estimate-name-[header_level]Record-count">Record count</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" style="background-color: #E1E1E1; text-align: center; font-weight: bold;" scope="col" id="[header_name]Database-name-[header_level]Eunomia-Synpuf-[header_name]Estimate-name-[header_level]Person-count">Person count</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" style="background-color: #E1E1E1; text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="col" id="[header_name]Database-name-[header_level]Eunomia-Synpuf-[header_name]Estimate-name-[header_level]Record-count">Record count</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" style="background-color: #E1E1E1; text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="col" id="[header_name]Database-name-[header_level]Eunomia-Synpuf-[header_name]Estimate-name-[header_level]Person-count">Person count</th>
     </tr>
   </thead>
   <tbody class="gt_table_body">
@@ -845,20 +845,20 @@ being used in the database that are associated with codes we included in
 our definition. So although many can be false positives, we may identify
 some codes that we may want to our cohort definitions.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">tableOrphanCodes</span>(code_diag)</span></code></pre></div>
-<div id="dqghkgaqck" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#dqghkgaqck table {
+<div id="goiplepiwx" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#goiplepiwx table {
 font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 -webkit-font-smoothing: antialiased;
 -moz-osx-font-smoothing: grayscale;
 }
-#dqghkgaqck thead, #dqghkgaqck tbody, #dqghkgaqck tfoot, #dqghkgaqck tr, #dqghkgaqck td, #dqghkgaqck th {
+#goiplepiwx thead, #goiplepiwx tbody, #goiplepiwx tfoot, #goiplepiwx tr, #goiplepiwx td, #goiplepiwx th {
 border-style: none;
 }
-#dqghkgaqck p {
+#goiplepiwx p {
 margin: 0;
 padding: 0;
 }
-#dqghkgaqck .gt_table {
+#goiplepiwx .gt_table {
 display: table;
 border-collapse: collapse;
 line-height: normal;
@@ -871,23 +871,23 @@ font-style: normal;
 background-color: #FFFFFF;
 width: auto;
 border-top-style: solid;
-border-top-width: 2px;
-border-top-color: #A8A8A8;
-border-right-style: none;
-border-right-width: 2px;
-border-right-color: #D3D3D3;
+border-top-width: 3px;
+border-top-color: #D9D9D9;
+border-right-style: solid;
+border-right-width: 3px;
+border-right-color: #D9D9D9;
 border-bottom-style: solid;
-border-bottom-width: 2px;
-border-bottom-color: #A8A8A8;
-border-left-style: none;
-border-left-width: 2px;
-border-left-color: #D3D3D3;
+border-bottom-width: 3px;
+border-bottom-color: #D9D9D9;
+border-left-style: solid;
+border-left-width: 3px;
+border-left-color: #D9D9D9;
 }
-#dqghkgaqck .gt_caption {
+#goiplepiwx .gt_caption {
 padding-top: 4px;
 padding-bottom: 4px;
 }
-#dqghkgaqck .gt_title {
+#goiplepiwx .gt_title {
 color: #333333;
 font-size: 125%;
 font-weight: initial;
@@ -898,7 +898,7 @@ padding-right: 5px;
 border-bottom-color: #FFFFFF;
 border-bottom-width: 0;
 }
-#dqghkgaqck .gt_subtitle {
+#goiplepiwx .gt_subtitle {
 color: #333333;
 font-size: 85%;
 font-weight: initial;
@@ -909,7 +909,7 @@ padding-right: 5px;
 border-top-color: #FFFFFF;
 border-top-width: 0;
 }
-#dqghkgaqck .gt_heading {
+#goiplepiwx .gt_heading {
 background-color: #FFFFFF;
 text-align: center;
 border-bottom-color: #FFFFFF;
@@ -920,12 +920,12 @@ border-right-style: none;
 border-right-width: 1px;
 border-right-color: #D3D3D3;
 }
-#dqghkgaqck .gt_bottom_border {
+#goiplepiwx .gt_bottom_border {
 border-bottom-style: solid;
 border-bottom-width: 2px;
 border-bottom-color: #D3D3D3;
 }
-#dqghkgaqck .gt_col_headings {
+#goiplepiwx .gt_col_headings {
 border-top-style: solid;
 border-top-width: 2px;
 border-top-color: #D3D3D3;
@@ -939,7 +939,7 @@ border-right-style: none;
 border-right-width: 1px;
 border-right-color: #D3D3D3;
 }
-#dqghkgaqck .gt_col_heading {
+#goiplepiwx .gt_col_heading {
 color: #333333;
 background-color: #FFFFFF;
 font-size: 100%;
@@ -958,7 +958,7 @@ padding-left: 5px;
 padding-right: 5px;
 overflow-x: hidden;
 }
-#dqghkgaqck .gt_column_spanner_outer {
+#goiplepiwx .gt_column_spanner_outer {
 color: #333333;
 background-color: #FFFFFF;
 font-size: 100%;
@@ -969,13 +969,13 @@ padding-bottom: 0;
 padding-left: 4px;
 padding-right: 4px;
 }
-#dqghkgaqck .gt_column_spanner_outer:first-child {
+#goiplepiwx .gt_column_spanner_outer:first-child {
 padding-left: 0;
 }
-#dqghkgaqck .gt_column_spanner_outer:last-child {
+#goiplepiwx .gt_column_spanner_outer:last-child {
 padding-right: 0;
 }
-#dqghkgaqck .gt_column_spanner {
+#goiplepiwx .gt_column_spanner {
 border-bottom-style: solid;
 border-bottom-width: 2px;
 border-bottom-color: #D3D3D3;
@@ -986,10 +986,10 @@ overflow-x: hidden;
 display: inline-block;
 width: 100%;
 }
-#dqghkgaqck .gt_spanner_row {
+#goiplepiwx .gt_spanner_row {
 border-bottom-style: hidden;
 }
-#dqghkgaqck .gt_group_heading {
+#goiplepiwx .gt_group_heading {
 padding-top: 8px;
 padding-bottom: 8px;
 padding-left: 5px;
@@ -1014,7 +1014,7 @@ border-right-color: #D3D3D3;
 vertical-align: middle;
 text-align: left;
 }
-#dqghkgaqck .gt_empty_group_heading {
+#goiplepiwx .gt_empty_group_heading {
 padding: 0.5px;
 color: #333333;
 background-color: #FFFFFF;
@@ -1028,13 +1028,13 @@ border-bottom-width: 2px;
 border-bottom-color: #D3D3D3;
 vertical-align: middle;
 }
-#dqghkgaqck .gt_from_md > :first-child {
+#goiplepiwx .gt_from_md > :first-child {
 margin-top: 0;
 }
-#dqghkgaqck .gt_from_md > :last-child {
+#goiplepiwx .gt_from_md > :last-child {
 margin-bottom: 0;
 }
-#dqghkgaqck .gt_row {
+#goiplepiwx .gt_row {
 padding-top: 8px;
 padding-bottom: 8px;
 padding-left: 5px;
@@ -1052,7 +1052,7 @@ border-right-color: #D3D3D3;
 vertical-align: middle;
 overflow-x: hidden;
 }
-#dqghkgaqck .gt_stub {
+#goiplepiwx .gt_stub {
 color: #333333;
 background-color: #FFFFFF;
 font-size: 100%;
@@ -1064,7 +1064,7 @@ border-right-color: #D3D3D3;
 padding-left: 5px;
 padding-right: 5px;
 }
-#dqghkgaqck .gt_stub_row_group {
+#goiplepiwx .gt_stub_row_group {
 color: #333333;
 background-color: #FFFFFF;
 font-size: 100%;
@@ -1077,13 +1077,13 @@ padding-left: 5px;
 padding-right: 5px;
 vertical-align: top;
 }
-#dqghkgaqck .gt_row_group_first td {
+#goiplepiwx .gt_row_group_first td {
 border-top-width: 2px;
 }
-#dqghkgaqck .gt_row_group_first th {
+#goiplepiwx .gt_row_group_first th {
 border-top-width: 2px;
 }
-#dqghkgaqck .gt_summary_row {
+#goiplepiwx .gt_summary_row {
 color: #333333;
 background-color: #FFFFFF;
 text-transform: inherit;
@@ -1092,14 +1092,14 @@ padding-bottom: 8px;
 padding-left: 5px;
 padding-right: 5px;
 }
-#dqghkgaqck .gt_first_summary_row {
+#goiplepiwx .gt_first_summary_row {
 border-top-style: solid;
 border-top-color: #D3D3D3;
 }
-#dqghkgaqck .gt_first_summary_row.thick {
+#goiplepiwx .gt_first_summary_row.thick {
 border-top-width: 2px;
 }
-#dqghkgaqck .gt_last_summary_row {
+#goiplepiwx .gt_last_summary_row {
 padding-top: 8px;
 padding-bottom: 8px;
 padding-left: 5px;
@@ -1108,7 +1108,7 @@ border-bottom-style: solid;
 border-bottom-width: 2px;
 border-bottom-color: #D3D3D3;
 }
-#dqghkgaqck .gt_grand_summary_row {
+#goiplepiwx .gt_grand_summary_row {
 color: #333333;
 background-color: #FFFFFF;
 text-transform: inherit;
@@ -1117,7 +1117,7 @@ padding-bottom: 8px;
 padding-left: 5px;
 padding-right: 5px;
 }
-#dqghkgaqck .gt_first_grand_summary_row {
+#goiplepiwx .gt_first_grand_summary_row {
 padding-top: 8px;
 padding-bottom: 8px;
 padding-left: 5px;
@@ -1126,7 +1126,7 @@ border-top-style: double;
 border-top-width: 6px;
 border-top-color: #D3D3D3;
 }
-#dqghkgaqck .gt_last_grand_summary_row_top {
+#goiplepiwx .gt_last_grand_summary_row_top {
 padding-top: 8px;
 padding-bottom: 8px;
 padding-left: 5px;
@@ -1135,18 +1135,18 @@ border-bottom-style: double;
 border-bottom-width: 6px;
 border-bottom-color: #D3D3D3;
 }
-#dqghkgaqck .gt_striped {
+#goiplepiwx .gt_striped {
 background-color: rgba(128, 128, 128, 0.05);
 }
-#dqghkgaqck .gt_table_body {
+#goiplepiwx .gt_table_body {
 border-top-style: solid;
-border-top-width: 2px;
-border-top-color: #D3D3D3;
+border-top-width: 3px;
+border-top-color: #D9D9D9;
 border-bottom-style: solid;
 border-bottom-width: 2px;
 border-bottom-color: #D3D3D3;
 }
-#dqghkgaqck .gt_footnotes {
+#goiplepiwx .gt_footnotes {
 color: #333333;
 background-color: #FFFFFF;
 border-bottom-style: none;
@@ -1159,7 +1159,7 @@ border-right-style: none;
 border-right-width: 2px;
 border-right-color: #D3D3D3;
 }
-#dqghkgaqck .gt_footnote {
+#goiplepiwx .gt_footnote {
 margin: 0px;
 font-size: 90%;
 padding-top: 4px;
@@ -1167,7 +1167,7 @@ padding-bottom: 4px;
 padding-left: 5px;
 padding-right: 5px;
 }
-#dqghkgaqck .gt_sourcenotes {
+#goiplepiwx .gt_sourcenotes {
 color: #333333;
 background-color: #FFFFFF;
 border-bottom-style: none;
@@ -1180,72 +1180,72 @@ border-right-style: none;
 border-right-width: 2px;
 border-right-color: #D3D3D3;
 }
-#dqghkgaqck .gt_sourcenote {
+#goiplepiwx .gt_sourcenote {
 font-size: 90%;
 padding-top: 4px;
 padding-bottom: 4px;
 padding-left: 5px;
 padding-right: 5px;
 }
-#dqghkgaqck .gt_left {
+#goiplepiwx .gt_left {
 text-align: left;
 }
-#dqghkgaqck .gt_center {
+#goiplepiwx .gt_center {
 text-align: center;
 }
-#dqghkgaqck .gt_right {
+#goiplepiwx .gt_right {
 text-align: right;
 font-variant-numeric: tabular-nums;
 }
-#dqghkgaqck .gt_font_normal {
+#goiplepiwx .gt_font_normal {
 font-weight: normal;
 }
-#dqghkgaqck .gt_font_bold {
+#goiplepiwx .gt_font_bold {
 font-weight: bold;
 }
-#dqghkgaqck .gt_font_italic {
+#goiplepiwx .gt_font_italic {
 font-style: italic;
 }
-#dqghkgaqck .gt_super {
+#goiplepiwx .gt_super {
 font-size: 65%;
 }
-#dqghkgaqck .gt_footnote_marks {
+#goiplepiwx .gt_footnote_marks {
 font-size: 75%;
 vertical-align: 0.4em;
 position: initial;
 }
-#dqghkgaqck .gt_asterisk {
+#goiplepiwx .gt_asterisk {
 font-size: 100%;
 vertical-align: 0;
 }
-#dqghkgaqck .gt_indent_1 {
+#goiplepiwx .gt_indent_1 {
 text-indent: 5px;
 }
-#dqghkgaqck .gt_indent_2 {
+#goiplepiwx .gt_indent_2 {
 text-indent: 10px;
 }
-#dqghkgaqck .gt_indent_3 {
+#goiplepiwx .gt_indent_3 {
 text-indent: 15px;
 }
-#dqghkgaqck .gt_indent_4 {
+#goiplepiwx .gt_indent_4 {
 text-indent: 20px;
 }
-#dqghkgaqck .gt_indent_5 {
+#goiplepiwx .gt_indent_5 {
 text-indent: 25px;
 }
-#dqghkgaqck .katex-display {
+#goiplepiwx .katex-display {
 display: inline-flex !important;
 margin-bottom: 0.75em !important;
 }
-#dqghkgaqck div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#goiplepiwx div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
 height: 0px !important;
 }
 </style>
 <table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
   <thead>
     <tr class="gt_col_headings gt_spanner_row">
-      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="6" style="background-color: #D9D9D9; text-align: center; font-weight: bold;" scope="colgroup"></th>
-      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="2" style="background-color: #D9D9D9; text-align: center; font-weight: bold;" scope="colgroup" id="spanner-[header_name]Database name
+      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="6" style="background-color: #D9D9D9; text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="colgroup"></th>
+      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="2" style="background-color: #D9D9D9; text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="colgroup" id="spanner-[header_name]Database name
 [header_level]Eunomia Synpuf
 [header_name]Estimate name
 [header_level]Record count">
@@ -1253,28 +1253,28 @@ height: 0px !important;
       </th>
     </tr>
     <tr class="gt_col_headings gt_spanner_row">
-      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="6" style="background-color: #E1E1E1; text-align: center; font-weight: bold;" scope="colgroup"></th>
-      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="2" style="background-color: #E1E1E1; text-align: center; font-weight: bold;" scope="colgroup" id="spanner-[header_level]Eunomia Synpuf
+      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="6" style="background-color: #E1E1E1; text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="colgroup"></th>
+      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="2" style="background-color: #E1E1E1; text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="colgroup" id="spanner-[header_level]Eunomia Synpuf
 [header_name]Estimate name
 [header_level]Record count">
         <div class="gt_column_spanner">Eunomia Synpuf</div>
       </th>
     </tr>
     <tr class="gt_col_headings gt_spanner_row">
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Codelist-name">Codelist name</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Domain-ID">Domain ID</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Standard-concept-name">Standard concept name</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Standard-concept-ID">Standard concept ID</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Standard-concept">Standard concept</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Vocabulary-ID">Vocabulary ID</th>
-      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="2" style="background-color: #D9D9D9; text-align: center; font-weight: bold;" scope="colgroup" id="spanner-[header_name]Estimate name
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="col" id="Codelist-name">Codelist name</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="col" id="Domain-ID">Domain ID</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="col" id="Standard-concept-name">Standard concept name</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="2" colspan="1" style="text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="col" id="Standard-concept-ID">Standard concept ID</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="col" id="Standard-concept">Standard concept</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="col" id="Vocabulary-ID">Vocabulary ID</th>
+      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="2" style="background-color: #D9D9D9; text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="colgroup" id="spanner-[header_name]Estimate name
 [header_level]Record count">
         <div class="gt_column_spanner">Estimate name</div>
       </th>
     </tr>
     <tr class="gt_col_headings">
-      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" style="background-color: #E1E1E1; text-align: center; font-weight: bold;" scope="col" id="[header_name]Database-name-[header_level]Eunomia-Synpuf-[header_name]Estimate-name-[header_level]Record-count">Record count</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" style="background-color: #E1E1E1; text-align: center; font-weight: bold;" scope="col" id="[header_name]Database-name-[header_level]Eunomia-Synpuf-[header_name]Estimate-name-[header_level]Person-count">Person count</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" style="background-color: #E1E1E1; text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="col" id="[header_name]Database-name-[header_level]Eunomia-Synpuf-[header_name]Estimate-name-[header_level]Record-count">Record count</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" style="background-color: #E1E1E1; text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="col" id="[header_name]Database-name-[header_level]Eunomia-Synpuf-[header_name]Estimate-name-[header_level]Person-count">Person count</th>
     </tr>
   </thead>
   <tbody class="gt_table_body">

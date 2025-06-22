@@ -17,13 +17,13 @@ test_that("run with a single cohort", {
                           schema ="main", overwrite = TRUE)
 
   expect_no_error(result <- cdm$my_cohort |>
-    cohortDiagnostics())
+    cohortDiagnostics(match = FALSE))
 
-  # check density is being calculated
-  expect_true(any(stringr::str_detect(
-    omopgenerics::settings(result) |>
-      dplyr::pull("result_type"),
-    "table")))
+  # Check all the expected summarised results have been calculated)
+  expect_true(all(c((dplyr::pull(omopgenerics::settings(result), "result_type") |> unique()) %in%
+                      c("summarise_cohort_attrition", "summarise_cohort_count", "summarise_characteristics",
+                    "summarise_table", "summarise_large_scale_characteristics"))))
+  expect_true(result$group_level |> unique() == "cohort_1")
 
   # cohort and timing and overlap should have been skipped
   expect_false(any("summarise_cohort_overlap" ==
@@ -49,8 +49,8 @@ test_that("run with multiple cohorts", {
   db <- DBI::dbConnect(duckdb::duckdb())
   cdm <- CDMConnector::copyCdmTo(con = db, cdm = cdm_local,
                                  schema ="main", overwrite = TRUE)
-  expect_no_error(result <- cdm$my_cohort |>
-                    cohortDiagnostics())
+  expect_warning(result <- cdm$my_cohort |>
+                   cohortDiagnostics(match = TRUE))
 
   # check density is being calculated
   expect_true(any(stringr::str_detect(
@@ -65,7 +65,8 @@ test_that("run with multiple cohorts", {
                      dplyr::distinct() |>
                      dplyr::pull() |>
                      sort(),
-                   c("cohort_1", "cohort_2"))
+                   c("cohort_1", "cohort_1_matched", "cohort_1_sampled",
+                     "cohort_2", "cohort_2_matched", "cohort_2_sampled"))
 
   # cohort and timing and overlap should have been estimated now we have more than one cohort
   expect_true(any(stringr::str_detect(
@@ -76,6 +77,53 @@ test_that("run with multiple cohorts", {
                    omopgenerics::settings(result) |>
                     dplyr::pull("result_type"),
                    "cohort_timing")))
+
+  # Check matched cohorts
+  expect_true(
+    all(sort(unique(result$group_level)) == c("cohort_1", "cohort_1 &&& cohort_2", "cohort_1_matched", "cohort_1_sampled",
+                                                        "cohort_2", "cohort_2 &&& cohort_1", "cohort_2_matched", "cohort_2_sampled"))
+  )
+
+  # Check all the summarised results are there
+  expect_true(
+    all(result |>
+          omopgenerics::settings() |>
+          dplyr::pull("result_type")  %in%
+        c(rep("summarise_cohort_attrition",2), "summarise_cohort_count", "summarise_cohort_overlap",
+        "summarise_cohort_timing", "summarise_characteristics", "summarise_table",
+        rep("summarise_large_scale_characteristics", 12))
+    )
+  )
+
+  # empty death table
+  cdm <- omopgenerics::emptyOmopTable(cdm, name = "death")
+  expect_warning(cohortDiagnostics(cdm$my_cohort))
+
+  # check survival analysis is being done
+  cdm_local <- omock::mockCdmReference() |>
+    omock::mockPerson(nPerson = 100) |>
+    omock::mockObservationPeriod() |>
+    omock::mockConditionOccurrence() |>
+    omock::mockDrugExposure() |>
+    omock::mockObservation() |>
+    omock::mockMeasurement() |>
+    omock::mockVisitOccurrence() |>
+    omock::mockProcedureOccurrence() |>
+    omock::mockDeath() |>
+    omock::mockCohort(name = "my_cohort", numberCohorts = 2)
+
+  db <- DBI::dbConnect(duckdb::duckdb())
+  cdm <- CDMConnector::copyCdmTo(con = db, cdm = cdm_local,
+                                 schema ="main", overwrite = TRUE)
+  result <- cohortDiagnostics(cdm$my_cohort, survival = TRUE)
+  expect_identical(result |>
+    omopgenerics::settings() |>
+    dplyr::pull("result_type") |>
+    unique(),
+    c("summarise_cohort_attrition",
+      "summarise_cohort_count", "summarise_cohort_overlap", "summarise_cohort_timing",
+      "summarise_characteristics","summarise_table", "summarise_large_scale_characteristics",
+      "survival_probability", "survival_events", "survival_summary", "survival_attrition"))
 })
 
 test_that("check all expected analyses are present in results", {

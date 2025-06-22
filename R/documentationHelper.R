@@ -8,13 +8,22 @@
 #' @keywords internal
 NULL
 
-
-#' Helper for consistent documentation of `matchedSample`.
+#' Helper for consistent documentation of `survival`.
 #'
-#' @param matchedSample The number of people to take a random sample for
+#' @param survival Boolean variable. Whether to conduct survival analysis (TRUE) or not (FALSE).
+#'
+#' @name survivalDoc
+#' @keywords internal
+NULL
+
+
+#' Helper for consistent documentation of `matched` and `match`.
+#'
+#' @param match Boolean variable. Whether to conduct the analysis for the matched cohorts (TRUE) or not (FALSE).
+#' @param matchedSample Only if match = TRUE. The number of people to take a random sample for
 #' matching. If NULL, no sampling will be performed.
 #'
-#' @name matchedSampleDoc
+#' @name matchedDoc
 #' @keywords internal
 NULL
 

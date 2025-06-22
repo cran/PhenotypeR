@@ -42,11 +42,11 @@ if (!eunomiaIsAvailable()) downloadEunomiaData(datasetName = "synpuf-1k", cdmVer
 #   databaseDiagnostics = TRUE,
 #   codelistDiagnostics = TRUE,
 #   cohortDiagnostics   = TRUE,
+#   match = TRUE,
+#   matchedSample = 1000
 #   populationDiagnostics = TRUE,
 #   populationSample = 1e+06,
-#   populationDateRange = as.Date(c(NA, NA)),
-#   matchedDiagnostics  = TRUE,
-#   matchedSample = 1000
+#   populationDateRange = as.Date(c(NA, NA))
 #   )
 # result |> glimpse()
 
