@@ -24,7 +24,7 @@
 #' cdm <- mockPhenotypeR()
 #'
 #' cdm$arthropathies <- conceptCohort(cdm,
-#'                                    conceptSet = list("arthropathies" = c(40475132)),
+#'                                    conceptSet = list("arthropathies" = c(37110496)),
 #'                                    name = "arthropathies")
 #'
 #' result <- codelistDiagnostics(cdm$arthropathies)
@@ -35,11 +35,6 @@ codelistDiagnostics <- function(cohort){
 
   cohort <- omopgenerics::validateCohortArgument(cohort = cohort)
   cdm <- omopgenerics::cdmReference(cohort)
-  cohortName <- omopgenerics::tableName(cohort)
-  cohortIds <- omopgenerics::settings(cohort) |>
-    dplyr::select("cohort_definition_id") |>
-    dplyr::pull()
-
   cohortTable <- omopgenerics::tableName(cohort)
   cohortIds <- omopgenerics::settings(cohort) |>
     dplyr::select("cohort_definition_id") |>
@@ -89,66 +84,106 @@ codelistDiagnostics <- function(cohort){
   results[[1]] <- omopgenerics::emptySummarisedResult()
 
   # Check empty cohorts
-  ids <- CDMConnector::cohortCount(cdm[[cohortName]]) |>
+  ids <- CDMConnector::cohortCount(cdm[[cohortTable]]) |>
     dplyr::filter(.data$number_subjects == 0) |>
     dplyr::pull("cohort_definition_id")
 
   cli::cli_bullets(c("*" = "Getting index event breakdown"))
-  for(i in seq_along(cohortIds)){
-    if(i %in% ids){
+  for (i in seq_along(cohortIds)){
+    if (i %in% ids) {
       cli::cli_warn(message = c("!" = paste0("cohort_definition_id ", i, " is empty. Skipping code use for this cohort.")))
       results[[paste0("index_event_", i)]] <- omopgenerics::emptySummarisedResult()
-    }else{
-      results[[paste0("index_event_", i)]] <- CodelistGenerator::summariseCohortCodeUse(
-        x = omopgenerics::cohortCodelist(cdm[[cohortName]], cohortIds[[i]]),
-        cdm = cdm,
-        cohortTable = cohortName,
-        cohortId = cohortIds[[i]],
-        timing = "entry",
-        countBy = c("record", "person"),
-        byConcept = TRUE
-      )
+    } else {
+      codes <- omopgenerics::cohortCodelist(cdm[[cohortTable]], cohortIds[[i]])
+      if (length(codes) > 0) {
+        results[[paste0("index_event_", i)]] <- CodelistGenerator::summariseCohortCodeUse(
+          x = codes,
+          cdm = cdm,
+          cohortTable = cohortTable,
+          cohortId = cohortIds[[i]],
+          timing = "entry",
+          countBy = c("record", "person"),
+          byConcept = TRUE
+        )
+      }
     }
   }
 
+  # If any measurement/observation codes: do measurement diagnostics
+  measurements <- cdm$concept |>
+    dplyr::select(dplyr::all_of(c("concept_id", "domain_id"))) |>
+    dplyr::inner_join(
+      attr(cdm[[cohortTable]], "cohort_codelist") |>
+        dplyr::distinct(.data$cohort_definition_id, .data$codelist_name, .data$concept_id),
+      by = "concept_id"
+    ) |>
+    dplyr::filter(tolower(.data$domain_id) %in% c("measurement")) |>
+    dplyr::collect()
+  if (nrow(measurements) > 0) {
+    cli::cli_bullets(c("*" = "Getting diagnostics for measurement concepts"))
+    measurementCohortsIds <- unique(measurements$cohort_definition_id)
+    for (id in measurementCohortsIds) {
+      measurementCohort <- cdm[[cohortTable]] |>
+        CohortConstructor::subsetCohorts(cohortId = id, name = "measurement_diagnostics_temp_1234")
+      codes <- measurements |>
+        dplyr::filter(.data$cohort_definition_id == id)
+      codes <- base::split(codes$concept_id, codes$codelist_name)
+      results[[paste0("measurement_diagnostics_", id)]] <- MeasurementDiagnostics::summariseCohortMeasurementUse(
+        codes = codes,
+        cohort = measurementCohort,
+        timing = "during",
+        byConcept = TRUE,
+        byYear = FALSE,
+        bySex = FALSE,
+        ageGroup = NULL,
+        dateRange = as.Date(c(NA, NA)),
+        checks = c("measurement_timings", "measurement_value_as_numeric",
+                   "measurement_value_as_concept")
+      )
+    }
+    omopgenerics::dropSourceTable(cdm = cdm, name = dplyr::starts_with("measurement_diagnostics_temp_1234"))
+  }
+
   # all other analyses require achilles, so return if not available
-  if(!"achilles_results" %in% names(cdm)){
+  if("achilles_results" %in% names(cdm)){
+    cli::cli_bullets(c("*" = "Getting code counts in database based on achilles"))
+    results[[paste0("achilles_code_use")]] <- CodelistGenerator::summariseAchillesCodeUse(x = all_codelists, cdm = cdm)
+
+    # cli::cli_bullets(c("*" = "Getting unmapped concepts"))
+    # results[[paste0("unmapped_codes", i)]] <- CodelistGenerator::summariseUnmappedCodes(
+    #   x = all_codelists,
+    #   cdm = cdm
+    # )
+
+    cli::cli_bullets(c("*" = "Getting orphan concepts"))
+    results[[paste0("orphan_codes", i)]] <- CodelistGenerator::summariseOrphanCodes(
+      x = all_codelists,
+      cdm = cdm
+    )
+  }else{
     cli::cli_warn(
       c("The CDM reference containing the cohort must also contain achilles tables.",
         "Returning only index event breakdown.")
     )
-    results <- results |>
-      vctrs::list_drop_empty() |>
-      omopgenerics::bind()
-
-    if(is.null(results)){
-      results <- omopgenerics::emptySummarisedResult()
-    }
-
-    return(results)
   }
-
-
-  cli::cli_bullets(c("*" = "Getting code counts in database based on achilles"))
-  results[[paste0("achilles_code_use")]] <- CodelistGenerator::summariseAchillesCodeUse(x = all_codelists, cdm = cdm)
-
-  # cli::cli_bullets(c("*" = "Getting unmapped concepts"))
-  # results[[paste0("unmapped_codes", i)]] <- CodelistGenerator::summariseUnmappedCodes(
-  #   x = all_codelists,
-  #   cdm = cdm
-  # )
-
-  cli::cli_bullets(c("*" = "Getting orphan concepts"))
-  results[[paste0("orphan_codes", i)]] <- CodelistGenerator::summariseOrphanCodes(
-    x = all_codelists,
-    cdm = cdm
-  )
 
   results <- results |>
     vctrs::list_drop_empty() |>
     omopgenerics::bind()
 
-  results
+  if(is.null(results)){
+    results <- omopgenerics::emptySummarisedResult()
+  }
+
+  newSettings <- results |>
+    omopgenerics::settings() |>
+    dplyr::mutate("phenotyper_version" = as.character(utils::packageVersion(pkg = "PhenotypeR")),
+                  "diagnostic" = "codelistDiagnostics")
+
+  results <- results |>
+    omopgenerics::newSummarisedResult(settings = newSettings)
+
+ return(results)
 }
 
 duplicatedCodelists <- function(codelists) {

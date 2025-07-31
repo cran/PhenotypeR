@@ -1,7 +1,7 @@
 Package: PhenotypeR
 Type: Package
 Title: Assess Study Cohorts Using a Common Data Model
-Version: 0.1.6
+Version: 0.2.0
 Authors@R: c(
     person("Edward", "Burn", , "edward.burn@ndorms.ox.ac.uk", 
     role = c("aut", "cre"), comment = c(ORCID = "0000-0002-9286-1128")),
@@ -11,6 +11,8 @@ Authors@R: c(
     role = c("aut"), comment = c(ORCID = "0009-0001-8112-8959")),
     person("Marta", "Alcalde-Herraiz", , "marta.alcaldeherraiz@ndorms.ox.ac.uk", 
     role = c("aut"), comment = c(ORCID = "0009-0002-4405-1814")),
+    person("Nuria", "Mercade-Besora", , "nuria.mercadebesora@ndorms.ox.ac.uk", 
+    role = c("aut"), comment = c(ORCID = "0009-0006-7948-3747")),
     person("Albert", "Prats-Uribe", , "albert.prats-uribe@ndorms.ox.ac.uk", 
     role = "aut", comment = c(ORCID = "0000-0003-1202-9153")))
 Description: Phenotype study cohorts in data mapped to the 
@@ -21,29 +23,33 @@ License: Apache License (>= 2)
 Encoding: UTF-8
 Depends: R (>= 4.1.0)
 Suggests: CDMConnector (>= 1.6.1), duckdb, DBI, gt, omock, testthat (>=
-        3.0.0), knitr, visOmopResults (>= 1.0.0), glue, RPostgres,
-        PatientProfiles (>= 1.2.2), ggplot2, ggpubr, stringr, shiny,
-        DiagrammeR, DiagrammeRsvg, reactable, reactablefmtr, rsvg,
-        sortable, shinycssloaders, here, DT, bslib, shinyWidgets,
-        plotly, tidyr, scales, usethis, rmarkdown, CohortSurvival (>=
-        1.0.2)
+        3.0.0), knitr, glue, RPostgres, PatientProfiles (>= 1.2.2),
+        ggplot2, ggpubr, stringr, shiny (>= 1.11.1), DiagrammeR,
+        DiagrammeRsvg, reactable, reactablefmtr, rsvg, sortable,
+        shinycssloaders, here, DT, bslib, shinyWidgets, plotly, tidyr,
+        scales, usethis, rmarkdown, CohortSurvival (>= 1.0.2), ellmer,
+        htmltools, visOmopResults (>= 1.0.0), rsconnect, cpp11,
+        progress
 Config/testthat/edition: 3
 RoxygenNote: 7.3.2
 Imports: CodelistGenerator (>= 3.4.0), CohortCharacteristics (>=
         1.0.0), CohortConstructor (>= 0.4.0), cli, dplyr,
         IncidencePrevalence (>= 1.2.0), omopgenerics (>= 1.2.0),
-        OmopSketch (>= 0.5.0), magrittr, purrr, rlang, vctrs
+        OmopSketch (>= 0.5.0), magrittr, purrr, rlang, vctrs,
+        MeasurementDiagnostics (>= 0.1.0), readr
 URL: https://ohdsi.github.io/PhenotypeR/
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2025-06-22 13:15:54 UTC; eburn
+Packaged: 2025-07-31 09:38:30 UTC; orms0426
 Author: Edward Burn [aut, cre] (ORCID: <https://orcid.org/0000-0002-9286-1128>),
   Marti Catala [aut] (ORCID: <https://orcid.org/0000-0003-3308-9905>),
   Xihang Chen [aut] (ORCID: <https://orcid.org/0009-0001-8112-8959>),
   Marta Alcalde-Herraiz [aut] (ORCID:
     <https://orcid.org/0009-0002-4405-1814>),
+  Nuria Mercade-Besora [aut] (ORCID:
+    <https://orcid.org/0009-0006-7948-3747>),
   Albert Prats-Uribe [aut] (ORCID:
     <https://orcid.org/0000-0003-1202-9153>)
 Maintainer: Edward Burn <edward.burn@ndorms.ox.ac.uk>
 Repository: CRAN
-Date/Publication: 2025-06-22 13:30:02 UTC
+Date/Publication: 2025-07-31 10:00:37 UTC

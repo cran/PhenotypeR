@@ -1,0 +1,86 @@
+## ----include = FALSE----------------------------------------------------------
+NOT_CRAN <- identical(tolower(Sys.getenv("NOT_CRAN")), "true")
+
+knitr::opts_chunk$set(
+collapse = TRUE,
+comment = "#>",
+eval = NOT_CRAN
+)
+
+## ----include = FALSE----------------------------------------------------------
+# knitr::opts_chunk$set(
+#   collapse = TRUE,
+#   comment = "#>", message = FALSE, warning = FALSE,
+#   fig.width = 7
+# )
+# 
+# library(CDMConnector)
+# if (Sys.getenv("EUNOMIA_DATA_FOLDER") == "") Sys.setenv("EUNOMIA_DATA_FOLDER" = tempdir())
+# if (!dir.exists(Sys.getenv("EUNOMIA_DATA_FOLDER"))) dir.create(Sys.getenv("EUNOMIA_DATA_FOLDER"))
+# if (!eunomiaIsAvailable()) downloadEunomiaData(datasetName = "synpuf-1k")
+
+## -----------------------------------------------------------------------------
+# library(CDMConnector)
+# library(CohortConstructor)
+# library(CodelistGenerator)
+# library(CohortCharacteristics)
+# library(CohortSurvival)
+# library(PhenotypeR)
+# library(dplyr)
+# library(ggplot2)
+# 
+# con <- DBI::dbConnect(duckdb::duckdb(),
+#                       CDMConnector::eunomiaDir("synpuf-1k", "5.3"))
+# cdm <- CDMConnector::cdmFromCon(con = con,
+#                                 cdmName = "Eunomia Synpuf",
+#                                 cdmSchema   = "main",
+#                                 writeSchema = "main",
+#                                 achillesSchema = "main")
+# 
+# cdm$injuries <- conceptCohort(cdm = cdm,
+#   conceptSet = list(
+#     "ankle_sprain" = 81151,
+#     "ankle_fracture" = 4059173,
+#     "forearm_fracture" = 4278672,
+#     "hip_fracture" = 4230399
+#   ),
+#   name = "injuries")
+
+## -----------------------------------------------------------------------------
+# cohort_diag <- cohortDiagnostics(cdm$injuries,
+#                                  matchedSample = NULL,
+#                                  survival = TRUE)
+
+## -----------------------------------------------------------------------------
+# tableCohortCount(cohort_diag)
+
+## -----------------------------------------------------------------------------
+# tableCohortAttrition(cohort_diag)
+
+## -----------------------------------------------------------------------------
+# plotCohortAttrition(cohort_diag)
+
+## -----------------------------------------------------------------------------
+# tableCharacteristics(cohort_diag)
+
+## -----------------------------------------------------------------------------
+# tableLargeScaleCharacteristics(cohort_diag)
+
+## -----------------------------------------------------------------------------
+# tableCohortOverlap(cohort_diag)
+
+## -----------------------------------------------------------------------------
+# plotCohortOverlap(cohort_diag)
+
+## -----------------------------------------------------------------------------
+# tableCohortTiming(cohort_diag)
+
+## -----------------------------------------------------------------------------
+# plotCohortTiming(cohort_diag)
+
+## -----------------------------------------------------------------------------
+# tableSurvival(cohort_diag, header = "estimate_name")
+
+## -----------------------------------------------------------------------------
+# plotSurvival(cohort_diag, colour = "target_cohort", facet = "cdm_name")
+

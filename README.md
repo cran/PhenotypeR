@@ -63,16 +63,19 @@ and create the cdm reference for the data.
 library(dplyr)
 library(CohortConstructor)
 library(PhenotypeR)
+library(CodelistGenerator)
+library(duckdb)
+library(CDMConnector)
+library(DBI)
 ```
 
 ``` r
 # Connect to the database and create the cdm object
-con <- DBI::dbConnect(duckdb::duckdb(), 
-                      CDMConnector::eunomiaDir("synpuf-1k", "5.3"))
+con <- dbConnect(duckdb(), dbdir = eunomiaDir("synpuf-1k", "5.3"))
 cdm <- CDMConnector::cdmFromCon(con = con, 
                                 cdmName = "Eunomia Synpuf",
                                 cdmSchema   = "main",
-                                writeSchema = "main", 
+                                writeSchema = "main",
                                 achillesSchema = "main")
 ```
 
@@ -98,9 +101,10 @@ cdm
 
 ``` r
 # Create a code lists
-codes <- list("warfarin" = c(1310149, 40163554),
-              "acetaminophen" = c(1125315, 1127078, 1127433, 40229134, 40231925, 40162522, 19133768),
-              "morphine" = c(1110410, 35605858, 40169988))
+codes <- list("warfarin" = c(1310149L, 40163554L),
+              "acetaminophen" = c(1125315L, 1127078L, 1127433L, 40229134L, 40231925L, 40162522L, 19133768L),
+              "morphine" = c(1110410L, 35605858L, 40169988L),
+              "measurements_cohort" = c(40660437L, 2617206L, 4034850L,  2617239L, 4098179L))
 
 # Instantiate cohorts with CohortConstructor
 cdm$my_cohort <- conceptCohort(cdm = cdm,
@@ -118,16 +122,43 @@ diagnostics**, **codelist diagnostics**, **cohort diagnostics**, and
 result <- phenotypeDiagnostics(cdm$my_cohort, survival = TRUE)
 ```
 
+You can also create a table with the expected results, so you can
+compare later with the actual results.
+
+``` r
+expectations <- tibble(
+  "cohort_name" = c("warfarin", "acetaminophen", "morphine", "measurements_cohort"),
+  "estimate" = c("Male percentage", "Survival probability after 5y", "Median age", "Median age"),
+  "value" = c("56%", "96%", "57-58", "42-45"),
+  "source" = c("A clinician", "A clinician", "A clinician", "A clinician"),
+  "diagnostic" = c("cohort_characteristics", "cohort_survival", "cohort_characteristics", "cohort_characteristics") 
+)
+```
+
+Or alternatively, you can use AI to generate expectations
+
+``` r
+library(ellmer)
+# Notice that you may need to generate an google gemini API with https://aistudio.google.com/app/apikey and add it to your R environment:
+# usethis::edit_r_environ()
+# GEMINI_API_KEY = "your API"
+
+chat <- chat("google_gemini")
+
+expectations <- getCohortExpectations(chat = chat, 
+                      phenotypes = result)
+```
+
 Once we have our results we can quickly view them in an interactive
 application. Here we’ll apply a minimum cell count of 10 to our results
 and save our shiny app to a temporary directory.
 
 ``` r
-shinyDiagnostics(result = result |> suppress(10), directory = tempdir())
+shinyDiagnostics(result = result, minCellCount = 2, directory = tempdir(), expectations = expectations)
 ```
 
 See the shiny app generated from the example cohort in
-[here](https://dpa-pde-oxford.shinyapps.io/Readme_PhenotypeR/).
+[here](https://dpa-pde-oxford.shinyapps.io/PhenotypeRShiny/).
 
 ### More information
 

@@ -1,5 +1,13 @@
 # Argument descriptions repeated > 1:
 
+#' Helper for consistent documentation of `expectations`.
+#'
+#' @param expectations Data frame or tibble with cohort expectations. It must contain the following columns: cohort_name, estimate, value, and source.
+#'
+#' @name expectationsDoc
+#' @keywords internal
+NULL
+
 #' Helper for consistent documentation of `cohort`.
 #'
 #' @param cohort Cohort table in a cdm reference
@@ -17,11 +25,11 @@ NULL
 NULL
 
 
-#' Helper for consistent documentation of `matched` and `match`.
+#' Helper for consistent documentation of `matched`.
 #'
-#' @param match Boolean variable. Whether to conduct the analysis for the matched cohorts (TRUE) or not (FALSE).
-#' @param matchedSample Only if match = TRUE. The number of people to take a random sample for
-#' matching. If NULL, no sampling will be performed.
+#' @param matchedSample The number of people to take a random sample for
+#' matching. If `matchedSample = NULL`, no sampling will be performed. If `matchedSample = 0`, no
+#' matched cohorts will be created.
 #'
 #' @name matchedDoc
 #' @keywords internal
@@ -30,7 +38,8 @@ NULL
 #' Helper for consistent documentation of `populationSample`.
 #'
 #' @param populationSample Number of people from the cdm to sample. If NULL no
-#' sampling will be performed
+#' sampling will be performed. Sample will be within populationDateRange if
+#' specified.
 #' @param populationDateRange Two dates. The first indicating the earliest cohort
 #' start date and the second indicating the latest possible cohort end date. If
 #' NULL or the first date is set as missing, the earliest observation_start_date
