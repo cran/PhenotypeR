@@ -404,11 +404,12 @@ or FALSE each one of the corresponding arguments:</p>
 <span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>  <span class="at">cohort =</span> cdm<span class="sc">$</span>my_cohort, </span>
 <span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>  <span class="at">diagnostics =</span> <span class="fu">c</span>(<span class="st">&quot;databaseDiagnostics&quot;</span>, <span class="st">&quot;codelistDiagnostics&quot;</span>, </span>
 <span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>                  <span class="st">&quot;cohortDiagnostics&quot;</span>, <span class="st">&quot;populationDiagnostics&quot;</span>),</span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>  <span class="at">matchedSample =</span> <span class="dv">1000</span></span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>  <span class="at">populationSample =</span> <span class="fl">1e+06</span>,</span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>  <span class="at">populationDateRange =</span> <span class="fu">as.Date</span>(<span class="fu">c</span>(<span class="cn">NA</span>, <span class="cn">NA</span>))</span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>  )</span>
-<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>result <span class="sc">|&gt;</span> <span class="fu">glimpse</span>()</span></code></pre></div>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>  <span class="at">cohortSample =</span> <span class="dv">20000</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>  <span class="at">matchedSample =</span> <span class="dv">1000</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>  <span class="at">populationSample =</span> <span class="fl">1e+06</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>  <span class="at">populationDateRange =</span> <span class="fu">as.Date</span>(<span class="fu">c</span>(<span class="cn">NA</span>, <span class="cn">NA</span>))</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>  )</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>result <span class="sc">|&gt;</span> <span class="fu">glimpse</span>()</span></code></pre></div>
 <p>Notice that we have three additional arguments:</p>
 <ul>
 <li><code>populationSample</code>: It allows to specify a number of
@@ -422,11 +423,20 @@ whole in which case we would set this argument to NULL.</li>
 <li><code>populationDateRange</code>: We can use it to specify the time
 period when we want to perform our <strong>Population
 diagnostics</strong> analysis.</li>
+<li><code>cohortSample</code>: This argument will subset a random sample
+of people from our cohort and performs the cohortDiagnostics on this
+sample (notice that the attrition and the cohort counts will be
+calculated from the original cohorts, not the sampled ones). If the
+sample specified is bigger than the number of individuals in the cohort,
+no sampling will be performed. We recommend to use this option when
+there are cohorts bigger than 20,000 individuals.</li>
 <li><code>matchedSample</code>: Similar to populationSample, this
 arguments subsets a random sample of people from our cohort and performs
-the matched analysis on this sample. If we have very large cohorts we
-can use this to save computational time. If we do not want to create
-matched cohorts, we can define <code>matchedSample = 0</code>.</li>
+the matched analysis on this sample. If the sample specified is bigger
+than the size of the cohort, no sampling will be performed. If we have
+specified a cohortSample, the sampling will be performed on top of the
+sampled cohorts. If we do not want to create matched cohorts, we can
+define <code>matchedSample = 0</code>.</li>
 </ul>
 </div>
 <div id="save-the-results" class="section level2">
@@ -434,17 +444,17 @@ matched cohorts, we can define <code>matchedSample = 0</code>.</li>
 <p>To save the results, we can use <a href="https://darwin-eu.github.io/omopgenerics/reference/exportSummarisedResult.html">exportSummarisedResult</a>
 function from <a href="https://darwin-eu.github.io/omopgenerics/index.html">omopgenerics</a>
 R Package:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">exportSummarisedResult</span>(result, <span class="at">directory =</span> here<span class="sc">::</span><span class="fu">here</span>(), <span class="at">minCellCount =</span> <span class="dv">5</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">exportSummarisedResult</span>(result, <span class="at">path =</span> here<span class="sc">::</span><span class="fu">here</span>(), <span class="at">minCellCount =</span> <span class="dv">5</span>)</span></code></pre></div>
 </div>
 <div id="visualisation-of-the-results" class="section level2">
 <h2>Visualisation of the results</h2>
 <p>Once we get our <strong>Phenotype diagnostics</strong> result, we can
 use <code>shinyDiagnostics</code> to easily create a shiny app and
 visualise our results:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">shinyDiagnostics</span>(result,</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>                           <span class="at">directory =</span> <span class="fu">tempdir</span>(),</span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>                           <span class="at">minCellCount =</span> <span class="dv">5</span>, </span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>                           <span class="at">open =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">shinyDiagnostics</span>(result,</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>                 <span class="at">directory =</span> <span class="fu">tempdir</span>(),</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>                 <span class="at">minCellCount =</span> <span class="dv">5</span>, </span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>                 <span class="at">open =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <p>Notice that we have specified the minimum number of counts
 (<code>minCellCount</code>) for suppression to be shown in the shiny
 app, and also that we want the shiny to be launched in a new R session

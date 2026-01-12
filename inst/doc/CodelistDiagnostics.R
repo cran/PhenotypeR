@@ -58,10 +58,10 @@ tableOrphanCodes(code_diag)
 tableCohortCodeUse(code_diag)
 
 ## -----------------------------------------------------------------------------
-tableMeasurementTimings(code_diag)
+tableMeasurementSummary(code_diag)
 
 ## -----------------------------------------------------------------------------
-plotMeasurementTimings(code_diag)
+plotMeasurementSummary(code_diag)
 
 ## -----------------------------------------------------------------------------
 tableMeasurementValueAsConcept(code_diag)
@@ -70,8 +70,8 @@ tableMeasurementValueAsConcept(code_diag)
 plotMeasurementValueAsConcept(code_diag)
 
 ## -----------------------------------------------------------------------------
-tableMeasurementValueAsNumeric(code_diag)
+tableMeasurementValueAsNumber(code_diag)
 
 ## -----------------------------------------------------------------------------
-plotMeasurementValueAsNumeric(code_diag)
+plotMeasurementValueAsNumber(code_diag)
 

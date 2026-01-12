@@ -41,18 +41,19 @@ if (!eunomiaIsAvailable()) downloadEunomiaData(datasetName = "synpuf-1k", cdmVer
 #   cohort = cdm$my_cohort,
 #   diagnostics = c("databaseDiagnostics", "codelistDiagnostics",
 #                   "cohortDiagnostics", "populationDiagnostics"),
-#   matchedSample = 1000
+#   cohortSample = 20000,
+#   matchedSample = 1000,
 #   populationSample = 1e+06,
 #   populationDateRange = as.Date(c(NA, NA))
 #   )
 # result |> glimpse()
 
 ## ----eval=FALSE---------------------------------------------------------------
-# exportSummarisedResult(result, directory = here::here(), minCellCount = 5)
+# exportSummarisedResult(result, path = here::here(), minCellCount = 5)
 
 ## ----eval=FALSE---------------------------------------------------------------
-# result <- shinyDiagnostics(result,
-#                            directory = tempdir(),
-#                            minCellCount = 5,
-#                            open = TRUE)
+# shinyDiagnostics(result,
+#                  directory = tempdir(),
+#                  minCellCount = 5,
+#                  open = TRUE)
 

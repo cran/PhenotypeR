@@ -15,7 +15,7 @@ library(CDMConnector)
 library(OmopSketch)
 library(PhenotypeR)
 library(dplyr)
-library(ggplot2)
+library(CohortConstructor)
 
 con <- DBI::dbConnect(duckdb::duckdb(), 
                       CDMConnector::eunomiaDir("synpuf-1k", "5.3"))
@@ -25,12 +25,27 @@ cdm <- CDMConnector::cdmFromCon(con = con,
                                 writeSchema = "main", 
                                 achillesSchema = "main")
 
+cdm$injuries <- conceptCohort(cdm = cdm,
+  conceptSet = list(
+    "ankle_sprain" = 81151L,
+    "ankle_fracture" = 4059173L,
+    "forearm_fracture" = 4278672L,
+    "hip_fracture" = 4230399L
+  ),
+  name = "injuries")
+
 ## -----------------------------------------------------------------------------
-db_diagnostics <- databaseDiagnostics(cdm)
+db_diagnostics <- databaseDiagnostics(cdm$injuries)
 
 ## -----------------------------------------------------------------------------
 tableOmopSnapshot(db_diagnostics)
 
 ## -----------------------------------------------------------------------------
 tableObservationPeriod(db_diagnostics)
+
+## -----------------------------------------------------------------------------
+tablePerson(db_diagnostics)
+
+## -----------------------------------------------------------------------------
+tableClinicalRecords(db_diagnostics)
 

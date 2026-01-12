@@ -377,8 +377,9 @@ fracture, or a hip fracture using the Eunomia synthetic data.</p>
 <p>We can run cohort diagnostics analyses for each of our overall
 cohorts like so:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>cohort_diag <span class="ot">&lt;-</span> <span class="fu">cohortDiagnostics</span>(cdm<span class="sc">$</span>injuries, </span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>                                 <span class="at">matchedSample =</span> <span class="cn">NULL</span>,</span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>                                 <span class="at">survival =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>                                 <span class="at">cohortSample =</span> <span class="cn">NULL</span>,</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>                                 <span class="at">matchedSample =</span> <span class="cn">NULL</span>,</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>                                 <span class="at">survival =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <p>Cohort diagnostics builds on <a href="https://darwin-eu.github.io/CohortCharacteristics/">CohortCharacteristics</a>
 and <a href="https://darwin-eu-dev.github.io/CohortSurvival/">CohortSurvival</a>
 R packages to perform the following analyses on our cohorts:</p>

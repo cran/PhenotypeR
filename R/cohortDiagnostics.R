@@ -10,6 +10,7 @@
 #' * Overlap between cohorts (if more than one cohort is being used).
 #'
 #' @inheritParams cohortDoc
+#' @inheritParams cohortSampleDoc
 #' @inheritParams survivalDoc
 #' @inheritParams matchedDoc
 #'
@@ -18,21 +19,27 @@
 #'
 #' @examples
 #' \donttest{
+#' library(omock)
+#' library(CohortConstructor)
 #' library(PhenotypeR)
 #'
-#' cdm <- mockPhenotypeR()
+#' cdm <- mockCdmFromDataset(source = "duckdb")
+#' cdm$warfarin <- conceptCohort(cdm,
+#'                               conceptSet =  list(warfarin = c(1310149L,
+#'                                                               40163554L)),
+#'                               name = "warfarin")
 #'
-#' result <- cohortDiagnostics(cdm$my_cohort)
-#'
-#' CDMConnector::cdmDisconnect(cdm = cdm)
+#' result <- cohortDiagnostics(cdm$warfarin)
 #' }
+cohortDiagnostics <- function(cohort, survival = FALSE, cohortSample = 20000, matchedSample = 1000){
 
-cohortDiagnostics <- function(cohort, survival = FALSE, matchedSample = 1000){
-
-  cli::cli_bullets(c("*" = "Starting Cohort Diagnostics"))
+  if (!is.null(getOption("omopgenerics.logFile"))) {
+    omopgenerics::logMessage("Cohort diagnostics - input validation")
+  }
 
   # Initial checks ----
-  checksCohortDiagnostics(survival, matchedSample)
+  omopgenerics::validateCohortArgument(cohort)
+  checksCohortDiagnostics(survival, cohortSample, matchedSample)
 
   cdm <- omopgenerics::cdmReference(cohort)
   cohortName <- omopgenerics::tableName(cohort)
@@ -44,31 +51,62 @@ cohortDiagnostics <- function(cohort, survival = FALSE, matchedSample = 1000){
   tempCohortName  <- paste0(prefix, cohortName)
   results <- list()
 
-  cli::cli_bullets(c(">" = "Getting cohort attrition"))
+  if (!is.null(getOption("omopgenerics.logFile"))) {
+    omopgenerics::logMessage("Cohort diagnostics - cohort attrition")
+  }
   results[["cohort_attrition"]] <- cdm[[cohortName]] |>
     CohortCharacteristics::summariseCohortAttrition()
 
-  cli::cli_bullets(c(">" = "Getting cohort count"))
+  if (!is.null(getOption("omopgenerics.logFile"))) {
+    omopgenerics::logMessage("Cohort diagnostics - cohort count")
+  }
   results[["cohort_count"]] <- cdm[[cohortName]] |>
     CohortCharacteristics::summariseCohortCount()
 
+  cohortNameSampled <- paste0(prefix, "sampled")
+  if(is.null(cohortSample)){
+    cdm[[cohortNameSampled]] <- CohortConstructor::copyCohorts(cdm[[cohortName]], name = cohortNameSampled)
+  }else{
+    # Check cohort sizes
+    x <- cohort |>
+      omopgenerics::cohortCount() |>
+      dplyr::filter(.data$number_subjects > !!cohortSample) |>
+      dplyr::collect()
+
+    if(nrow(x) == 0){
+      cli::cli_bullets(c(">" = "Skipping cohort sampling as all cohorts have less than {cohortSample} individuals."))
+      cdm[[cohortNameSampled]] <- CohortConstructor::copyCohorts(cdm[[cohortName]], name = cohortNameSampled)
+    }else{
+      if (!is.null(getOption("omopgenerics.logFile"))) {
+        omopgenerics::logMessage(paste0("Cohort diagnostics - sampling cohorts to up to ", cohortSample, " individuals"))
+      }
+      cdm[[cohortNameSampled]] <- CohortConstructor::sampleCohorts(cdm[[cohortName]], n = cohortSample, name = cohortNameSampled)
+    }
+  }
+
   # if there is more than one cohort, we'll get timing and overlap of all together
   if(length(cohortIds) > 1){
-    cli::cli_bullets(c(">" = "Getting cohort overlap"))
-    results[["cohort_overlap"]] <-  cdm[[cohortName]] |>
+    if (!is.null(getOption("omopgenerics.logFile"))) {
+      omopgenerics::logMessage("Cohort diagnostics - cohort overlap")
+    }
+    results[["cohort_overlap"]] <-  cdm[[cohortNameSampled]] |>
       CohortCharacteristics::summariseCohortOverlap()
 
-    cli::cli_bullets(c(">" = "Getting cohort timing"))
-    results[["cohort_timing"]] <- cdm[[cohortName]] |>
+    if (!is.null(getOption("omopgenerics.logFile"))) {
+      omopgenerics::logMessage("Cohort diagnostics - cohort timing")
+    }
+    results[["cohort_timing"]] <- cdm[[cohortNameSampled]] |>
       CohortCharacteristics::summariseCohortTiming(estimates = c("median", "q25", "q75", "min", "max", "density"))
   }
 
   if(is.null(matchedSample) || matchedSample != 0){
-    cli::cli_bullets(c(">" = "Creating matching cohorts"))
-    cdm <- createMatchedCohorts(cdm, tempCohortName, cohortName, cohortIds, matchedSample)
-    cdm <- bind(cdm[[cohortName]], cdm[[tempCohortName]], name = tempCohortName)
+    if (!is.null(getOption("omopgenerics.logFile"))) {
+      omopgenerics::logMessage("Cohort diagnostics - matched cohorts")
+    }
+    cdm <- createMatchedCohorts(cdm, tempCohortName, cohortNameSampled, cohortIds, matchedSample)
+    cdm <- bind(cdm[[cohortNameSampled]], cdm[[tempCohortName]], name = tempCohortName)
   }else{
-    cdm[[tempCohortName]] <- CohortConstructor::copyCohorts(cdm[[cohortName]],
+    cdm[[tempCohortName]] <- CohortConstructor::copyCohorts(cdm[[cohortNameSampled]],
                                                             name = tempCohortName)
   }
 
@@ -83,7 +121,9 @@ cohortDiagnostics <- function(cohort, survival = FALSE, matchedSample = 1000){
                                      name = tempCohortName)
   cdm[[tempCohortName]] <- CohortConstructor::addCohortTableIndex(cdm[[tempCohortName]])
 
-  cli::cli_bullets(c(">" = "Summarising cohort characteristics"))
+  if (!is.null(getOption("omopgenerics.logFile"))) {
+    omopgenerics::logMessage("Cohort diagnostics - cohort characteristics")
+  }
   results[["cohort_summary"]] <- cdm[[tempCohortName]] |>
     CohortCharacteristics::summariseCharacteristics(
       strata = list("age_group", "sex"),
@@ -95,7 +135,9 @@ cohortDiagnostics <- function(cohort, survival = FALSE, matchedSample = 1000){
       )
     )
 
-  cli::cli_bullets(c(">" = "Calculating age density"))
+  if (!is.null(getOption("omopgenerics.logFile"))) {
+    omopgenerics::logMessage("Cohort diagnostics - age density")
+  }
   results[["cohort_density"]] <- cdm[[tempCohortName]] |>
     PatientProfiles::addCohortName() |>
     PatientProfiles::summariseResult(
@@ -109,59 +151,63 @@ cohortDiagnostics <- function(cohort, survival = FALSE, matchedSample = 1000){
     )
 
   # Large scale characteristics
-  cli::cli_bullets(c(">" = "Run large scale characteristics (including source and standard codes)"))
+  lscWindows <- list(c(-Inf, -366), c(-365, -31),
+                     c(-30, -1), c(0, 0),
+                     c(1, 30), c(31, 365),
+                     c(366, Inf))
+
+  lscTableEvents<-c("condition_occurrence",
+                    "visit_occurrence",
+                    # "visit_detail",  # not currently supported by CohortCharacteristics
+                    "measurement",
+                    "procedure_occurrence",
+                    "device_exposure",
+                    "observation")
+  lscTableEvents<-intersect(lscTableEvents, names(cdm))
+
+  lscTableEpisodes<- c("drug_exposure", "drug_era")
+  lscTableEpisodes<-intersect(lscTableEpisodes, names(cdm))
+
+  lscMminimumFrequency <- 0.01
+
+  if (!is.null(getOption("omopgenerics.logFile"))) {
+    omopgenerics::logMessage("Cohort diagnostics - large scale characteristics")
+  }
   results[["lsc_standard_source"]] <- CohortCharacteristics::summariseLargeScaleCharacteristics(
     cohort = cdm[[tempCohortName]],
-    window = list(c(-Inf, -1), c(-Inf, -366), c(-365, -31),
-                  c(-30, -1), c(0, 0),
-                  c(1, 30), c(31, 365),
-                  c(366, Inf), c(1, Inf)),
-    eventInWindow = c("condition_occurrence", "visit_occurrence",
-                      "measurement", "procedure_occurrence",
-                      "observation"),
-    episodeInWindow = c("drug_exposure"),
-    minimumFrequency = 0.0005,
-    includeSource = TRUE,
-    excludedCodes = NULL
-  )
-
-  cli::cli_bullets(c(">" = "Run large scale characteristics (including only standard codes)"))
-  results[["lsc_standard"]] <- CohortCharacteristics::summariseLargeScaleCharacteristics(
-    cohort = cdm[[tempCohortName]],
-    window = list(c(-Inf, -1), c(-Inf, -366), c(-365, -31),
-                  c(-30, -1), c(0, 0),
-                  c(1, 30), c(31, 365),
-                  c(366, Inf), c(1, Inf)),
-    eventInWindow = c("condition_occurrence", "visit_occurrence",
-                      "measurement", "procedure_occurrence",
-                      "observation"),
-    episodeInWindow = c("drug_exposure"),
-    minimumFrequency = 0.0005,
-    includeSource = FALSE,
+    window = lscWindows,
+    eventInWindow = lscTableEvents,
+    episodeInWindow = lscTableEpisodes,
+    minimumFrequency = lscMminimumFrequency,
+    includeSource = c(TRUE, FALSE),
     excludedCodes = NULL
   )
 
   if(isTRUE(survival)){
-  if("death" %in% names(cdm)){
-    cli::cli_bullets(c(">" = "Creating death cohort"))
-    if(cdm$death |> dplyr::summarise("n" = dplyr::n()) |> dplyr::pull("n") == 0){
-      cli::cli_warn("Death table is empty. Skipping survival analysis")
-    }else{
-      deathCohortName <- paste0(prefix, "death_cohort")
-      cdm[[deathCohortName]] <- CohortConstructor::deathCohort(cdm,
-                                                               name = deathCohortName,
-                                                               subsetCohort = tempCohortName,
-                                                               subsetCohortId = NULL)
+    if("death" %in% names(cdm)){
+      if (!is.null(getOption("omopgenerics.logFile"))) {
+        omopgenerics::logMessage("Cohort diagnostics - death cohorts")
+      }
+      if(cdm$death |> dplyr::summarise("n" = dplyr::n()) |> dplyr::pull("n") == 0){
+        cli::cli_warn("Death table is empty. Skipping survival analysis")
+      }else{
+        deathCohortName <- paste0(prefix, "death_cohort")
+        cdm[[deathCohortName]] <- CohortConstructor::deathCohort(cdm,
+                                                                 name = deathCohortName,
+                                                                 subsetCohort = tempCohortName,
+                                                                 subsetCohortId = NULL)
 
-      cli::cli_bullets(c(">" = "Estimating single survival event"))
-      results[["single_survival_event"]] <- CohortSurvival::estimateSingleEventSurvival(cdm,
-                                                                                        targetCohortTable = tempCohortName,
-                                                                                        outcomeCohortTable = deathCohortName)
+        if (!is.null(getOption("omopgenerics.logFile"))) {
+          omopgenerics::logMessage("Cohort diagnostics - survival analysis")
+        }
+        results[["single_survival_event"]] <- CohortSurvival::estimateSingleEventSurvival(cdm,
+                                                                                          targetCohortTable = tempCohortName,
+                                                                                          outcomeCohortTable = deathCohortName)
+      }
+    }else{
+      cli::cli_warn("No table 'death' in the cdm object. Skipping survival analysis.")
+      results[["single_survival_event"]] <- omopgenerics::emptySummarisedResult()
     }
-  }else{
-    cli::cli_warn("No table 'death' in the cdm object. Skipping survival analysis.")
-    results[["single_survival_event"]] <- omopgenerics::emptySummarisedResult()
-  }
   }
 
   omopgenerics::dropSourceTable(cdm, dplyr::starts_with(prefix))
@@ -173,7 +219,8 @@ cohortDiagnostics <- function(cohort, survival = FALSE, matchedSample = 1000){
     omopgenerics::settings() |>
     dplyr::mutate("phenotyper_version" = as.character(utils::packageVersion(pkg = "PhenotypeR")),
                   "diagnostic" = "cohortDiagnostics",
-                  "matchedSample" = .env$matchedSample)
+                  "cohort_sample"  = .env$cohortSample,
+                  "matched_sample" = .env$matchedSample)
 
   results <- results |>
     omopgenerics::newSummarisedResult(settings = newSettings)
@@ -215,10 +262,11 @@ createMatchedCohorts <- function(cdm, tempCohortName, cohortName, cohortIds, mat
   return(cdm)
 }
 
-checksCohortDiagnostics <- function(survival, matchedSample, call = parent.frame()){
+checksCohortDiagnostics <- function(survival, cohortSample, matchedSample, call = parent.frame()){
   omopgenerics::assertLogical(survival, call = call)
   if(isTRUE(survival)){
     rlang::check_installed("CohortSurvival", version = "1.0.2")
   }
+  omopgenerics::assertNumeric(cohortSample, integerish = TRUE, min = 0, null = TRUE, length = 1, call = call)
   omopgenerics::assertNumeric(matchedSample, integerish = TRUE, min = 0, null = TRUE, length = 1, call = call)
 }

@@ -48,6 +48,7 @@ eval = NOT_CRAN
 
 ## -----------------------------------------------------------------------------
 # cohort_diag <- cohortDiagnostics(cdm$injuries,
+#                                  cohortSample = NULL,
 #                                  matchedSample = NULL,
 #                                  survival = TRUE)
 

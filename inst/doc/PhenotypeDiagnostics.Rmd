@@ -72,7 +72,8 @@ result <- phenotypeDiagnostics(
   cohort = cdm$my_cohort, 
   diagnostics = c("databaseDiagnostics", "codelistDiagnostics", 
                   "cohortDiagnostics", "populationDiagnostics"),
-  matchedSample = 1000
+  cohortSample = 20000,
+  matchedSample = 1000,
   populationSample = 1e+06,
   populationDateRange = as.Date(c(NA, NA))
   )
@@ -83,22 +84,23 @@ Notice that we have three additional arguments:
 
 -   `populationSample`: It allows to specify a number of people that randomly will be extracted from the CDM to perform the **Population diagnostics** analysis. If NULL, all the participants in the CDM will be included. It helps to reduce the computational time. This is particularly useful when outcomes of interest are relatively common, but when they are rarer we may wish to maximise statistical power and calculate estimates for the dataset as a whole in which case we would set this argument to NULL.
 -   `populationDateRange`: We can use it to specify the time period when we want to perform our **Population diagnostics** analysis.
--   `matchedSample`: Similar to populationSample, this arguments subsets a random sample of people from our cohort and performs the matched analysis on this sample. If we have very large cohorts we can use this to save computational time. If we do not want to create matched cohorts, we can define `matchedSample = 0`. 
+-   `cohortSample`: This argument will subset a random sample of people from our cohort and performs the cohortDiagnostics on this sample (notice that the attrition and the cohort counts will be calculated from the original cohorts, not the sampled ones). If the sample specified is bigger than the number of individuals in the cohort, no sampling will be performed. We recommend to use this option when there are cohorts bigger than 20,000 individuals.
+-   `matchedSample`: Similar to populationSample, this arguments subsets a random sample of people from our cohort and performs the matched analysis on this sample. If the sample specified is bigger than the size of the cohort, no sampling will be performed. If we have specified a cohortSample, the sampling will be performed on top of the sampled cohorts. If we do not want to create matched cohorts, we can define `matchedSample = 0`. 
 
 ## Save the results
 To save the results, we can use [exportSummarisedResult](https://darwin-eu.github.io/omopgenerics/reference/exportSummarisedResult.html) function from [omopgenerics](https://darwin-eu.github.io/omopgenerics/index.html) R Package:
 ```{r, eval=FALSE}
-exportSummarisedResult(result, directory = here::here(), minCellCount = 5)
+exportSummarisedResult(result, path = here::here(), minCellCount = 5)
 ```
 
 ## Visualisation of the results
 Once we get our **Phenotype diagnostics** result, we can use `shinyDiagnostics` to easily create a shiny app and visualise our results:
 
 ```{r, eval=FALSE}
-result <- shinyDiagnostics(result,
-                           directory = tempdir(),
-                           minCellCount = 5, 
-                           open = TRUE)
+shinyDiagnostics(result,
+                 directory = tempdir(),
+                 minCellCount = 5, 
+                 open = TRUE)
 ```
 Notice that we have specified the minimum number of counts (`minCellCount`) for suppression to be shown in the shiny app, and also that we want the shiny to be launched in a new R session (`open`). You can see the shiny app generated for this example in [here](https://dpa-pde-oxford.shinyapps.io/PhenotypeRShiny/).See [Shiny diagnostics vignette](https://ohdsi.github.io/PhenotypeR/articles/a02_ShinyDiagnostics.html) for a full explanation of the shiny app.
 

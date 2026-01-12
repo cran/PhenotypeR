@@ -23,18 +23,24 @@
 #'
 #' @examples
 #' \donttest{
+#' library(omock)
+#' library(CohortConstructor)
 #' library(PhenotypeR)
-#' library(dplyr)
 #'
-#' cdm <- mockPhenotypeR()
+#' cdm <- mockCdmFromDataset(source = "duckdb")
+#' cdm$warfarin <- conceptCohort(cdm,
+#'                               conceptSet =  list(warfarin = c(1310149L,
+#'                                                               40163554L)),
+#'                               name = "warfarin")
 #'
-#' result <- phenotypeDiagnostics(cdm$my_cohort)
-#' expectations <- tibble("cohort_name" = rep(c("cohort_1", "cohort_2"),3),
-#'                        "value" = c(rep(c("Mean age"),2),
-#'                                    rep("Male percentage",2),
-#'                                    rep("Survival probability after 5y",2)),
-#'                        "estimate" = c("32", "54", "25%", "74%", "95%", "21%"),
-#'                        "source" = rep(c("AlbertAI"),6))
+#' result <- phenotypeDiagnostics(cdm$warfarin)
+#'
+#' expectations <- dplyr::tibble("cohort_name" = "warfarin",
+#'                        "value" = c("Mean age",
+#'                                    "Male percentage",
+#'                                    "Survival probability after 5y"),
+#'                        "estimate" = c("32", "74%",  "4%"),
+#'                        "source" = c("AlbertAI"))
 #'
 #' shinyDiagnostics(result, tempdir(), expectations = expectations)
 #'
@@ -179,11 +185,16 @@ checkWhichDiagnostics <- function(result){
   diagnostics  <- c("databaseDiagnostics", "codelistDiagnostics", "cohortDiagnostics", "populationDiagnostics")
 
   to_remove <- diagnostics[!diagnostics %in% diag_present]
+  if(!"databaseDiagnostics" %in% to_remove){
+    if(!"summarise_clinical_records" %in% (omopgenerics::settings(result) |> dplyr::pull("result_type") |> unique())){
+      to_remove <- append(to_remove, "clinical_records")
+    }
+  }
   if(!"codelistDiagnostics" %in% to_remove){
     if(!"achilles_code_use" %in% (omopgenerics::settings(result) |> dplyr::pull("result_type") |> unique())){
       to_remove <- append(to_remove, "achilles_results")
     }
-    if(!"measurement_timings" %in% (omopgenerics::settings(result) |> dplyr::pull("result_type") |> unique())){
+    if(!"measurement_summary" %in% (omopgenerics::settings(result) |> dplyr::pull("result_type") |> unique())){
       to_remove <- append(to_remove, "measurement_diagnostics")
     }
   }
@@ -204,6 +215,7 @@ removeLines <- function(ui, result, diagnostic){
       ui <- ui[-seq(start,end,1)]
 
       msg <- switch(x,
+             "clinical_records" = "No summary of the clinical records containing the codes from the concept list. Removing tab from the shiny app.",
              "measurement_diagnostics" = "No measurements present in the concept list. Removing tab from the shiny app.",
              "cohort_survival" = "No survival analysis present in cohortDiagnostics. Removing tab from the shiny app.",
              "achilles_results" = "No achilles code use or orphan codes results in codelistDiagnostics. Removing tabs from the shiny app.",
