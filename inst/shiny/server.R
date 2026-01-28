@@ -558,11 +558,11 @@ server <- function(input, output, session) {
         ribbon = FALSE,
         ymin = NULL,
         ymax = NULL) +
-      ggplot2::xlab("Date of Birth") +
+      ggplot2::xlab("Date") +
       ggplot2::ylab("Density") +
       ggplot2::scale_y_continuous(labels = scales::label_number()) +
       ggplot2::facet_wrap(vars(variable_name),
-                          ncol = 1)
+                          ncol = 1, scales = "free_y")
 
   })
 
@@ -571,9 +571,9 @@ server <- function(input, output, session) {
     if (is.null(dataFiltered$summarise_clinical_records)) {
       validate("No clinical records summary in results")
     }
-
     result <- dataFiltered$summarise_clinical_records |>
-      dplyr::filter(cdm_name %in% shared_cdm_names())
+      dplyr::filter(cdm_name %in% shared_cdm_names(),
+                    group_level %in% input$summarise_clinical_records_omop_table)
     attr(result, "settings")  <- attr(result, "settings") |>
       dplyr::select(!c("diagnostic", "phenotyper_version"))
     validateFilteredResult(result)
@@ -611,7 +611,8 @@ server <- function(input, output, session) {
     }
 
     result <- dataFiltered$summarise_trend |>
-      dplyr::filter(cdm_name %in% shared_cdm_names())
+      dplyr::filter(cdm_name %in% shared_cdm_names(),
+                    group_level %in% input$summarise_clinical_records_omop_table)
     validateFilteredResult(result)
 
     return(result)
@@ -2005,7 +2006,7 @@ server <- function(input, output, session) {
     req(shared_cdm_names())
     req(shared_cohort_names())
     req(inputs_initialized())
-    if (is.null(dataFiltered$survival_probability)) {
+    if (is.null(dataFiltered$survival_estimates)) {
       validate("No survival in results")
     }
 
@@ -2016,16 +2017,14 @@ server <- function(input, output, session) {
       cohorts <- shared_cohort_names()
     }
     result <- omopgenerics::bind(
-      dataFiltered$survival_attrition,
-      dataFiltered$survival_events,
-      dataFiltered$survival_probability,
-      dataFiltered$survival_summary) |>
+      dataFiltered[str_detect(names(dataFiltered), "survival_")]) |>
       dplyr::filter(.data$cdm_name %in% shared_cdm_names()) |>
       visOmopResults::filterGroup(.data$target_cohort %in% cohorts)
 
     validateFilteredResult(result)
     return(result)
   }))
+
 
   getTimeScale <- eventReactive(input$updateCohortSurvival, ({
     timeScale <- input$survival_probability_time_scale

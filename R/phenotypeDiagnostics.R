@@ -13,6 +13,7 @@
 #' @param diagnostics Vector indicating which diagnostics to perform. Options
 #' include: `databaseDiagnostics`, `codelistDiagnostics`, `cohortDiagnostics`,
 #' and `populationDiagnostics`.
+#' @inheritParams measurementSampleDoc
 #' @inheritParams survivalDoc
 #' @inheritParams cohortSampleDoc
 #' @inheritParams matchedDoc
@@ -38,6 +39,7 @@
 phenotypeDiagnostics <- function(cohort,
                                  diagnostics = c("databaseDiagnostics", "codelistDiagnostics",
                                                  "cohortDiagnostics", "populationDiagnostics"),
+                                 measurementSample = 20000,
                                  survival = FALSE,
                                  cohortSample = 20000,
                                  matchedSample = 1000,
@@ -46,9 +48,16 @@ phenotypeDiagnostics <- function(cohort,
 
   cohort <- omopgenerics::validateCohortArgument(cohort = cohort)
 
-  # Setup omopgenerics logging
-  log_file <- tempfile(pattern = "phenotypeDiagnostics_log_{date}_{time}", fileext = ".txt")
-  omopgenerics::createLogFile(logFile = log_file)
+  # Check if a log file exists
+  oldLogFile <- getOption(x = "omopgenerics.logFile", default = NULL) 
+  
+  if (is.null(oldLogFile)) {
+    # If no log file exists, create a new temporary one
+    log_file <- tempfile(pattern = "phenotypeDiagnostics_log_{date}_{time}", fileext = ".txt")
+    omopgenerics::createLogFile(logFile = log_file)
+    on.exit(options("omopgenerics.logFile" = NULL))
+  } 
+  
   omopgenerics::logMessage("Phenotype diagnostics - input validation")
 
   omopgenerics::assertChoice(diagnostics,
@@ -75,7 +84,8 @@ phenotypeDiagnostics <- function(cohort,
   }
 
   if ("codelistDiagnostics" %in% diagnostics) {
-    results[["code_diag"]] <- codelistDiagnostics(cohort)
+    results[["code_diag"]] <- codelistDiagnostics(cohort,
+                                                  measurementSample = measurementSample)
     if(!is.null(incrementalResultPath)){
       if (dir.exists(incrementalResultPath)) {
         exportSummarisedResult(results[["code_diag"]],
@@ -129,9 +139,6 @@ phenotypeDiagnostics <- function(cohort,
   if (is.null(results)) {
     results <- omopgenerics::emptySummarisedResult()
   }
-
-  unlink(log_file)
-  options("omopgenerics.logFile" = NULL)
 
   results
 }
