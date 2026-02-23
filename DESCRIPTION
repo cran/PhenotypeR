@@ -1,7 +1,7 @@
 Package: PhenotypeR
 Type: Package
 Title: Assess Study Cohorts Using a Common Data Model
-Version: 0.3.2
+Version: 0.3.3
 Authors@R: c(
     person("Edward", "Burn", , "edward.burn@ndorms.ox.ac.uk", 
     role = c("aut", "cre"), comment = c(ORCID = "0000-0002-9286-1128")),
@@ -35,14 +35,15 @@ RoxygenNote: 7.3.3
 Imports: cli, clock, CodelistGenerator (>= 4.0.2),
         CohortCharacteristics (>= 1.1.0), CohortConstructor (>= 0.5.0),
         dplyr, DrugUtilisation (>= 1.1.0), IncidencePrevalence (>=
-        1.2.0), MeasurementDiagnostics (>= 0.2.0), omopgenerics (>=
+        1.2.0), MeasurementDiagnostics (>= 0.3.0), omopgenerics (>=
         1.2.0), OmopSketch (>= 1.0.1), PatientProfiles (>= 1.4.5),
         purrr, readr, rlang, vctrs
 URL: https://ohdsi.github.io/PhenotypeR/
 BugReports: https://github.com/OHDSI/PhenotypeR/issues
 VignetteBuilder: knitr
+Config/testthat/parallel: true
 NeedsCompilation: no
-Packaged: 2026-02-08 17:37:04 UTC; orms0426
+Packaged: 2026-02-23 20:15:26 UTC; orms0426
 Author: Edward Burn [aut, cre] (ORCID: <https://orcid.org/0000-0002-9286-1128>),
   Martí Català [aut] (ORCID: <https://orcid.org/0000-0003-3308-9905>),
   Xihang Chen [aut] (ORCID: <https://orcid.org/0009-0001-8112-8959>),
@@ -54,4 +55,4 @@ Author: Edward Burn [aut, cre] (ORCID: <https://orcid.org/0000-0002-9286-1128>),
     <https://orcid.org/0000-0003-1202-9153>)
 Maintainer: Edward Burn <edward.burn@ndorms.ox.ac.uk>
 Repository: CRAN
-Date/Publication: 2026-02-08 18:30:02 UTC
+Date/Publication: 2026-02-23 22:10:08 UTC

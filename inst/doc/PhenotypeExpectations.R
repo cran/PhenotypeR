@@ -1,36 +1,45 @@
 ## ----include = FALSE----------------------------------------------------------
+NOT_CRAN <- identical(tolower(Sys.getenv("NOT_CRAN")), "true")
+
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>", 
-  warning=FALSE, 
-  message=FALSE, 
-  eval = TRUE
+collapse = TRUE,
+comment = "#>",
+eval = NOT_CRAN
 )
 
+## ----include = FALSE----------------------------------------------------------
+# knitr::opts_chunk$set(
+#   collapse = TRUE,
+#   comment = "#>",
+#   warning=FALSE,
+#   message=FALSE,
+#   eval = TRUE
+# )
+
 ## -----------------------------------------------------------------------------
-library(dplyr)
-library(PhenotypeR)
-
-knee_oa <- tibble(cohort_name = "knee_osteoarthritis",
-                  estimate = c("Median age", "Proportion male"),
-                  value = c("60 to 65", "45%"),
-                  source = "Clinician")
-knee_replacement <- tibble(cohort_name = "knee_replacement",
-                           estimate = c("Median age", "Proportion male"),
-                           value = c("65 to 70", "50%"),
-                           source = "Clinician")
-
-expectations <- bind_rows(knee_oa, knee_replacement)
+# library(dplyr)
+# library(PhenotypeR)
+# 
+# knee_oa <- tibble(cohort_name = "knee_osteoarthritis",
+#                   estimate = c("Median age", "Proportion male"),
+#                   value = c("60 to 65", "45%"),
+#                   source = "Clinician")
+# knee_replacement <- tibble(cohort_name = "knee_replacement",
+#                            estimate = c("Median age", "Proportion male"),
+#                            value = c("65 to 70", "50%"),
+#                            source = "Clinician")
+# 
+# expectations <- bind_rows(knee_oa, knee_replacement)
 
 ## ----warning=FALSE, message=FALSE---------------------------------------------
-tableCohortExpectations(expectations)
+# tableCohortExpectations(expectations)
 
 ## -----------------------------------------------------------------------------
-tibble(cohort_name = "knee_osteoarthritis",
-                  estimate = c("Commonly seen subsequent procedures"),
-                  value = c("Knee replacement"),
-                  source = "Expert opinion") |> 
-  tableCohortExpectations()
+# tibble(cohort_name = "knee_osteoarthritis",
+#                   estimate = c("Commonly seen subsequent procedures"),
+#                   value = c("Knee replacement"),
+#                   source = "Expert opinion") |>
+#   tableCohortExpectations()
 
 ## ----eval=FALSE---------------------------------------------------------------
 # usethis::edit_r_environ()
@@ -54,8 +63,8 @@ tibble(cohort_name = "knee_osteoarthritis",
 #   tableCohortExpectations()
 
 ## ----echo=FALSE---------------------------------------------------------------
-readr::read_csv("vignette_phenotype_expectations/expectations_1.csv") |>
-    tableCohortExpectations()
+# readr::read_csv("vignette_phenotype_expectations/expectations_1.csv") |>
+#     tableCohortExpectations()
 
 ## ----eval=FALSE---------------------------------------------------------------
 # getCohortExpectations(chat = chat,
@@ -65,8 +74,8 @@ readr::read_csv("vignette_phenotype_expectations/expectations_1.csv") |>
 #   tableCohortExpectations()
 
 ## ----echo=FALSE---------------------------------------------------------------
-readr::read_csv("vignette_phenotype_expectations/expectations_2.csv") |>
-    tableCohortExpectations()
+# readr::read_csv("vignette_phenotype_expectations/expectations_2.csv") |>
+#     tableCohortExpectations()
 
 ## ----eval=FALSE---------------------------------------------------------------
 # library(DBI)
@@ -95,8 +104,8 @@ readr::read_csv("vignette_phenotype_expectations/expectations_2.csv") |>
 #   tableCohortExpectations()
 
 ## ----echo=FALSE---------------------------------------------------------------
-readr::read_csv("vignette_phenotype_expectations/expectations_2.csv") |>
-    tableCohortExpectations()
+# readr::read_csv("vignette_phenotype_expectations/expectations_2.csv") |>
+#     tableCohortExpectations()
 
 ## ----eval=FALSE---------------------------------------------------------------
 # chat <- ellmer::chat("mistral")
@@ -106,6 +115,6 @@ readr::read_csv("vignette_phenotype_expectations/expectations_2.csv") |>
 #   tableCohortExpectations()
 
 ## ----echo=FALSE---------------------------------------------------------------
-readr::read_csv("vignette_phenotype_expectations/expectations_3.csv") |>
-    tableCohortExpectations()
+# readr::read_csv("vignette_phenotype_expectations/expectations_3.csv") |>
+#     tableCohortExpectations()
 

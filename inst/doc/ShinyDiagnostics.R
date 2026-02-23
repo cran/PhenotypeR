@@ -1,8 +1,17 @@
 ## ----include = FALSE----------------------------------------------------------
+NOT_CRAN <- identical(tolower(Sys.getenv("NOT_CRAN")), "true")
+
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
+collapse = TRUE,
+comment = "#>",
+eval = NOT_CRAN
 )
+
+## ----include = FALSE----------------------------------------------------------
+# knitr::opts_chunk$set(
+#   collapse = TRUE,
+#   comment = "#>"
+# )
 
 ## ----message=FALSE, warning=FALSE, eval=FALSE---------------------------------
 # library(CohortConstructor)
@@ -46,38 +55,38 @@ knitr::opts_chunk$set(
 # shinyDiagnostics(result = result, minCellCount = 2, directory = tempdir(), expectations = expectations)
 
 ## ----echo=FALSE, out.width='90%'----------------------------------------------
-knitr::include_graphics(here::here("vignettes/ShinyDiagnosticsFigures/figure1.png"))
+# knitr::include_graphics(here::here("vignettes/ShinyDiagnosticsFigures/figure1.png"))
 
 ## ----echo=FALSE, out.width='90%'----------------------------------------------
-knitr::include_graphics(here::here("vignettes/ShinyDiagnosticsFigures/figure2.png"))
+# knitr::include_graphics(here::here("vignettes/ShinyDiagnosticsFigures/figure2.png"))
 
 ## ----echo=FALSE, out.width='90%'----------------------------------------------
-knitr::include_graphics(here::here("vignettes/ShinyDiagnosticsFigures/figure3.png"))
+# knitr::include_graphics(here::here("vignettes/ShinyDiagnosticsFigures/figure3.png"))
 
 ## ----echo=FALSE, out.width='90%'----------------------------------------------
-knitr::include_graphics(here::here("vignettes/ShinyDiagnosticsFigures/figure4.png"))
+# knitr::include_graphics(here::here("vignettes/ShinyDiagnosticsFigures/figure4.png"))
 
 ## ----echo=FALSE, out.width='90%'----------------------------------------------
-knitr::include_graphics(here::here("vignettes/ShinyDiagnosticsFigures/figure5.png"))
+# knitr::include_graphics(here::here("vignettes/ShinyDiagnosticsFigures/figure5.png"))
 
 ## ----echo=FALSE, out.width='90%'----------------------------------------------
-knitr::include_graphics(here::here("vignettes/ShinyDiagnosticsFigures/figure6.png"))
+# knitr::include_graphics(here::here("vignettes/ShinyDiagnosticsFigures/figure6.png"))
 
 ## ----echo=FALSE, out.width='90%'----------------------------------------------
-knitr::include_graphics(here::here("vignettes/ShinyDiagnosticsFigures/figure7.png"))
+# knitr::include_graphics(here::here("vignettes/ShinyDiagnosticsFigures/figure7.png"))
 
 ## ----echo=FALSE, out.width='90%'----------------------------------------------
-knitr::include_graphics(here::here("vignettes/ShinyDiagnosticsFigures/figure8.png"))
+# knitr::include_graphics(here::here("vignettes/ShinyDiagnosticsFigures/figure8.png"))
 
 ## ----echo=FALSE, out.width='90%'----------------------------------------------
-knitr::include_graphics(here::here("vignettes/ShinyDiagnosticsFigures/figure9.png"))
+# knitr::include_graphics(here::here("vignettes/ShinyDiagnosticsFigures/figure9.png"))
 
 ## ----echo=FALSE, out.width='90%'----------------------------------------------
-knitr::include_graphics(here::here("vignettes/ShinyDiagnosticsFigures/figure10.png"))
+# knitr::include_graphics(here::here("vignettes/ShinyDiagnosticsFigures/figure10.png"))
 
 ## ----echo=FALSE, out.width='90%'----------------------------------------------
-knitr::include_graphics(here::here("vignettes/ShinyDiagnosticsFigures/figure11.png"))
+# knitr::include_graphics(here::here("vignettes/ShinyDiagnosticsFigures/figure11.png"))
 
 ## ----echo=FALSE, out.width='90%'----------------------------------------------
-knitr::include_graphics(here::here("vignettes/ShinyDiagnosticsFigures/figure12.png"))
+# knitr::include_graphics(here::here("vignettes/ShinyDiagnosticsFigures/figure12.png"))
 

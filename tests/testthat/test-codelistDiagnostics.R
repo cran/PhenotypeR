@@ -81,6 +81,7 @@ test_that("duplicated codelists", {
 })
 
 test_that("measurementDiagnostics working", {
+  skip_on_cran()
   cdm_local <- omock::mockCdmReference() |>
     omock::mockPerson(nPerson = 100) |>
     omock::mockObservationPeriod() |>
@@ -119,12 +120,11 @@ test_that("measurementDiagnostics working", {
 
 
  # sampling
-  res_sampled <- PhenotypeR::codelistDiagnostics(cdm$measurement_cohort,
-                                         measurementSample = 5)
+  res_sampled <- PhenotypeR::codelistDiagnostics(cdm$measurement_cohort, measurementSample = 5)
 
   expect_true(res_sampled |>
     omopgenerics::filterSettings(result_type == "measurement_summary") |>
-    dplyr::filter(variable_name == "number subjects") |>
+    dplyr::filter(variable_name == "number_subjects", .data$estimate_name == "count") |>
     dplyr::pull("estimate_value") |>
     as.integer() <= 5)
 
@@ -151,3 +151,56 @@ test_that("measurementDiagnostics working", {
                names(multiple_codes) |> sort())
 })
 
+test_that("drugDiagnostics working", {
+  skip_on_cran()
+  cdm_local <- omock::mockCdmReference() |>
+    omock::mockPerson(nPerson = 100) |>
+    omock::mockObservationPeriod() |>
+    omock::mockConditionOccurrence() |>
+    omock::mockDrugExposure() |>
+    omock::mockMeasurement() |>
+    omock::mockCohort(name = "my_cohort_1")
+
+  con <- DBI::dbConnect(duckdb::duckdb())
+  cdm <- omopgenerics::insertCdmTo(
+    cdm = cdm_local,
+    to = CDMConnector::dbSource(con = con, writeSchema = "main")
+  )
+
+  codes <- list(all_drugs = unique(cdm_local$drug_exposure$drug_concept_id)) |>
+    omopgenerics::newCodelist()
+  cdm$drug_cohort <- CohortConstructor::conceptCohort(cdm, codes, "drug_cohort")
+
+  expect_no_error(res <- PhenotypeR::codelistDiagnostics(cdm$drug_cohort))
+
+  expect_true(all(
+    settings(res)$result_type %in% c("cohort_code_use", "summarise_drug_use")
+  ))
+
+
+  expect_identical(
+    res |>
+      omopgenerics::settings() |>
+      dplyr::pull("diagnostic") |>
+      unique(),
+    "codelistDiagnostics"
+  )
+
+  # no drug diagnostics
+  expect_no_error(res <- PhenotypeR::codelistDiagnostics(cdm$drug_cohort,
+                                                         drugExposureSample = 0))
+  expect_false(any(
+    settings(res)$result_type %in% c("summarise_drug_use")
+  ))
+
+  # sampling
+  expect_no_error(res <- PhenotypeR::codelistDiagnostics(cdm$drug_cohort,
+                                                         drugExposureSample = 2))
+  # add test for sampling, but needs better test data (with associated ingredient)
+
+
+  # check ingredient work (dose checks)
+
+
+
+})

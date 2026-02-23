@@ -1,13 +1,22 @@
 ## ----include = FALSE----------------------------------------------------------
+NOT_CRAN <- identical(tolower(Sys.getenv("NOT_CRAN")), "true")
+
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
+collapse = TRUE,
+comment = "#>",
+eval = NOT_CRAN
 )
 
-library(CDMConnector)
-if (Sys.getenv("EUNOMIA_DATA_FOLDER") == "") Sys.setenv("EUNOMIA_DATA_FOLDER" = tempdir())
-if (!dir.exists(Sys.getenv("EUNOMIA_DATA_FOLDER"))) dir.create(Sys.getenv("EUNOMIA_DATA_FOLDER"))
-if (!eunomiaIsAvailable()) downloadEunomiaData(datasetName = "synpuf-1k", cdmVersion = "5.3")
+## ----include = FALSE----------------------------------------------------------
+# knitr::opts_chunk$set(
+#   collapse = TRUE,
+#   comment = "#>"
+# )
+# 
+# library(CDMConnector)
+# if (Sys.getenv("EUNOMIA_DATA_FOLDER") == "") Sys.setenv("EUNOMIA_DATA_FOLDER" = tempdir())
+# if (!dir.exists(Sys.getenv("EUNOMIA_DATA_FOLDER"))) dir.create(Sys.getenv("EUNOMIA_DATA_FOLDER"))
+# if (!eunomiaIsAvailable()) downloadEunomiaData(datasetName = "synpuf-1k", cdmVersion = "5.3")
 
 ## ----message=FALSE, warning=FALSE, eval=FALSE---------------------------------
 # library(CohortConstructor)

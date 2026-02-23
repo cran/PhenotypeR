@@ -949,8 +949,129 @@ ui <- fluidPage(
             )
           )
         )
+      ), ## measurement_diagnostics_end
+      ## drug_diagnostics_start
+      ## Drug diagnostics -----
+      bslib::nav_panel(
+        title = "Drug diagnostics",
+        bslib::accordion(
+          bslib::accordion_panel(
+            title = "Shared inputs",
+            tags$div(
+              style = "background-color: #750075; color: white; padding: 10px; font-weight: bold;  display: flex; flex-wrap: wrap; gap: 10px; gap: 10px; height: auto; align-items: center;",
+              tags$label("Select Database(s):"),
+              tags$div(
+                style = "width: 225px;",
+                tags$div(
+                  style = "margin-top: 15px;",
+                  shinyWidgets::pickerInput(
+                    inputId = "drug_diagnostics_cdm_name",
+                    label = NULL,
+                    selected = selected$shared_cdm_name,
+                    choices = choices$shared_cdm_name,
+                    multiple = TRUE,
+                    options = list(`actions-box` = TRUE, `selected-text-format` = "count > 1",
+                                   `deselect-all-text` = "None", `select-all-text` = "All"),
+                    width = "100%"
+                  )
+                )
+              ),
+              tags$label("Select Cohort(s):"),
+              tags$div(
+                style = "width: 225px;",
+                tags$div(
+                  style = "margin-top: 15px;",
+                  shinyWidgets::pickerInput(
+                    inputId = "drug_diagnostics_cohort_name",
+                    label = NULL,
+                    selected = selected$shared_cohort_name,
+                    choices = choices$shared_cohort_name,
+                    multiple = TRUE,
+                    options = list(`actions-box` = TRUE, `selected-text-format` = "count > 1",
+                                   `deselect-all-text` = "None", `select-all-text` = "All"),
+                    width = "100%"
+                  )
+                )
+              ),
+              tags$div(
+                style = "width: 225px;",
+                actionBttn("updateDrugDiagnostics", "Update",
+                           style = "simple"),
+                width = "100%"
+              )
+            )
+          )),
+        icon = shiny::icon("pills"),
+        bslib::layout_sidebar(
+          sidebar = bslib::sidebar(width = 400, open = "closed",
+                                   bslib::accordion(
+                                     bslib::accordion_panel(
+                                       title = "Settings",
+                                       shinyWidgets::pickerInput(
+                                         inputId = "summarise_drug_use_codelist_name",
+                                         label = "Codelist",
+                                         choices = NULL,
+                                         selected = NULL,
+                                         multiple = TRUE,
+                                         options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
+                                       ),
+                                       div(style="display: flex; justify-content: space-between;",
+                                           div(style="flex: 1;", prettyCheckbox(inputId = "drug_use_overall",
+                                                                                label = "Overall",
+                                                                                value = TRUE,
+                                                                                status = "primary",
+                                                                                shape = "curve",
+                                                                                outline = TRUE)),
+                                           div(style="flex: 1;", prettyCheckbox(inputId = "drug_use_by_concept",
+                                                                                label = "By concept",
+                                                                                value = TRUE,
+                                                                                status = "primary",
+                                                                                shape = "curve",
+                                                                                outline = TRUE))
+                                       ),
+                                       shinyWidgets::pickerInput(
+                                         inputId = "summarise_drug_use_drug_type",
+                                         label = "Drug type",
+                                         choices = NULL,
+                                         selected = NULL,
+                                         multiple = TRUE,
+                                         options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
+                                       ),
+                                       shinyWidgets::pickerInput(
+                                         inputId = "summarise_drug_use_route",
+                                         label = "Route",
+                                         choices = NULL,
+                                         selected = NULL,
+                                         multiple = TRUE,
+                                         options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
+                                       )
+                                     ),
+                                     bslib::accordion_panel(
+                                       title = "Table formatting",
+                                       materialSwitch(inputId = "drug_diagnostics_interactive",
+                                                      value = FALSE,
+                                                      label = "Interactive",
+                                                      status = "primary"),
+                                       uiOutput("drug_diagnostics_sortable")
+                                     )
+                                   )
+          ),
+        bslib::navset_card_tab(
+          bslib::nav_panel(
+            title = "Drug diagnostics",
+            bslib::card(
+              full_screen = TRUE,
+              bslib::card_header(
+                shiny::downloadButton(outputId = "drug_diagnostics_gt_download", label = ""),
+                class = "text-end"
+              ),
+                gt::gt_output("drug_diagnostics_tbl") |> withSpinner()
+            )
+          )
+        )
       )
-      ## measurement_diagnostics_end
+      )
+      ## drug_diagnostics_end
     ),
     # codelistDiagnostics_end ----
     # cohortDiagnostics_start -----
