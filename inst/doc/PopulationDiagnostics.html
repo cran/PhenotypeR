@@ -48,9 +48,8 @@ overflow: visible;
 }
 </style>
 <style type="text/css" data-origin="pandoc">
-html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -61,7 +60,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
 { counter-reset: source-line 0; }
@@ -368,7 +367,8 @@ with an ankle sprain using the Eunomia synthetic data.</p>
 <span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a>  <span class="at">name =</span> <span class="st">&quot;injuries&quot;</span>)</span></code></pre></div>
 <p>We can get the incidence and prevalence of our study cohort using
 <code>populationDiagnostics()</code>:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>pop_diag <span class="ot">&lt;-</span> <span class="fu">populationDiagnostics</span>(cdm<span class="sc">$</span>injuries)</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>pop_diag <span class="ot">&lt;-</span> <span class="fu">populationDiagnostics</span>(cdm<span class="sc">$</span>injuries, </span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>                                  <span class="at">populationSample =</span> <span class="dv">10000</span>)</span></code></pre></div>
 <p>This function builds on <a href="https://darwin-eu.github.io/IncidencePrevalence/index.html">IncidencePrevalence</a>
 R package to perform the following analyses:</p>
 <ul>

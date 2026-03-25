@@ -43,7 +43,8 @@ eval = NOT_CRAN
 #   name = "injuries")
 
 ## -----------------------------------------------------------------------------
-# pop_diag <- populationDiagnostics(cdm$injuries)
+# pop_diag <- populationDiagnostics(cdm$injuries,
+#                                   populationSample = 10000)
 
 ## -----------------------------------------------------------------------------
 # tableIncidence(pop_diag,
