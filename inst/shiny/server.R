@@ -5,30 +5,40 @@ server <- function(input, output, session) {
 
   # Shared variables
   inputs_initialized <- reactiveVal(FALSE)
-  shared_cdm_names     <- reactiveVal(NULL)
+  shared_cdm_names   <- reactiveVal(NULL)
   shared_cohort_names  <- reactiveVal(NULL)
 
   # fill selectise variables ----
   shiny::observe({
     for (k in seq_along(choices)) {
       if(!grepl("cdm_name|cohort_name", names(choices)[k])){
-        shiny::updateSelectizeInput(
-          session,
-          inputId = names(choices)[k],
-          choices = choices[[k]],
-          selected = selected[[k]],
-          server = TRUE
-        )
 
-        shinyWidgets::updatePickerInput(session,
-                                        inputId = names(choices)[k],
-                                        choices = choices[[k]],
-                                        selected = selected[[k]])
+        if(any(c("compare_large_scale_characteristics_cohort_1",
+                 "compare_large_scale_characteristics_cohort_2") %in%
+               names(choices)[k])){
+          shinyWidgets::updateRadioGroupButtons(session,
+                                                inputId = names(choices)[k],
+                                                choices = choices[[k]],
+                                                selected = selected[[k]],
+                                                status = "custom-light")
+        } else {
+          shiny::updateSelectizeInput(
+            session,
+            inputId = names(choices)[k],
+            choices = choices[[k]],
+            selected = selected[[k]],
+            server = TRUE
+          )
+
+          shinyWidgets::updatePickerInput(session,
+                                          inputId = names(choices)[k],
+                                          choices = choices[[k]],
+                                          selected = selected[[k]])
+        }
       }
     }
     inputs_initialized(TRUE)
   })
-
 
   # sortable ui elements -----
   # have these in server to avoid race condition (if in UI)
@@ -429,6 +439,116 @@ server <- function(input, output, session) {
     }
   )
 
+  # database description ----
+  database_description <- eventReactive(input$updateDatabaseDescription, {
+    req(shared_cdm_names())
+    req(inputs_initialized())
+
+    info <- database_descriptions |>
+      dplyr::filter(.data$database %in% shared_cdm_names())
+
+    return(info)
+  })
+
+  output$database_text <- renderUI({
+    info <- database_description()
+
+    info$author[which(info$author == "")] <- "Unknown author"
+    info$date[which(info$date == "")]     <- "Unknown date"
+    info$key_sources[which(info$key_sources == "")] <- "Unknown key sources"
+
+    info <- info |>
+      dplyr::mutate("metadata" = paste0("Author: ", author, " (Date: ", date, ")<br>Sources: ", key_sources))
+
+    info$description <-  purrr::map(info$description,
+                                    function(info) {paste0("<lbr>", info, "</br>")})
+
+    lapply(1:nrow(info), function(i) {
+      row <- info[i, ]
+
+      has_meta <- !is.na(row$author) && !is.na(row$date) && !is.na(row$key_sources)
+
+      tags$details(
+        tags$summary(row$database),
+        tags$div(
+          class = "content-box",
+
+          if (has_meta) {
+            tagList(
+              tags$div(
+                style = "padding: 15px; border-left: 4px solid #750075; color = grey; background: #E9E9E9; font-style: italic;",
+                shiny::HTML(row$metadata)
+              ),
+              tags$div(
+                style = "padding: 15px; border-left: 4px solid #750075; background: #E9E9E9; font-weight: normal;",
+                shiny::HTML(row$description[[1]])
+              )
+            )
+          } else{
+            tags$div(style = "padding: 15px; border-left: 4px solid #750075; background: #E9E9E9; font-weight: normal;",
+                     "No database description for this database")
+          }
+        )
+      )
+    })
+  })
+
+  # clinical description ----
+  clinical_description <- eventReactive(input$updateClinicalDescription, {
+    req(shared_cohort_names())
+    req(inputs_initialized())
+
+    info <- clinical_descriptions |>
+      dplyr::filter(.data$phenotype %in% shared_cohort_names()) |>
+      dplyr::rename("description" = input$phenotypes_section)
+
+    return(info)
+  })
+
+  output$clinical_text <- renderUI({
+    info <- clinical_description()
+    info$author[which(info$author == "")] <- "Unknown author"
+    info$date[which(info$date == "")]     <- "Unknown date"
+    info$key_sources[which(info$key_sources == "")] <- "Unknown key sources"
+
+    info <- info |>
+      dplyr::mutate("metadata" = paste0("Author: ", author, " (Date: ", date, ")<br>Sources: ", key_sources))
+
+    info$description <-  purrr::map(info$description,
+                                    function(info) {paste0("<lbr>", info, "</br>")})
+
+    lapply(1:nrow(info), function(i) {
+      row <- info[i, ]
+
+      has_meta <- !is.na(row$author) && !is.na(row$date) && !is.na(row$key_sources)
+
+      tags$details(
+        tags$summary(row$phenotype),
+        tags$div(
+          class = "content-box",
+
+          if (has_meta) {
+            tagList(
+              tags$div(
+                style = "padding: 15px; border-left: 4px solid #750075; color = grey; background: #E9E9E9; font-style: italic;",
+                shiny::HTML(row$metadata)
+              ),
+              tags$div(
+                style = "padding: 15px; border-left: 4px solid #750075; background: #E9E9E9; font-weight: normal;",
+                shiny::HTML(row$description[[1]])
+              )
+            )
+          } else{
+            tags$div(
+              style = "padding: 15px; border-left: 4px solid #750075; background: #E9E9E9; font-weight: normal;",
+              "No description for this cohort")
+
+          }
+        )
+      )
+    })
+  })
+
   # summarise_omop_snapshot -----
   filterOmopSnapshot <- eventReactive(input$updateSnapshot, ({
     if (is.null(dataFiltered$summarise_omop_snapshot)) {
@@ -513,6 +633,7 @@ server <- function(input, output, session) {
 
     result <- dataFiltered$summarise_dob_density |>
       dplyr::filter(cdm_name %in% shared_cdm_names())
+
     validateFilteredResult(result)
 
     return(result)
@@ -520,6 +641,10 @@ server <- function(input, output, session) {
 
   output$dobPlot <- renderPlot({
     filterPersonDob() |>
+      dplyr::filter(estimate_name == "density_y" |
+                      (estimate_name == "density_x" &
+                         as.Date(estimate_value) >= input$dob_date_range[[1]]) &
+                      as.Date(estimate_value) <= input$dob_date_range[[2]]) |>
       visOmopResults::scatterPlot(
         x = "density_x",
         y = "density_y",
@@ -532,7 +657,9 @@ server <- function(input, output, session) {
       ggplot2::xlab("Date of Birth") +
       ggplot2::ylab("Density") +
       ggplot2::scale_y_continuous(labels = scales::label_number()) +
-      visOmopResults::themeVisOmop()
+      visOmopResults::themeVisOmop() +
+      ggplot2::theme(legend.title = element_blank(),
+                     legend.position = "top")
   })
 
   # summarise_observation_period -----
@@ -588,18 +715,24 @@ server <- function(input, output, session) {
 
   output$obsPlot <- renderPlot({
 
-    filterObs() |>
+    plot_data <- filterObs() |>
+      dplyr::filter(estimate_name == "density_y" |
+                      (estimate_name == "density_x" &
+                         as.Date(estimate_value) >= input$obs_date_range[[1]]) &
+                      as.Date(estimate_value) <= input$obs_date_range[[2]]) |>
       dplyr::mutate(variable_name =
                       dplyr::if_else(variable_name == "observation_period_start_date",
                                      "observation period start date",
                                      "observation period end date")) |>
       dplyr::mutate(variable_name = factor(variable_name,
                                            levels = c("observation period start date",
-                                                      "observation period end date"))) |>
+                                                      "observation period end date")))
+
+    plot_data |>
       visOmopResults::scatterPlot(
         x = "density_x",
         y = "density_y",
-        group = "variable_name",
+        group = c("cdm_name", "variable_name"),
         facet = "variable_name",
         colour = "cdm_name",
         line = TRUE,
@@ -609,9 +742,13 @@ server <- function(input, output, session) {
         ymax = NULL) +
       ggplot2::xlab("Date") +
       ggplot2::ylab("Density") +
-      ggplot2::scale_y_continuous(labels = scales::label_number()) +
       ggplot2::facet_wrap(vars(variable_name),
-                          ncol = 1, scales = "free_y")
+                          ncol = 1, scales = "free_y") +
+      ggplot2::scale_y_continuous(labels = scales::label_number()) +
+      visOmopResults::themeVisOmop() +
+      ggplot2::theme(legend.title = element_blank(),
+                     legend.position = "top") +
+      ggplot2::scale_y_continuous(labels = scales::label_number())
 
   })
 
@@ -669,19 +806,35 @@ server <- function(input, output, session) {
 
   output$clinicalTrends <- renderPlot({
 
-  plot <- filterClinicalRecordTrends() |>
+    plot_data <- filterClinicalRecordTrends() |>
+      dplyr::filter(
+        as.Date(stringr::str_split_i(additional_level, " to", 1)) >= input$records_date_range[[1]] &
+          as.Date(stringr::str_split_i(additional_level, " to", 1)) <= input$records_date_range[[2]]
+      )
+
+    plot <- plot_data |>
       OmopSketch::plotTrend(style = "default",
-                          colour = input$clinical_records_plot_colour,
-                          facet = input$clinical_records_plot_facet)
+                            colour = input$clinical_records_plot_colour,
+                            facet = input$clinical_records_plot_facet) +
+      visOmopResults::themeVisOmop() +
+      ggplot2::theme(legend.title = element_blank(),
+                     legend.position = "top") +
+      ggplot2::scale_y_continuous(labels = scales::label_number()) +
+      ggplot2::ggtitle("")
 
-  if(!is.null(input$clinical_records_plot_facet) &&
-     isTRUE(input$clinical_records_plot_facet_free)){
-    plot <- plot +
-      facet_wrap(facets = input$clinical_records_plot_facet,
-                 scales = "free_y")
-  }
+    if(!is.null(input$clinical_records_plot_facet) &&
+       isTRUE(input$clinical_records_plot_facet_free)){
+      plot <- plot +
+        facet_wrap(facets = input$clinical_records_plot_facet,
+                   scales = "free_y")
+    }
 
-  plot
+    plot@data <- plot@data  |>
+      dplyr::mutate(time_interval = stringr::str_split_i(time_interval, " to", 1)) |>
+      dplyr::mutate(time_interval = as.Date(time_interval))
+
+    plot +
+      ggplot2::scale_x_date()
   })
 
   # achilles_code_use -----
@@ -757,7 +910,7 @@ server <- function(input, output, session) {
       # column ordering by codelist and first column with a count
       order <- list("Codelist name"  = "asc",
                     "count" = "desc")
-      names(order)[2] <- names(tbl)[9]
+      names(order)[2] <- names(tbl)[ncol(tbl)]
 
       # suppressed to NA
       tbl <- tbl |>
@@ -779,11 +932,11 @@ server <- function(input, output, session) {
                                   compact = TRUE,
                                   showSortable = TRUE) |>
         reactablefmtr_add_title("Summary of achilles codes",
-                                 font_size = 25,
-                                 font_weight = "normal") |>
+                                font_size = 25,
+                                font_weight = "normal") |>
         reactablefmtr_add_subtitle("Codes from codelist observed in achilles tables.",
-                                    font_size = 15,
-                                    font_weight = "normal")
+                                   font_size = 15,
+                                   font_weight = "normal")
 
       return(tbl)
     }
@@ -902,11 +1055,11 @@ server <- function(input, output, session) {
                        compact = TRUE,
                        showSortable = TRUE) |>
         reactablefmtr_add_title("Summary of orphan codes",
-                                 font_size = 25,
-                                 font_weight = "normal") |>
+                                font_size = 25,
+                                font_weight = "normal") |>
         reactablefmtr_add_subtitle("Orphan codes refer to concepts present in the database that are not in a codelist but are related to included codes.",
-                                    font_size = 15,
-                                    font_weight = "normal")
+                                   font_size = 15,
+                                   font_weight = "normal")
 
       return(tbl)
     }
@@ -1037,11 +1190,11 @@ server <- function(input, output, session) {
                        compact = TRUE,
                        showSortable = TRUE) |>
         reactablefmtr_add_title("Summary of cohort code use",
-                                 font_size = 25,
-                                 font_weight = "normal") |>
+                                font_size = 25,
+                                font_weight = "normal") |>
         reactablefmtr_add_subtitle("Codes from codelist observed on day of cohort entry. Note more than one code could be seen for a person on this day (both of which would have led to inclusion).",
-                                    font_size = 15,
-                                    font_weight = "normal")
+                                   font_size = 15,
+                                   font_weight = "normal")
 
       return(tbl)
     }
@@ -1069,6 +1222,7 @@ server <- function(input, output, session) {
   filterMeasurementSummary <- eventReactive(input$updateMeasurementCodeUse, ({
     req(shared_cdm_names())
     req(shared_cohort_names())
+    req(inputs_initialized())
     if (is.null(dataFiltered$measurement_summary)) {
       validate("No measurement summary in results")
     }
@@ -1302,6 +1456,7 @@ server <- function(input, output, session) {
   filterDrugDiagnostics<- eventReactive(input$updateDrugDiagnostics, ({
     req(shared_cdm_names())
     req(shared_cohort_names())
+    req(inputs_initialized())
     if (is.null(dataFiltered$summarise_drug_use)) {
       validate("No drug diagnostics in results")
     }
@@ -1410,8 +1565,8 @@ server <- function(input, output, session) {
                        compact = TRUE,
                        showSortable = TRUE) |>
         reactablefmtr_add_title("Drug diagnostics",
-                                 font_size = 25,
-                                 font_weight = "normal")
+                                font_size = 25,
+                                font_weight = "normal")
     }
     tbl
   })
@@ -1760,11 +1915,11 @@ server <- function(input, output, session) {
               compact = TRUE,
               showSortable = TRUE) |>
       reactablefmtr_add_title("Large scale characteristics",
-                               font_size = 25,
-                               font_weight = "normal") |>
+                              font_size = 25,
+                              font_weight = "normal") |>
       reactablefmtr_add_subtitle("Summary of all records from clinical tables within a time window. The sampled cohort represents individuals from the original cohort, the matched cohort comprises individuals of similar age and sex from the database.",
-                                  font_size = 15,
-                                  font_weight = "normal")
+                                 font_size = 15,
+                                 font_weight = "normal")
 
   })
 
@@ -1812,7 +1967,6 @@ server <- function(input, output, session) {
     if(length(cohort) > 1){
       validate("Please select only one cohort")
     }
-
     if(length(cohort) == 0){
       validate("Please select a cohort")
     }
@@ -1826,6 +1980,13 @@ server <- function(input, output, session) {
                       "original" = input$compare_large_scale_characteristics_cohort_compare,
                       "sampled" = paste0(input$compare_large_scale_characteristics_cohort_compare,"_sampled"),
                       "matched" = paste0(input$compare_large_scale_characteristics_cohort_compare,"_matched"))
+
+    if(length(cohort2) > 1){
+      validate("Please select only one comparator cohort")
+    }
+    if(length(cohort2) == 0){
+      validate("Please select a comparator cohort")
+    }
 
     return(list("cohort1" = cohort1,
                 "cohort2" = cohort2))
@@ -1876,6 +2037,17 @@ server <- function(input, output, session) {
       tidy() |>
       tidyr::pivot_wider(names_from = cohort_name,
                          values_from = percentage)
+
+    lsc <- lscFiltered |>
+      dplyr::filter(.data$estimate_name == "percentage") |>
+      tidy() |>
+      tidyr::pivot_wider(names_from = cohort_name,
+                         values_from = percentage)
+
+    missing_target_col <- setdiff(target_cohort, colnames(lsc))
+    if(length(missing_target_col)>0){
+      lsc[missing_target_col] <- NA_integer_
+    }
 
     if(isTRUE(input$compare_large_scale_characteristics_impute_missings)){
       lsc <- lsc |>
@@ -2446,8 +2618,8 @@ server <- function(input, output, session) {
                          "outcome_cohort_name")
     ) |>
       tab_header(
-        title = "Prevalence estimates",
-        subtitle = "Prevalence rates estimated for outcomes of interest"
+        title = "Period Prevalence Estimates",
+        subtitle = "Period prevalence estimated for outcomes of interest"
       ) |>
       tab_options(
         heading.align = "left"
@@ -2457,7 +2629,7 @@ server <- function(input, output, session) {
     createTablePrevalence()
   })
   output$prevalence_gt_download <- shiny::downloadHandler(
-    filename = "prevalence_gt.docx",
+    filename = "period_prevalence_gt.docx",
     content = function(file) {
       obj <- createTablePrevalence()
       gt::gtsave(data = obj, filename = file)

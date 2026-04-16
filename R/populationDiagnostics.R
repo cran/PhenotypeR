@@ -1,13 +1,19 @@
 #' Population-level diagnostics
 #'
 #' @description
-#' phenotypeR diagnostics on the cohort of input with relation to a denomination
+#' PhenotypeR diagnostics on the cohort of input with relation to a denomination
 #' population. Diagnostics include:
 #'
 #' * Incidence
-#' * Prevalence
+#' * Period Prevalence
 #'
 #' @inheritParams cohortDoc
+#' @param cohortId Specific cohort definition ID for which to run population
+#' diagnostics.
+#' @param incidence Whether to run `IncidencePrevalence::estimateIncidence()` (TRUE)
+#'        or not (FALSE).
+#' @param periodPrevalence Whether to run `IncidencePrevalence::estimatePeriodPrevalence()` (TRUE)
+#'        or not (FALSE).
 #' @inheritParams populationSampleDoc
 #'
 #' @return A summarised result
@@ -18,6 +24,7 @@
 #' library(omock)
 #' library(CohortConstructor)
 #' library(PhenotypeR)
+#' library(CDMConnector)
 #'
 #' cdm <- mockCdmFromDataset(source = "duckdb")
 #' cdm$warfarin <- conceptCohort(cdm,
@@ -28,14 +35,21 @@
 #' result <- cdm$warfarin |>
 #'   populationDiagnostics(populationSample = 100000)
 #'
-#' CDMConnector::cdmDisconnect(cdm = cdm)
+#' cdmDisconnect(cdm = cdm)
 #' }
 populationDiagnostics <- function(cohort,
-                                  populationSample = 1000000,
+                                  cohortId = NULL,
+                                  incidence = TRUE,
+                                  periodPrevalence = TRUE,
+                                  populationSample = 100000,
                                   populationDateRange = as.Date(c(NA, NA))) {
 
   cohort <- omopgenerics::validateCohortArgument(cohort = cohort)
+  cohortId <- omopgenerics::validateCohortIdArgument(cohortId = cohortId,
+                                                     cohort = cohort)
   checksPopulationDiagnostics(populationSample, populationDateRange)
+  omopgenerics::assertLogical(incidence, length = 1)
+  omopgenerics::assertLogical(periodPrevalence, length = 1)
 
   cdm <- omopgenerics::cdmReference(cohort)
   cohortName <- omopgenerics::tableName(cohort)
@@ -48,7 +62,7 @@ populationDiagnostics <- function(cohort,
   # add population sampling
   if(!is.null(populationSample)){
     if (!is.null(getOption("omopgenerics.logFile"))) {
-      omopgenerics::logMessage(paste0("Population diagnosics - sampling person table to", populationSample))
+      omopgenerics::logMessage(paste0("Population diagnosics - sampling person table to ", populationSample, " people"))
     }
     if(is.na(populationDateRange[[1]]) && is.na(populationDateRange[[2]])){
       cdm$person <- cdm$person |>
@@ -105,32 +119,39 @@ populationDiagnostics <- function(cohort,
 
   results <- list()
 
-  if (!is.null(getOption("omopgenerics.logFile"))) {
-    omopgenerics::logMessage("Population diagnosics - incidence")
+  if(isTRUE(incidence)) {
+    if (!is.null(getOption("omopgenerics.logFile"))) {
+      omopgenerics::logMessage("Population diagnosics - incidence")
+    }
+    results[["incidence"]] <- IncidencePrevalence::estimateIncidence(
+      cdm = cdm,
+      denominatorTable = denominatorTable,
+      outcomeTable = cohortName,
+      outcomeCohortId = cohortId,
+      interval = c("years", "overall"),
+      repeatedEvents = FALSE,
+      outcomeWashout = Inf,
+      completeDatabaseIntervals = FALSE)
   }
-  results[["incidence"]] <- IncidencePrevalence::estimateIncidence(
-    cdm = cdm,
-    denominatorTable = denominatorTable,
-    outcomeTable = cohortName,
-    interval = c("years", "overall"),
-    repeatedEvents = FALSE,
-    outcomeWashout = Inf,
-    completeDatabaseIntervals = FALSE)
 
-  if (!is.null(getOption("omopgenerics.logFile"))) {
-    omopgenerics::logMessage("Population diagnosics - prevalence")
+  if(isTRUE(periodPrevalence)) {
+    if (!is.null(getOption("omopgenerics.logFile"))) {
+      omopgenerics::logMessage("Population diagnosics - prevalence")
+    }
+
+    results[["prevalence"]] <- IncidencePrevalence::estimatePeriodPrevalence(
+      cdm = cdm,
+      denominatorTable = denominatorTable,
+      outcomeTable = cohortName,
+      outcomeCohortId = cohortId,
+      interval = c("years", "overall"),
+      completeDatabaseIntervals = TRUE,
+      fullContribution = FALSE)
   }
-  results[["prevalence"]] <- IncidencePrevalence::estimatePeriodPrevalence(
-    cdm = cdm,
-    denominatorTable = denominatorTable,
-    outcomeTable = cohortName,
-    interval = c("years", "overall"),
-    completeDatabaseIntervals = TRUE,
-    fullContribution = FALSE)
 
-  results <- results |>
-    vctrs::list_drop_empty() |>
-    omopgenerics::bind()
+    results <- results |>
+      vctrs::list_drop_empty() |>
+      omopgenerics::bind()
 
   newSettings <- results |>
     omopgenerics::settings() |>

@@ -3,23 +3,48 @@
 #' @description
 #' This comprises all the diagnostics that are being offered in this package,
 #' this includes:
-#'
-#' * A diagnostics on the database via `databaseDiagnostics`.
-#' * A diagnostics on the cohort_codelist attribute of the cohort via `codelistDiagnostics`.
-#' * A diagnostics on the cohort via `cohortDiagnostics`.
-#' * A diagnostics on the population via `populationDiagnostics`.
+#' \itemize{
+#'   \item A diagnostic on the OMOP CDM dataset as a whole via \code{databaseDiagnostics}.
+#'   \item A diagnostic on the codelists associated with cohorts via \code{codelistDiagnostics}.
+#'   \item A diagnostic on the cohort itself via \code{cohortDiagnostics}.
+#'   \item A diagnostic on the frequency of the cohort in the dataset population via \code{populationDiagnostics}.
+#' }
 #'
 #' @inheritParams cohortDoc
-#' @param diagnostics Vector indicating which diagnostics to perform. Options
-#' include: `databaseDiagnostics`, `codelistDiagnostics`, `cohortDiagnostics`,
-#' and `populationDiagnostics`.
-#' @inheritParams clinicalTableSample
-#' @inheritParams measurementSampleDoc
-#' @inheritParams drugExposureSampleDoc
-#' @inheritParams survivalDoc
-#' @inheritParams cohortSampleDoc
-#' @inheritParams matchedDoc
-#' @inheritParams populationSampleDoc
+#' @param databaseDiagnostics A list of arguments that uses `databaseDiagnostics`.
+#'  If the list is empty, the default values will be used.
+#'  Example:
+#'  In the following example, all diagnostics will be run except *person table summary* from
+#'  databaseDiagnostics:
+#'  *databaseDiagnostics = list(
+#'  "personTableSummary" = FALSE
+#'   )
+#' @param codelistDiagnostics A list of arguments that uses `codelistDiagnostics`.
+#' If the list is empty, the default values will be used.
+#' Example:
+#' In the below example, all diagnostics will be run, and a subsample of 1,000 participants will
+#' be used to run measurement diagnostics and another independent subsample of 500 participants
+#' will be used to run drug diagnostics:
+#' *codelistDiagnostics = list(
+#'  "measurementDiagnosticsSample" = 1000,
+#'  "drugDiagnosticsSample" = 500
+#'   )
+#' @param cohortDiagnostics A list of arguments that uses `cohortDiagnostics`.
+#' If the list is empty,
+#' the default values will be used.
+#' Example:
+#' *cohortDiagnostics = list(
+#'  "cohortSurvival" = TRUE
+#'  )
+#' @param populationDiagnostics A list of arguments that uses `populationDiagnostics`.
+#' If the list is empty, the default values will be used.
+#' Example:
+#' In the below example, all diagnostics will be run and a subsample of 100,000 participants
+#' will be used to run populationDiagnostics.
+#' *populationDiagnostics = list(
+#'  "populationSample" = 100000
+#'  )
+#' @param stagingDirectory Path to folder to save incremental results and log file
 #'
 #' @return A summarised result
 #' @export
@@ -35,96 +60,120 @@
 #'                               conceptSet =  list(warfarin = c(1310149L,
 #'                                                               40163554L)),
 #'                               name = "warfarin")
+#' result <- phenotypeDiagnostics(cdm$warfarin)
 #'
-#' result <- phenotypeDiagnostics(cdm$warfarin, populationSample = 100000)
 #' }
 phenotypeDiagnostics <- function(cohort,
-                                 diagnostics = c("databaseDiagnostics", "codelistDiagnostics",
-                                                 "cohortDiagnostics", "populationDiagnostics"),
-                                 clinicalTableSample = NULL,
-                                 measurementSample = 20000,
-                                 drugExposureSample = 20000,
-                                 survival = FALSE,
-                                 cohortSample = 20000,
-                                 matchedSample = 1000,
-                                 populationSample = 1000000,
-                                 populationDateRange = as.Date(c(NA, NA))) {
-
+                                 databaseDiagnostics = list(),
+                                 codelistDiagnostics = list(),
+                                 cohortDiagnostics = list(),
+                                 populationDiagnostics = list(),
+                                 stagingDirectory = NULL) {
+  # Get arguments
   cohort <- omopgenerics::validateCohortArgument(cohort = cohort)
+  databaseDiagnostics <- checkDatabaseDiagnosticsInput(databaseDiagnostics)
+  codelistDiagnostics <- checkCodelistDiagnosticsInput(codelistDiagnostics)
+  cohortDiagnostics   <- checkCohortDiagnosticsInput(cohortDiagnostics)
+  populationDiagnostics <- checkPopulationDiagnosticsInput(populationDiagnostics)
 
-  # Check if a log file exists
-  oldLogFile <- getOption(x = "omopgenerics.logFile", default = NULL)
-
-  if (is.null(oldLogFile)) {
-    # If no log file exists, create a new temporary one
-    log_file <- tempfile(pattern = "phenotypeDiagnostics_log_{date}_{time}", fileext = ".txt")
-    omopgenerics::createLogFile(logFile = log_file)
-    on.exit(options("omopgenerics.logFile" = NULL))
+  existingLogFile <- getOption(x = "omopgenerics.logFile", default = NULL)
+  if(!is.null(existingLogFile)){
+  options("omopgenerics.logFile" = NULL)
   }
-  omopgenerics::assertChoice(diagnostics,
-                             c("databaseDiagnostics", "codelistDiagnostics",
-                               "cohortDiagnostics", "populationDiagnostics"),
-                             unique = TRUE)
-  checksCohortDiagnostics(survival, cohortSample, matchedSample)
-  checksPopulationDiagnostics(populationSample, populationDateRange)
+
+  if(!is.null(stagingDirectory)){
+    checkDirectory(stagingDirectory)
+    phenotyperLogFile <- file.path(stagingDirectory, "phenotypeDiagnostics_log_{date}_{time}")
+  } else {
+    phenotyperLogFile <- tempfile(pattern = "phenotypeDiagnostics_log_{date}_{time}",
+                                 fileext = ".txt")
+  }
+
+  if(!is.null(phenotyperLogFile)) {
+    cli::cli_inform("Logging PhenotypeR progress in {phenotyperLogFile}")
+    omopgenerics::createLogFile(logFile = phenotyperLogFile)
+  }
 
   incrementalResultPath <- getOption(x = "PhenotypeR.incremenatl_save_path")
+  if(!is.null(stagingDirectory)) {
+    incrementalResultPath <- stagingDirectory
+  }
 
   # Run phenotypeR diagnostics
   cdm <- omopgenerics::cdmReference(cohort)
   results <- list()
-  if ("databaseDiagnostics" %in% diagnostics) {
+
+  if (!is.null(databaseDiagnostics)) {
     results[["db_diag"]] <- databaseDiagnostics(cohort,
-                                                clinicalTableSample = clinicalTableSample)
+                                                cohortId = databaseDiagnostics$cohortId,
+                                                snapshot = databaseDiagnostics$snapshot,
+                                                personTableSummary = databaseDiagnostics$personTableSummary,
+                                                observationPeriodsSummary = databaseDiagnostics$observationPeriodsSummary,
+                                                clinicalRecordsSummary = databaseDiagnostics$clinicalRecordsSummary)
     if(!is.null(incrementalResultPath)){
-      if (dir.exists(incrementalResultPath)) {
-      exportSummarisedResult(results[["db_diag"]] ,
-                             fileName = "incremental_database_diagnostics.csv",
-                             path = incrementalResultPath)
-      }
-      }
+      if (dir.exists(incrementalResultPath))
+        cli::cli_inform("Savining database diagnostics results in {incrementalResultPath}")
+        exportSummarisedResult(results[["db_diag"]] ,
+                               fileName = "incremental_database_diagnostics.csv",
+                               path = incrementalResultPath)
+    }
   }
 
-  if ("codelistDiagnostics" %in% diagnostics) {
+  if (!is.null(codelistDiagnostics)) {
     results[["code_diag"]] <- codelistDiagnostics(cohort,
-                                                  measurementSample = measurementSample,
-                                                  drugExposureSample = drugExposureSample)
+                                                  cohortId = codelistDiagnostics$cohortId,
+                                                  achillesCodeUse = codelistDiagnostics$achillesCodeUse,
+                                                  orphanCodeUse = codelistDiagnostics$orphanCodeUse,
+                                                  cohortCodeUse = codelistDiagnostics$cohortCodeUse,
+                                                  drugDiagnostics = codelistDiagnostics$drugDiagnostics,
+                                                  measurementDiagnostics = codelistDiagnostics$measurementDiagnostics,
+                                                  measurementDiagnosticsSample = codelistDiagnostics$measurementDiagnosticsSample,
+                                                  drugDiagnosticsSample = codelistDiagnostics$drugDiagnosticsSample)
     if(!is.null(incrementalResultPath)){
       if (dir.exists(incrementalResultPath)) {
+        cli::cli_inform("Savining codelist diagnostics results in {incrementalResultPath}")
         exportSummarisedResult(results[["code_diag"]],
                                fileName = "incremental_codelist_diagnostics.csv",
                                path = incrementalResultPath)
       }
     }
-}
+  }
 
-  if ("cohortDiagnostics" %in% diagnostics) {
+  if (!is.null(cohortDiagnostics)) {
     results[["cohort_diag"]] <- cohortDiagnostics(cohort,
-                                                  survival = survival,
-                                                  cohortSample  = cohortSample,
-                                                  matchedSample = matchedSample)
+                                                  cohortId = cohortDiagnostics$cohortId,
+                                                  cohortCount = cohortDiagnostics$cohortCount,
+                                                  cohortCharacteristics = cohortDiagnostics$cohortCharacteristics,
+                                                  largeScaleCharacteristics = cohortDiagnostics$largeScaleCharacteristics,
+                                                  compareCohorts = cohortDiagnostics$compareCohorts,
+                                                  cohortSurvival = cohortDiagnostics$cohortSurvival,
+                                                  cohortSample = cohortDiagnostics$cohortSample,
+                                                  matchedSample = cohortDiagnostics$matchedSample)
     if(!is.null(incrementalResultPath)){
       if (dir.exists(incrementalResultPath)) {
+        cli::cli_inform("Savining cohort diagnostics results in {incrementalResultPath}")
         exportSummarisedResult(results[["cohort_diag"]] ,
                                fileName = "incremental_cohort_diagnostics.csv",
                                path = incrementalResultPath)
       }
     }
   }
-  if ("populationDiagnostics" %in% diagnostics) {
+  if (!is.null(populationDiagnostics)) {
     results[["pop_diag"]] <- populationDiagnostics(cohort,
-                                                   populationSample = populationSample,
-                                                   populationDateRange = populationDateRange)
+                                                   cohortId = populationDiagnostics$cohortId,
+                                                   incidence = populationDiagnostics$incidence,
+                                                   periodPrevalence = populationDiagnostics$periodPrevalence,
+                                                   populationSample = populationDiagnostics$populationSample,
+                                                   populationDateRange = eval(populationDiagnostics$populationDateRange))
     if(!is.null(incrementalResultPath)){
       if (dir.exists(incrementalResultPath)) {
+        cli::cli_inform("Savining population diagnostics results in {incrementalResultPath}")
         exportSummarisedResult(results[["pop_diag"]] ,
                                fileName = "incremental_population_diagnostics.csv",
                                path = incrementalResultPath)
       }
     }
   }
-
-  omopgenerics::logMessage("Phenotype diagnostics - exporting results")
   results[["log"]] <- omopgenerics::summariseLogFile(
     cdmName = omopgenerics::cdmName(cdm)
   )
@@ -143,5 +192,14 @@ phenotypeDiagnostics <- function(cohort,
     results <- omopgenerics::emptySummarisedResult()
   }
 
-  results
+  # if log file existed at the start, copy back to original location
+  if (!is.null(existingLogFile)) {
+    file.copy(from = getOption(x = "omopgenerics.logFile", default = NULL),
+              to = existingLogFile,
+              overwrite = TRUE) |>
+      invisible()
+    options("omopgenerics.logFile" = existingLogFile)
+  }
+
+  return(results)
 }

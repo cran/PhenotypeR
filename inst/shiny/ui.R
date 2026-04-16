@@ -3,17 +3,125 @@ ui <- fluidPage(
     theme = bs_theme(5, "pulse"),
     navbar_options =list(class = "bg-dark", theme = "dark"),
 
-    title = "PhenotypeR",
 
-    bslib::nav_panel(title = "Background",
-                     icon = shiny::icon("disease"),
+    bslib::nav_panel(title = "PhenotypeR",
+                     icon = shiny::icon("search"),
                      shiny::includeMarkdown(path = "background.md")),
 
+    # Background_start -----
+    bslib::nav_menu(
+      title = "Background",
+      icon = shiny::icon("list"),
+      # databaseDescriptions_start
+      bslib::nav_panel(
+        title = "Database descriptions",
+        bslib::accordion(
+          bslib::accordion_panel(
+            title = "Shared inputs",
+            tags$div(
+              style = "background-color: #750075; color: white; padding: 10px; font-weight: bold;  display: flex; flex-wrap: wrap; gap: 10px; gap: 10px; height: auto; align-items: center;",
+              tags$label("Select Database(s):"),
+              tags$div(
+                style = "width: 225px;",
+                tags$div(
+                  style = "margin-top: 15px;",
+                  shinyWidgets::pickerInput(
+                    inputId = "summarise_database_description_cdm_name",
+                    label = NULL,
+                    selected = selected$shared_cdm_names,
+                    choices = choices$shared_cdm_names,
+                    multiple = TRUE,
+                    options = list(`actions-box` = TRUE, `selected-text-format` = "count > 1",
+                                   `deselect-all-text` = "None", `select-all-text` = "All"),
+                    width = "100%"
+                  )
+                )
+              ),
+              tags$div(
+                style = "width: 225px;",
+                actionBttn("updateDatabaseDescription", "Update",
+                           style = "simple"),
+                width = "100%"
+              )
+            )
+          )
+        ),
+        bslib::nav_panel(
+          title = "Description",
+          bslib::card(
+            full_screen = TRUE,
+            shiny::uiOutput("database_text")
+          )
+        )
+      ),
+      # databaseDescriptions_end -----
+      # clinicalDescriptions_start
+      bslib::nav_panel(
+        title = "Clinical descriptions",
+        bslib::accordion(
+          bslib::accordion_panel(
+            title = "Shared inputs",
+            tags$div(
+              style = "background-color: #750075; color: white; padding: 10px; font-weight: bold;  display: flex; flex-wrap: wrap; gap: 10px; gap: 10px; height: auto; align-items: center;",
+              tags$label("Select Cohort(s):"),
+              tags$div(
+                style = "width: 225px;",
+                tags$div(
+                  style = "margin-top: 15px;",
+                  shinyWidgets::pickerInput(
+                    inputId = "summarise_clinical_description_cohort_name",
+                    label = NULL,
+                    selected = selected$shared_cohort_names,
+                    choices = choices$shared_cohort_names,
+                    multiple = TRUE,
+                    options = list(`actions-box` = TRUE, `selected-text-format` = "count > 1",
+                                   `deselect-all-text` = "None", `select-all-text` = "All"),
+                    width = "100%"
+                  )
+                )
+              ),
+              tags$div(
+                style = "width: 225px;",
+                actionBttn("updateClinicalDescription", "Update",
+                           style = "simple"),
+                width = "100%"
+              )
+            )
+          )
+        ),
+        bslib::layout_sidebar(
+          sidebar = bslib::sidebar(width = 400, open = "closed",
+                                   bslib::accordion(
+                                     bslib::accordion_panel(
+                                       title = "Settings",
+                                       shinyWidgets::pickerInput(
+                                         inputId = "phenotypes_section",
+                                         label = "Sections",
+                                         choices = c("background", "phenotyping_plan"),
+                                         selected = c("background"),
+                                         multiple = FALSE,
+                                         options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
+                                       )
+                                     )
+                                   )
+          ),
+          bslib::nav_panel(
+            title = "Table",
+            bslib::card(
+              full_screen = TRUE,
+              shiny::uiOutput("clinical_text")
+            )
+          )
+        )
+      )
+      # clinicalDescriptions_end
+    ),
+    # Background_end
     # databaseDiagnostics_start -----
     bslib::nav_menu(
       title = "Database diagnostics",
       icon = shiny::icon("list"),
-      ## snapshot -----
+      ## snapshot_start -----
       bslib::nav_panel(
         title = "Snapshot",
         bslib::accordion(
@@ -56,7 +164,8 @@ ui <- fluidPage(
           gt::gt_output("summarise_omop_snapshot_gt") |> withSpinner()
         )
       ),
-      ## person -----
+      ## snapshot_end -----
+      ## person_start -----
       bslib::nav_panel(
         title = "Person",
         bslib::accordion(
@@ -91,25 +200,69 @@ ui <- fluidPage(
           )),
         icon = shiny::icon("eye"),
         bslib::navset_card_tab(
-        bslib::nav_panel(
-          title = "Table person",
-          bslib::card(
-            full_screen = TRUE,
-            bslib::card_header(
-              shiny::downloadButton(outputId = "summarise_person_gt_download", label = ""),
-              class = "text-end"
-            ),
-            gt::gt_output("summarise_person_gt") |> withSpinner()
+          bslib::nav_panel(
+            title = "Person table summary",
+            bslib::card(
+              full_screen = TRUE,
+              bslib::card_header(
+                shiny::downloadButton(outputId = "summarise_person_gt_download", label = ""),
+                class = "text-end"
+              ),
+              gt::gt_output("summarise_person_gt") |> withSpinner()
+            )
+          ),
+          bslib::nav_panel(
+            title = "Date of birth distribution",
+            bslib::card(
+              full_screen = TRUE,
+              bslib::card_header(
+                # bslib::popover(
+                #   shiny::icon("download"),
+                #   shiny::numericInput(
+                #     inputId = "plot_age_pyramid_download_width",
+                #     label = "Width",
+                #     value = 15
+                #   ),
+                #   shiny::numericInput(
+                #     inputId = "plot_age_pyramid_download_height",
+                #     label = "Height",
+                #     value = 10
+                #   ),
+                #   shinyWidgets::pickerInput(
+                #     inputId = "plot_age_pyramid_download_units",
+                #     label = "Units",
+                #     selected = "cm",
+                #     choices = c("px", "cm", "inch"),
+                #     multiple = FALSE
+                #   ),
+                #   shiny::numericInput(
+                #     inputId = "plot_age_pyramid_download_dpi",
+                #     label = "dpi",
+                #     value = 300
+                #   ),
+                #   shiny::downloadButton(outputId = "plot_age_pyramid_download", label = "Download")
+                 ),
+                # class = "text-end",
+            bslib::layout_sidebar(
+              sidebar = bslib::sidebar(width = 400, open = "closed",
+                                       sliderInput(
+                                         inputId = "dob_date_range",
+                                         label = "Trim date range:",
+                                         min = minDob,
+                                         max = maxDob,
+                                         value = c(minDob, maxDob),
+                                         timeFormat = "%Y"
+                                       ),
+                                       position = "right"
+              ),
+              shiny::plotOutput("dobPlot")
           )
-        ),
-        bslib::nav_panel(
-          title = "Date of birth",
-          plotOutput("dobPlot")
+            )
         )
-      )
+        )
       ),
-
-      ## observation periods -----
+      ## person_end -----
+      ## observation_period_start -----
       bslib::nav_panel(
         title = "Observation periods",
         bslib::accordion(
@@ -144,23 +297,68 @@ ui <- fluidPage(
           )),
         icon = shiny::icon("eye"),
         bslib::navset_card_tab(
-        bslib::nav_panel(
-          title = "Table observation period",
-          bslib::card(
-            full_screen = TRUE,
-            bslib::card_header(
-              shiny::downloadButton(outputId = "summarise_observation_period_gt_download", label = ""),
-              class = "text-end"
-            ),
-            gt::gt_output("summarise_observation_period_gt") |> withSpinner()
+          bslib::nav_panel(
+            title = "Observation period table",
+            bslib::card(
+              full_screen = TRUE,
+              bslib::card_header(
+                shiny::downloadButton(outputId = "summarise_observation_period_gt_download", label = ""),
+                class = "text-end"
+              ),
+              gt::gt_output("summarise_observation_period_gt") |> withSpinner()
+            )
+          ),
+          bslib::nav_panel(
+            title = "Observation period distributions",
+            bslib::card(
+              full_screen = TRUE,
+              bslib::card_header(
+                # bslib::popover(
+                #   shiny::icon("download"),
+                #   shiny::numericInput(
+                #     inputId = "plot_age_pyramid_download_width",
+                #     label = "Width",
+                #     value = 15
+                #   ),
+                #   shiny::numericInput(
+                #     inputId = "plot_age_pyramid_download_height",
+                #     label = "Height",
+                #     value = 10
+                #   ),
+                #   shinyWidgets::pickerInput(
+                #     inputId = "plot_age_pyramid_download_units",
+                #     label = "Units",
+                #     selected = "cm",
+                #     choices = c("px", "cm", "inch"),
+                #     multiple = FALSE
+                #   ),
+                #   shiny::numericInput(
+                #     inputId = "plot_age_pyramid_download_dpi",
+                #     label = "dpi",
+                #     value = 300
+                #   ),
+                #   shiny::downloadButton(outputId = "plot_age_pyramid_download", label = "Download")
+                 ),
+                # class = "text-end",
+            bslib::layout_sidebar(
+              sidebar = bslib::sidebar(width = 400, open = "closed",
+                                       sliderInput(
+                                         inputId = "obs_date_range",
+                                         label = "Trim date range:",
+                                         min = minObs,
+                                         max = maxObs,
+                                         value = c(minObs, maxObs),
+                                         timeFormat = "%Y"
+                                       ),
+                                       position = "right"
+              ),
+            plotOutput("obsPlot")
           )
-        ),
-        bslib::nav_panel(
-          title = "Observation periods",
-          plotOutput("obsPlot")
         )
-      )
+          )
+        )
       ),
+      ## observation_period_end -----
       ## clinical_records_start ----
       bslib::nav_panel(
         title = "Clinical Records",
@@ -211,56 +409,64 @@ ui <- fluidPage(
                                      )
                                    )
           ),
-        bslib::navset_card_tab(
-        bslib::nav_panel(
-          title = "Table Clinical Records",
-          bslib::card(
-            full_screen = TRUE,
-            bslib::card_header(
-              shiny::downloadButton(outputId = "summarise_clinical_records_gt_download", label = ""),
-              class = "text-end"
+          bslib::navset_card_tab(
+            bslib::nav_panel(
+              title = "Table Clinical Records",
+              bslib::card(
+                full_screen = TRUE,
+                bslib::card_header(
+                  shiny::downloadButton(outputId = "summarise_clinical_records_gt_download", label = ""),
+                  class = "text-end"
+                ),
+                gt::gt_output("summarise_clinical_records_gt") |> withSpinner()
+              )
             ),
-            gt::gt_output("summarise_clinical_records_gt") |> withSpinner()
+            bslib::nav_panel(
+              title = "Trends",
+              bslib::layout_sidebar(
+                sidebar = bslib::sidebar(width = 400, open = "closed",
+                                         sliderInput(
+                                           inputId = "records_date_range",
+                                           label = "Trim date range:",
+                                           min = minRecords,
+                                           max = maxRecords,
+                                           value = c(minRecords, maxRecords),
+                                           timeFormat = "%Y"
+                                         ),
+                                         shinyWidgets::pickerInput(
+                                           inputId = "clinical_records_plot_facet",
+                                           label = "Facet",
+                                           selected = "cdm_name",
+                                           multiple = TRUE,
+                                           choices = c("cdm_name",
+                                                       "omop_table"),
+                                           options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
+                                         ),
+                                         shiny::checkboxInput(
+                                           inputId = "clinical_records_plot_facet_free",
+                                           label = "Free scales",
+                                           value = c(FALSE)
+                                         ),
+                                         shinyWidgets::pickerInput(
+                                           inputId = "clinical_records_plot_colour",
+                                           label = "Colour",
+                                           selected = "omop_table",
+                                           multiple = TRUE,
+                                           choices = c("cdm_name",
+                                                       "omop_table"),
+                                           options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
+                                         ),
+                                         position = "right"
+                ),
+                bslib::card(
+                  full_screen = TRUE,
+                  plotOutput("clinicalTrends")
+                )
+              )
+            )
           )
-        ),
-      bslib::nav_panel(
-        title = "Trends",
-        bslib::layout_sidebar(
-          sidebar = bslib::sidebar(width = 400, open = "closed",
-                                   shinyWidgets::pickerInput(
-                                     inputId = "clinical_records_plot_facet",
-                                     label = "Facet",
-                                     selected = "cdm_name",
-                                     multiple = TRUE,
-                                     choices = c("cdm_name",
-                                                 "omop_table"),
-                                     options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
-                                   ),
-                                   shiny::checkboxInput(
-                                     inputId = "clinical_records_plot_facet_free",
-                                     label = "Free scales",
-                                     value = c(FALSE)
-                                   ),
-                                   shinyWidgets::pickerInput(
-                                     inputId = "clinical_records_plot_colour",
-                                     label = "Colour",
-                                     selected = "omop_table",
-                                     multiple = TRUE,
-                                     choices = c("cdm_name",
-                                                 "omop_table"),
-                                     options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
-                                   ),
-                                   position = "right"
-                                   ),
-        bslib::card(
-          full_screen = TRUE,
-        plotOutput("clinicalTrends")
-      )
         )
       )
-        )
-      )
-    )
       ## clinical_records_end ----
     ),
     # databaseDiagnostics_end ----
@@ -268,8 +474,7 @@ ui <- fluidPage(
     bslib::nav_menu(
       title = "Codelist diagnostics",
       icon = shiny::icon("list"),
-      ## achilles_results_start
-      ## achilles code use -----
+      ## achilles_code_use_start -----
       bslib::nav_panel(
         title = "Achilles code use",
         bslib::accordion(
@@ -354,84 +559,8 @@ ui <- fluidPage(
           )
         )
       ),
-      ## unmapped concepts -----
-      # bslib::nav_panel(
-      #   title = "Unmapped concepts",
-      #   icon = shiny::icon("database"),
-      #   bslib::layout_sidebar(
-      #     sidebar = bslib::sidebar(width = 400, open = "closed",
-      #                              bslib::accordion(
-      #                                bslib::accordion_panel(
-      #                                  title = "Settings",
-      #                                  shinyWidgets::pickerInput(
-      #                                    inputId = "unmapped_cdm_name",
-      #                                    label = "Database",
-      #                                    choices = NULL,
-      #                                    selected = NULL,
-      #                                    multiple = TRUE,
-      #                                    options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
-      #                                  ),
-      #                                  shinyWidgets::pickerInput(
-      #                                    inputId = "unmapped_codelist_name",
-      #                                    label = "Codelist name",
-      #                                    choices = NULL,
-      #                                    selected = NULL,
-      #                                    multiple = TRUE,
-      #                                    options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
-      #                                  )
-      #                                ),
-      #                                bslib::accordion_panel(
-      #                                  title = "Table formatting",
-      #                                  sortable::bucket_list(
-      #                                    header = NULL,
-      #                                    sortable::add_rank_list(
-      #                                      text = "none",
-      #                                      labels = c( "codelist_name"),
-      #                                      input_id = "unmapped_none"
-      #                                    ),
-      #                                    sortable::add_rank_list(
-      #                                      text = "header",
-      #                                      labels = c("cdm_name", "estimate_name"),
-      #                                      input_id = "unmapped_header"
-      #                                    ),
-      #                                    sortable::add_rank_list(
-      #                                      text = "groupColumn",
-      #                                      labels = NULL,
-      #                                      input_id = "unmapped_groupColumn"
-      #                                    ),
-      #                                    sortable::add_rank_list(
-      #                                      text = "hide",
-      #                                      labels = character(),
-      #                                      input_id = "unmapped_hide"
-      #                                    )
-      #                                  )
-      #                                )
-      #                              )
-      #     ),
-      #     bslib::nav_panel(
-      #       title = "Unmapped",
-      #         bslib::card(
-      #           full_screen = TRUE,
-      #           bslib::card_header(
-      #             bslib::popover(
-      #               shiny::icon("download"),
-      #               shinyWidgets::pickerInput(
-      #                 inputId = "unmapped_formatted_download_type",
-      #                 label = "File type",
-      #                 selected = "docx",
-      #                 choices = c("docx", "png", "pdf", "html"),
-      #                 multiple = FALSE
-      #               ),
-      #               shiny::downloadButton(outputId = "unmapped_formatted_download", label = "Download")
-      #             ),
-      #             class = "text-end"
-      #           ),
-      #           gt::gt_output("unmapped_formatted") |> withSpinner()
-      #         )
-      #     )
-      #   )
-      # ),
-      ## Orphan codes -----
+      ## achilles_code_use_end ----
+      ## orphan_code_use_start ----
       bslib::nav_panel(
         title = "Orphan codes",
         bslib::accordion(
@@ -514,8 +643,8 @@ ui <- fluidPage(
           )
         )
       ),
-      ## achilles_results_end
-      ## Cohort code use -----
+      ## orphan_code_use_end ----
+      ## cohort_code_use_start -----
       bslib::nav_panel(
         title = "Cohort code use",
         bslib::accordion(
@@ -617,10 +746,10 @@ ui <- fluidPage(
           )
         )
       ),
-      ## measurement_diagnostics_start
-      ## Measurement code use -----
+      ## cohort_code_use_end -----
+      ## measurement_diagnostics_start ----
       bslib::nav_panel(
-        title = "Measurements Code Use",
+        title = "Measurement Diagnostics",
         bslib::accordion(
           bslib::accordion_panel(
             title = "Shared inputs",
@@ -670,104 +799,104 @@ ui <- fluidPage(
           )),
         icon = shiny::icon("weight-scale"),
         bslib::navset_card_tab(
-        bslib::nav_panel(
-          title = "Table Summary",
-          bslib::card(
-            full_screen = TRUE,
-            bslib::card_header(
-              shiny::downloadButton(outputId = "measurement_summary_gt_download", label = ""),
-              class = "text-end"
-            ),
-            bslib::layout_sidebar(
-              sidebar = bslib::sidebar(width = 400, open = "closed",
-                                       uiOutput("measurement_summary_sortable"),
-                                       position = "right"
+          bslib::nav_panel(
+            title = "Table Summary",
+            bslib::card(
+              full_screen = TRUE,
+              bslib::card_header(
+                shiny::downloadButton(outputId = "measurement_summary_gt_download", label = ""),
+                class = "text-end"
               ),
-              gt::gt_output("measurement_summary_tbl") |> withSpinner()
+              bslib::layout_sidebar(
+                sidebar = bslib::sidebar(width = 400, open = "closed",
+                                         uiOutput("measurement_summary_sortable"),
+                                         position = "right"
+                ),
+                gt::gt_output("measurement_summary_tbl") |> withSpinner()
+              )
             )
-          )
-        ),
-        bslib::nav_panel(
-          title = "Plot summary",
-          bslib::card(
-            full_screen = TRUE,
-            bslib::card_header(
-              bslib::popover(
-                shiny::icon("download"),
-                shiny::numericInput(
-                  inputId = "plot_measurement_summary_download_width",
-                  label = "Width",
-                  value = 15
+          ),
+          bslib::nav_panel(
+            title = "Plot summary",
+            bslib::card(
+              full_screen = TRUE,
+              bslib::card_header(
+                bslib::popover(
+                  shiny::icon("download"),
+                  shiny::numericInput(
+                    inputId = "plot_measurement_summary_download_width",
+                    label = "Width",
+                    value = 15
+                  ),
+                  shiny::numericInput(
+                    inputId = "plot_measurement_summary_download_height",
+                    label = "Height",
+                    value = 10
+                  ),
+                  shinyWidgets::pickerInput(
+                    inputId = "plot_measurement_summary_download_units",
+                    label = "Units",
+                    selected = "cm",
+                    choices = c("px", "cm", "inch"),
+                    multiple = FALSE
+                  ),
+                  shiny::numericInput(
+                    inputId = "plot_measurement_summary_download_dpi",
+                    label = "dpi",
+                    value = 300
+                  ),
+                  shiny::downloadButton(outputId = "plot_measurement_summary_download", label = "Download")
                 ),
-                shiny::numericInput(
-                  inputId = "plot_measurement_summary_download_height",
-                  label = "Height",
-                  value = 10
-                ),
-                shinyWidgets::pickerInput(
-                  inputId = "plot_measurement_summary_download_units",
-                  label = "Units",
-                  selected = "cm",
-                  choices = c("px", "cm", "inch"),
-                  multiple = FALSE
-                ),
-                shiny::numericInput(
-                  inputId = "plot_measurement_summary_download_dpi",
-                  label = "dpi",
-                  value = 300
-                ),
-                shiny::downloadButton(outputId = "plot_measurement_summary_download", label = "Download")
+                class = "text-end"
               ),
-              class = "text-end"
-            ),
-            bslib::layout_sidebar(
-              sidebar = bslib::sidebar(width = 400, open = "closed",
-                                       shinyWidgets::pickerInput(
-                                         inputId = "measurement_summary_y",
-                                         label = "Vertical axis",
-                                         selected = c("time"),
-                                         multiple = FALSE,
-                                         choices = c("time", "measurements_per_subject"),
-                                         options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
-                                       ),
-                                       shinyWidgets::pickerInput(
-                                         inputId = "measurement_summary_time_scale",
-                                         label = "Time scale",
-                                         selected = c("days"),
-                                         multiple = FALSE,
-                                         choices = c("days", "years"),
-                                         options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
-                                       ),
-                                       shinyWidgets::pickerInput(
-                                         inputId = "measurement_summary_plottype",
-                                         label = "Plot type",
-                                         selected = "boxplot",
-                                         multiple = FALSE,
-                                         choices = c("boxplot", "densityplot"),
-                                         options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
-                                       ),
-                                       shinyWidgets::pickerInput(
-                                         inputId = "measurement_summary_colour",
-                                         label = "Colour",
-                                         selected = c("codelist_name"),
-                                         multiple = TRUE,
-                                         choices = c("cdm_name", "codelist_name", "cohort_name"),
-                                         options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
-                                       ),
-                                       shinyWidgets::pickerInput(
-                                         inputId = "measurement_summary_facet",
-                                         label = "Facet",
-                                         selected = c("cdm_name"),
-                                         multiple = TRUE,
-                                         choices = c("cdm_name", "codelist_name", "cohort_name"),
-                                         options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
-                                       ),
-                                       position = "right"
-              ),
-              shiny::plotOutput("plot_measurement_summary")
+              bslib::layout_sidebar(
+                sidebar = bslib::sidebar(width = 400, open = "closed",
+                                         shinyWidgets::pickerInput(
+                                           inputId = "measurement_summary_y",
+                                           label = "Vertical axis",
+                                           selected = c("time"),
+                                           multiple = FALSE,
+                                           choices = c("time", "measurements_per_subject"),
+                                           options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
+                                         ),
+                                         shinyWidgets::pickerInput(
+                                           inputId = "measurement_summary_time_scale",
+                                           label = "Time scale",
+                                           selected = c("days"),
+                                           multiple = FALSE,
+                                           choices = c("days", "years"),
+                                           options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
+                                         ),
+                                         shinyWidgets::pickerInput(
+                                           inputId = "measurement_summary_plottype",
+                                           label = "Plot type",
+                                           selected = "boxplot",
+                                           multiple = FALSE,
+                                           choices = c("boxplot", "densityplot"),
+                                           options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
+                                         ),
+                                         shinyWidgets::pickerInput(
+                                           inputId = "measurement_summary_colour",
+                                           label = "Colour",
+                                           selected = c("codelist_name"),
+                                           multiple = TRUE,
+                                           choices = c("cdm_name", "codelist_name", "cohort_name"),
+                                           options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
+                                         ),
+                                         shinyWidgets::pickerInput(
+                                           inputId = "measurement_summary_facet",
+                                           label = "Facet",
+                                           selected = c("cdm_name"),
+                                           multiple = TRUE,
+                                           choices = c("cdm_name", "codelist_name", "cohort_name"),
+                                           options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
+                                         ),
+                                         position = "right"
+                ),
+                shiny::plotOutput("plot_measurement_summary")
+              )
             )
-          )
-        ),
+          ),
           bslib::nav_panel(
             title = "Table Values (Concepts)",
             bslib::card(
@@ -949,9 +1078,9 @@ ui <- fluidPage(
             )
           )
         )
-      ), ## measurement_diagnostics_end
-      ## drug_diagnostics_start
-      ## Drug diagnostics -----
+      ),
+      ## measurement_diagnostics_end ----
+      ## drug_diagnostics_start ----
       bslib::nav_panel(
         title = "Drug diagnostics",
         bslib::accordion(
@@ -965,10 +1094,10 @@ ui <- fluidPage(
                 tags$div(
                   style = "margin-top: 15px;",
                   shinyWidgets::pickerInput(
-                    inputId = "drug_diagnostics_cdm_name",
+                    inputId = "summarise_drug_use_cdm_name",
                     label = NULL,
-                    selected = selected$shared_cdm_name,
-                    choices = choices$shared_cdm_name,
+                    selected = selected$shared_cdm_names,
+                    choices = choices$shared_cdm_names,
                     multiple = TRUE,
                     options = list(`actions-box` = TRUE, `selected-text-format` = "count > 1",
                                    `deselect-all-text` = "None", `select-all-text` = "All"),
@@ -982,7 +1111,7 @@ ui <- fluidPage(
                 tags$div(
                   style = "margin-top: 15px;",
                   shinyWidgets::pickerInput(
-                    inputId = "drug_diagnostics_cohort_name",
+                    inputId = "summarise_drug_use_cohort_name",
                     label = NULL,
                     selected = selected$shared_cohort_name,
                     choices = choices$shared_cohort_name,
@@ -1056,20 +1185,20 @@ ui <- fluidPage(
                                      )
                                    )
           ),
-        bslib::navset_card_tab(
-          bslib::nav_panel(
-            title = "Drug diagnostics",
-            bslib::card(
-              full_screen = TRUE,
-              bslib::card_header(
-                shiny::downloadButton(outputId = "drug_diagnostics_gt_download", label = ""),
-                class = "text-end"
-              ),
+          bslib::navset_card_tab(
+            bslib::nav_panel(
+              title = "Drug diagnostics",
+              bslib::card(
+                full_screen = TRUE,
+                bslib::card_header(
+                  shiny::downloadButton(outputId = "drug_diagnostics_gt_download", label = ""),
+                  class = "text-end"
+                ),
                 gt::gt_output("drug_diagnostics_tbl") |> withSpinner()
+              )
             )
           )
         )
-      )
       )
       ## drug_diagnostics_end
     ),
@@ -1078,7 +1207,7 @@ ui <- fluidPage(
     bslib::nav_menu(
       title = "Cohort diagnostics",
       icon = shiny::icon("list"),
-      ## Cohort count ----
+      ## cohort_count_start ----
       bslib::nav_panel(
         title = "Cohort count",
         bslib::accordion(
@@ -1129,12 +1258,14 @@ ui <- fluidPage(
             )
           )),
         icon = shiny::icon("person"),
+        # cohort_count_expectations_start
         accordion(open = FALSE,
                   accordion_panel(
                     title = "Show cohort expectations",
                     value = "panel_ce_1",
                     reactable::reactableOutput("cohort_count_expectations")
                   )),
+        # cohort_count_expectations_end
         bslib::layout_sidebar(
           sidebar = bslib::sidebar(width = 400, open = "closed",
                                    bslib::accordion(
@@ -1207,8 +1338,8 @@ ui <- fluidPage(
           )
         )
       ),
-
-      ## Cohort characteristics -----
+      ## cohort_count_end ----
+      ## cohort_characteristics_start -----
       bslib::nav_panel(
         title = "Cohort characteristics",
         bslib::accordion(
@@ -1259,12 +1390,14 @@ ui <- fluidPage(
             )
           )),
         icon = shiny::icon("users-gear"),
+        # cohort_characteristics_expectations_start
         accordion(open = FALSE,
                   accordion_panel(
                     title = "Show cohort expectations",
                     value = "panel_ce_2",
                     reactable::reactableOutput("cohort_characteristics_expectations")
                   )),
+        # cohort_characteristics_expectations_end
         bslib::layout_sidebar(
           sidebar = bslib::sidebar(width = 400, open = "closed",
                                    bslib::accordion(
@@ -1348,8 +1481,8 @@ ui <- fluidPage(
           )
         )
       ),
-
-      ## Large scale characteristics -----
+      ## cohort_characteristics_end -----
+      ## large_scale_characteristics_start -----
       bslib::nav_panel(
         title = "Large scale characteristics",
         bslib::accordion(
@@ -1400,12 +1533,14 @@ ui <- fluidPage(
             )
           )),
         icon = shiny::icon("arrow-up-right-dots"),
+        # large_scale_characteristics_expectations_start
         accordion(open = FALSE,
                   accordion_panel(
                     title = "Show cohort expectations",
                     value = "panel_ce_3",
                     reactable::reactableOutput("large_scale_characteristics_expectations")
                   )),
+        # large_scale_characteristics_expectations_end
         bslib::layout_sidebar(
           sidebar = bslib::sidebar(width = 400, open = "closed",
                                    bslib::accordion(
@@ -1478,111 +1613,104 @@ ui <- fluidPage(
           )
         )
       ),
-
-      ## Compare large scale characteristics -----
+      ## large_scale_characteristics_end -----
+      ## compare_large_scale_characteristics_start -----
       bslib::nav_panel(
         title = "Compare large scale characteristics",
+
+
         bslib::accordion(
           bslib::accordion_panel(
             title = "Shared inputs",
             tags$div(
-              style = "background-color: #750075; color: white; padding: 10px; font-weight: bold;  display: flex; flex-wrap: wrap; gap: 10px; gap: 10px; height: auto; align-items: center;",
-              tags$label("Select Database(s):"),
+              style = "background-color: #750075; color: white; padding: 15px; display: flex; flex-direction: column; gap: 15px;",
               tags$div(
-                style = "width: 225px;",
-                tags$div(
-                  style = "margin-top: 15px;",
-                  shinyWidgets::pickerInput(
-                    inputId = "compare_large_scale_characteristics_cdm_name",
-                    label = NULL,
-                    selected = selected$shared_cdm_names,
-                    choices = choices$shared_cdm_names,
-                    multiple = TRUE,
-                    options = list(`actions-box` = TRUE, `selected-text-format` = "count > 1",
-                                   `deselect-all-text` = "None", `select-all-text` = "All"),
-                    width = "100%",
-                  )
-                )
-              ),
-              tags$label("Select Cohort(s):"),
-              tags$div(
-                style = "width: 225px;",
-                tags$div(
-                  style = "margin-top: 15px;",
-                  shinyWidgets::pickerInput(
-                    inputId = "compare_large_scale_characteristics_cohort_name",
-                    label = NULL,
-                    selected = selected$shared_cohort_names,
-                    choices = choices$shared_cohort_names,
-                    multiple = TRUE,
-                    options = list(`actions-box` = TRUE, `selected-text-format` = "count > 1",
-                                   `deselect-all-text` = "None", `select-all-text` = "All"),
-                    width = "100%"
-                  )
+                style = "display: flex; align-items: center; gap: 15px;",
+                tags$strong("Database:"),
+                tags$div(style = "width: 300px;",
+                         shinyWidgets::pickerInput(
+                           inputId = "compare_large_scale_characteristics_cdm_name",
+                           label = NULL,
+                           selected = selected$shared_cdm_names,
+                           choices = choices$shared_cdm_names,
+                           multiple = TRUE,
+                           options = list(`actions-box` = TRUE, `selected-text-format` = "count > 1",
+                                          `deselect-all-text` = "None", `select-all-text` = "All"),
+                           width = "100%",
+                         )
                 )
               ),
               tags$div(
-                style = "width: 225px;",
-                actionBttn("updateCompareLSC", "Update",
-                           style = "simple"),
-                width = "100%"
+                style = "display: flex; flex-wrap: wrap; gap: 30px; align-items: flex-start; background: rgba(0,0,0,0.1); padding: 15px; border-radius: 5px;",
+
+                tags$div(
+                  style = "display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 250px;",
+                  tags$div(
+                    style = "flex: 1; min-width: 15px; border: 2px solid #993399; padding: 5px; border-radius: 8px; background-color: rgba(255,255,255,0.05);",
+                    tags$strong("Reference cohort:"),
+                    shinyWidgets::pickerInput(
+                      inputId = "compare_large_scale_characteristics_cohort_name",
+                      label = NULL,
+                      selected = selected$shared_cohort_names,
+                      choices = choices$shared_cohort_names,
+                      multiple = TRUE,
+                      options = list(`actions-box` = TRUE, `selected-text-format` = "count > 1",
+                                     `deselect-all-text` = "None", `select-all-text` = "All"),
+                      width = "100%"
+                    ),
+                    shinyWidgets::radioGroupButtons(
+                      inputId = "compare_large_scale_characteristics_cohort_1",
+                      label = NULL,
+                      choices = "",
+                      width = "100%",
+                      status = "custom-light"
+                    )
+                  )
+                ),
+                tags$div(
+                  style = "display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 250px;",
+                  tags$div(
+                    style = "flex: 1; min-width: 15px; border: 2px solid #993399; padding: 5px; border-radius: 8px; background-color: rgba(255,255,255,0.05);",
+                    tags$strong("Comparator cohort:"),
+                    shinyWidgets::pickerInput("compare_large_scale_characteristics_cohort_compare",
+                                              label = NULL,
+                                              choices = NULL,
+                                              multiple = TRUE,
+                                              options = list(`actions-box` = TRUE, `selected-text-format` = "count > 1",
+                                                             `deselect-all-text` = "None", `select-all-text` = "All"),
+                                              width = "100%"),
+
+                    shinyWidgets::radioGroupButtons(
+                      inputId = "compare_large_scale_characteristics_cohort_2",
+                      label = NULL,
+                      choices = "",
+                      width = "100%",
+                      status = "custom-light"
+                    )
+                  )
+                )
+              ),
+              tags$div(
+                style = "display: flex; justify-content: flex-end;",
+                shinyWidgets::actionBttn("updateCompareLSC", "Update", style = "simple")
               )
             )
-          )),
+          )
+        ),
         icon = shiny::icon("people-arrows"),
+        # compare_large_scale_characteristics_expectations_start
         accordion(open = FALSE,
                   accordion_panel(
                     title = "Show cohort expectations",
                     value = "panel_ce_4",
                     reactable::reactableOutput("compare_large_scale_characteristics_expectations")
                   )),
+        # compare_large_scale_characteristics_expectations_end
         bslib::layout_sidebar(
-          sidebar = bslib::sidebar(width = 400, open = "closed",
+          sidebar = bslib::sidebar(width = 400, open = "open",
                                    bslib::accordion(
                                      bslib::accordion_panel(
                                        title = "Settings",
-                                       shinyWidgets::pickerInput(
-                                         inputId = "compare_large_scale_characteristics_cohort_compare",
-                                         label = "Comparator cohort",
-                                         choices = NULL,
-                                         selected = NULL,
-                                         multiple = FALSE,
-                                         options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
-                                       ),
-                                       shiny::fluidRow(
-                                         shiny::column(width = 5, offset = 1,
-                                                       shinyWidgets::pickerInput(
-                                                         inputId = "compare_large_scale_characteristics_cohort_1",
-                                                         label = "Cohort type (reference)",
-                                                         choices = NULL,
-                                                         selected = NULL,
-                                                         multiple = FALSE,
-                                                         options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
-                                                       ),
-                                                       tags$style(HTML("
-                                                       label[for='compare_large_scale_characteristics_cohort_1'] {
-                                                       text-align: center;
-                                                       width: 100%;
-                                                       display: block;
-                                                       }"))
-                                         ),
-                                         shiny::column(width = 5,
-                                                       shinyWidgets::pickerInput(
-                                                         inputId = "compare_large_scale_characteristics_cohort_2",
-                                                         label = "Cohort type (comparator)",
-                                                         choices = NULL,
-                                                         selected = NULL,
-                                                         multiple = FALSE,
-                                                         options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
-                                                       ),
-                                                       tags$style(HTML("
-                                                       label[for='compare_large_scale_characteristics_cohort_2'] {
-                                                       text-align: center;
-                                                       width: 100%;
-                                                       display: block;
-                                                       }"))
-                                         )
-                                       ),
                                        shinyWidgets::pickerInput(
                                          inputId = "compare_large_scale_characteristics_table_name",
                                          label = "Domain",
@@ -1691,8 +1819,8 @@ ui <- fluidPage(
           )
         )
       ),
-
-      ## Compare cohorts -----
+      ## compare_large_scale_characteristics_end -----
+      ## compare_cohorts_start -----
       bslib::nav_panel(
         title = "Compare cohorts",
         bslib::accordion(
@@ -1743,12 +1871,14 @@ ui <- fluidPage(
             )
           )),
         icon = shiny::icon("yin-yang"),
+        # compare_cohorts_expectations_start
         accordion(open = FALSE,
                   accordion_panel(
                     title = "Show cohort expectations",
                     value = "panel_ce_5",
                     reactable::reactableOutput("compare_cohorts_expectations")
                   )),
+        # compare_cohorts_expectations_end
         bslib::layout_sidebar(
           sidebar = bslib::sidebar(width = 400, open = "closed",
                                    bslib::accordion(
@@ -1969,8 +2099,8 @@ ui <- fluidPage(
           )
         )
       ),
-      ## cohort_survival_start
-      ## Cohort survival -----
+      ## compare_cohorts_end -----
+      ## cohort_survival_start ----
       bslib::nav_panel(
         title = "Cohort survival",
         bslib::accordion(
@@ -2021,12 +2151,14 @@ ui <- fluidPage(
             )
           )),
         icon = shiny::icon("chart-gantt"),
+        # cohort_survival_expectations_start
         accordion(open = FALSE,
                   accordion_panel(
                     title = "Show cohort expectations",
                     value = "panel_ce_6",
                     reactable::reactableOutput("cohort_survival_expectations")
                   )),
+        # cohort_survival_expectations_end
         bslib::layout_sidebar(
           sidebar = bslib::sidebar(width = 400, open = "closed",
                                    bslib::accordion(
@@ -2149,14 +2281,14 @@ ui <- fluidPage(
           )
         )
       )
-      ## cohort_survival_end
+      ## cohort_survival_end ----
     ),
     # cohortDiagnostics_end ----
     # populationDiagnostics_start -----
     bslib::nav_menu(
       title = "Population diagnostics",
       icon = shiny::icon("list"),
-      ## Incidence -----
+      ## incidence_start -----
       bslib::nav_panel(
         title = "Incidence",
         bslib::accordion(
@@ -2364,9 +2496,10 @@ ui <- fluidPage(
           )
         )
       ),
-      ## Prevalence -----
+      ## incidence_end -----
+      ## prevalence_start -----
       bslib::nav_panel(
-        title = "Prevalence",
+        title = "Period Prevalence",
         bslib::accordion(
           bslib::accordion_panel(
             title = "Shared inputs",
@@ -2457,7 +2590,7 @@ ui <- fluidPage(
           ),
           bslib::navset_card_tab(
             bslib::nav_panel(
-              title = "Table prevalence",
+              title = "Table Period Prevalence",
               bslib::card(
                 full_screen = TRUE,
                 bslib::card_header(
@@ -2469,7 +2602,7 @@ ui <- fluidPage(
               )
             ),
             bslib::nav_panel(
-              title = "Plot prevalence",
+              title = "Plot Period Prevalence",
               bslib::card(
                 full_screen = TRUE,
                 bslib::card_header(
@@ -2569,6 +2702,7 @@ ui <- fluidPage(
           )
         )
       )
+      # prevalence_end
     ),
     # populationDiagnostics_end ----
     nav_spacer(),
@@ -2576,6 +2710,26 @@ ui <- fluidPage(
     # log ----
     tags$head(
       tags$style(HTML("
+          body .btn-custom-light {
+          background-color: transparent !important;
+          background-image: none !important;
+          color: #ffffff !important;
+          border: none !important;
+          box-shadow: none !important;
+          outline: none !important;
+        }
+
+        /* 2. Selected button style: Keeps transparent background, text stays white */
+        body .btn-check:checked + .btn-custom-light,
+        body .btn-custom-light.active {
+          background-color: transparent !important;
+          background-image: none !important;
+          color: #ffffff !important;
+          border: none !important;
+          box-shadow: none !important;
+        }
+
+
     /* 1. Expand the main container */
     .log-popover-wide {
       /* Uses 90% of screen width, but caps at 1200px on ultra-wide monitors */

@@ -17,14 +17,12 @@ eval = NOT_CRAN
 # library(CohortConstructor)
 # library(PhenotypeR)
 # library(dplyr)
+# library(readr)
+# library(here)
+# library(omock)
 # 
-# con <- DBI::dbConnect(duckdb::duckdb(),
-#                       CDMConnector::eunomiaDir("synpuf-1k", "5.3"))
-# cdm <- CDMConnector::cdmFromCon(con = con,
-#                                 cdmName = "Eunomia Synpuf",
-#                                 cdmSchema   = "main",
-#                                 writeSchema = "main",
-#                                 achillesSchema = "main")
+# cdm <- mockCdmFromDataset(datasetName = "synpuf-1k_5.3",
+#                           source = "duckdb")
 # 
 # # Create a code lists
 # codes <- list("user_of_warfarin" = c(1310149L, 40163554L),
@@ -42,17 +40,38 @@ eval = NOT_CRAN
 #                                name = "my_cohort")
 # 
 # # Run PhenotypeDiagnostics including all diagnostics
-# result <- phenotypeDiagnostics(cdm$my_cohort, survival = TRUE)
+# result <- phenotypeDiagnostics(cdm$my_cohort)
 # 
-# # Generate expectations
+# # Generate expectations (see the vignette for more details)
 # chat <- chat("google_gemini")
 # expectations <- getCohortExpectations(chat = chat,
 #                       phenotypes = result)
 # 
+# expectationsDir <- here()
+# write_csv(expectations,
+#           file = here("expectations.csv"))
+# 
+# # Create database descriptions (see the vignette for more details)
+# databaseDescriptionDir <- here("database_descriptions")
+# downloadDatabaseDescriptionTemplate(directory = databaseDescriptionDir,
+#                                     name = "synpuf-1k")
+# 
+# # Create clinical descriptions (see the vignette for more details)
+# clinicalDescriptionDir <- here("cinical_descriptions")
+# downloadClinicalDescriptionTemplate(directory = clinicalDescriptionDir, name = "user_of_warfarin")
+# downloadClinicalDescriptionTemplate(directory = clinicalDescriptionDir, name = "user_of_acetaminophen")
+# downloadClinicalDescriptionTemplate(directory = clinicalDescriptionDir, name = "user_of_morphine")
+# downloadClinicalDescriptionTemplate(directory = clinicalDescriptionDir, name = "measurements_cohort")
+# 
 # # Create the shiny app based on PhenotypeDiagnostics results, suppressing all
-# # cell counts smaller than 2, saved in a temporary directory, and with the
-# # expectations created using "gemini".
-# shinyDiagnostics(result = result, minCellCount = 2, directory = tempdir(), expectations = expectations)
+# # cell counts smaller than 2, saved in a temporary directory, with the
+# # expectations created using "gemini" and the database and clinical descriptions:
+# shinyDiagnostics(result = result,
+#                  minCellCount = 2,
+#                  directory = tempdir(),
+#                  expectationsDir = expectationsDir,
+#                  databaseDescriptionsDir = databaseDescriptionDir,
+#                  clinicalDescriptionsDir = clinicalDescriptionDir)
 
 ## ----echo=FALSE, out.width='90%'----------------------------------------------
 # knitr::include_graphics(here::here("vignettes/ShinyDiagnosticsFigures/figure1.png"))

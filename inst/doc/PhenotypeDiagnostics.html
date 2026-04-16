@@ -340,32 +340,36 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 
 
-<div id="introduction-run-phenotypediagnostics" class="section level2">
-<h2>Introduction: Run PhenotypeDiagnostics</h2>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
 <p>In this vignette, we are going to present how to run
-<code>PhenotypeDiagnostics()</code>. We are going to use the following
-packages and mock data:</p>
+<code>PhenotypeDiagnostics()</code>.</p>
+<p>We’ll use the following packages and mock data for example
+purposes:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(CohortConstructor)</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(PhenotypeR)</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>con <span class="ot">&lt;-</span> DBI<span class="sc">::</span><span class="fu">dbConnect</span>(duckdb<span class="sc">::</span><span class="fu">duckdb</span>(), </span>
-<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>                      CDMConnector<span class="sc">::</span><span class="fu">eunomiaDir</span>(<span class="st">&quot;synpuf-1k&quot;</span>, <span class="st">&quot;5.3&quot;</span>))</span>
-<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>cdm <span class="ot">&lt;-</span> CDMConnector<span class="sc">::</span><span class="fu">cdmFromCon</span>(<span class="at">con =</span> con, </span>
-<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>                                <span class="at">cdmName =</span> <span class="st">&quot;Eunomia Synpuf&quot;</span>,</span>
-<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>                                <span class="at">cdmSchema   =</span> <span class="st">&quot;main&quot;</span>,</span>
-<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>                                <span class="at">writeSchema =</span> <span class="st">&quot;main&quot;</span>, </span>
-<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>                                <span class="at">achillesSchema =</span> <span class="st">&quot;main&quot;</span>)</span>
-<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>cdm</span></code></pre></div>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(OmopSketch)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">library</span>(PhenotypeR)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="fu">library</span>(DBI)</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="fu">library</span>(duckdb)</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="fu">library</span>(CDMConnector)</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(<span class="fu">duckdb</span>(), </span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>                 <span class="fu">eunomiaDir</span>(<span class="st">&quot;synpuf-1k&quot;</span>, <span class="st">&quot;5.3&quot;</span>))</span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>cdm <span class="ot">&lt;-</span> <span class="fu">cdmFromCon</span>(<span class="at">con =</span> con, </span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a>                  <span class="at">cdmName =</span> <span class="st">&quot;Eunomia Synpuf&quot;</span>,</span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a>                  <span class="at">cdmSchema   =</span> <span class="st">&quot;main&quot;</span>,</span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a>                  <span class="at">writeSchema =</span> <span class="st">&quot;main&quot;</span>, </span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a>                  <span class="at">achillesSchema =</span> <span class="st">&quot;main&quot;</span>)</span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a>cdm</span></code></pre></div>
 <p>Note that we have included <a href="https://github.com/OHDSI/Achilles">achilles tables</a> in our cdm
 reference, which will be used to speed up some of the analyses.</p>
-</div>
-<div id="create-a-cohort" class="section level2">
-<h2>Create a cohort</h2>
-<p>First, we are going to use the package <a href="https://ohdsi.github.io/CohortConstructor/">CohortConstructor</a>
-to generate three cohorts of <em>warfarin</em>, <em>acetaminophen</em>
-and <em>morphine</em> users.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># Create a codelist</span></span>
+<p>We need to create a set of cohorts to review. For this we are going
+to use the package <a href="https://ohdsi.github.io/CohortConstructor/">CohortConstructor</a>
+to generate cohorts with users of <em>warfarin</em>,
+<em>acetaminophen</em> and <em>morphine</em>.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># Create codelists</span></span>
 <span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>codes <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="st">&quot;warfarin&quot;</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">1310149</span>, <span class="dv">40163554</span>),</span>
 <span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>              <span class="st">&quot;acetaminophen&quot;</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">1125315</span>, <span class="dv">1127078</span>, <span class="dv">1127433</span>, <span class="dv">40229134</span>, <span class="dv">40231925</span>, <span class="dv">40162522</span>, <span class="dv">19133768</span>),</span>
 <span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>              <span class="st">&quot;morphine&quot;</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">1110410</span>, <span class="dv">35605858</span>, <span class="dv">40169988</span>))</span>
@@ -377,84 +381,207 @@ and <em>morphine</em> users.</p>
 <span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>                               <span class="at">overlap =</span> <span class="st">&quot;merge&quot;</span>,</span>
 <span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>                               <span class="at">name =</span> <span class="st">&quot;my_cohort&quot;</span>)</span></code></pre></div>
 </div>
-<div id="run-phenotypediagnostics" class="section level2">
-<h2>Run PhenotypeDiagnostics</h2>
-<p>Now we will proceed to run <code>phenotypeDiagnotics()</code>. This
-function will run the following analyses:</p>
+<div id="running-phenotypediagnostics" class="section level2">
+<h2>Running PhenotypeDiagnostics</h2>
+<p>Now that we have our cohort, we will use
+<code>phenotypeDiagnotics()</code> to assess them. This will run the
+following diagnostics which help us know whether our cohorts are ready
+to be used in research with the OMOP CDM dataset we’re using:</p>
 <ul>
 <li><strong>Database diagnostics</strong>: This includes information
 about the size of the data, the time period covered, the number of
-people in the data, and other meta-data of the CDM object. See <a href="https://ohdsi.github.io/PhenotypeR/articles/a03_DatabaseDiagnostics.html">Database
-diagnostics vignette</a> for more details.</li>
+people in the data, and other meta-data of the CDM object. If only
+database diagnostics are of interest, these analyses can be run using
+<code>databaseDiagnotics()</code>.</li>
 <li><strong>Codelist diagnostics</strong>: This includes information on
-the concepts included in our cohorts’ codelist. See <a href="https://ohdsi.github.io/PhenotypeR/articles/a04_CodelistDiagnostics.html">Codelist
-diagnostics vignette</a> for further details.</li>
+the concepts included in our cohorts’ codelist. If only codelist
+diagnostics are of interest, these analyses can be run using
+<code>codelistDiagnotics()</code>.</li>
 <li><strong>Cohort diagnostics</strong>: This summarises the
 characteristics of our cohorts, as well as comparing them to age and sex
-matched controls from the database.. See <a href="https://ohdsi.github.io/PhenotypeR/articles/a05_CohortDiagnostics.html">Cohort
-diagnostics vignette</a> for further details.</li>
+matched controls from the dataset. If only cohort diagnostics are of
+interest, these analyses can be run using
+<code>cohortDiagnotics()</code>.</li>
 <li><strong>Population diagnostics</strong>: Calculates the frequency of
 our study cohorts in the database in terms of their incidence rates and
-prevalence. See <a href="https://ohdsi.github.io/PhenotypeR/articles/a07_PopulationDiagnostics.html">Population
-diagnostics vignette</a> for further details.</li>
+period prevalence. If only population diagnostics are of interest, these
+analyses can be run using <code>populationDiagnotics()</code>.</li>
 </ul>
-<p>We can specify which analysis we want to perform by setting to TRUE
-or FALSE each one of the corresponding arguments:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">phenotypeDiagnostics</span>(</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>  <span class="at">cohort =</span> cdm<span class="sc">$</span>my_cohort, </span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>  <span class="at">diagnostics =</span> <span class="fu">c</span>(<span class="st">&quot;databaseDiagnostics&quot;</span>, <span class="st">&quot;codelistDiagnostics&quot;</span>, </span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>                  <span class="st">&quot;cohortDiagnostics&quot;</span>, <span class="st">&quot;populationDiagnostics&quot;</span>),</span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>  <span class="at">cohortSample =</span> <span class="dv">20000</span>,</span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>  <span class="at">matchedSample =</span> <span class="dv">1000</span>,</span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>  <span class="at">populationSample =</span> <span class="fl">1e+06</span>,</span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>  <span class="at">populationDateRange =</span> <span class="fu">as.Date</span>(<span class="fu">c</span>(<span class="cn">NA</span>, <span class="cn">NA</span>))</span>
-<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>  )</span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>result <span class="sc">|&gt;</span> <span class="fu">glimpse</span>()</span></code></pre></div>
-<p>Notice that we have three additional arguments:</p>
+<p>If we do not provide any specifications, the default values of the
+functions will be used. That means, the following script will run with
+the default values used in each individual diagnostics function.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>diagnostics <span class="ot">&lt;-</span> <span class="fu">phenotypeDiagnostics</span>(cdm<span class="sc">$</span>my_cohort,</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>                                <span class="at">databaseDiagnostics =</span> <span class="fu">list</span>(),</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>                                <span class="at">codelistDiagnostics =</span> <span class="fu">list</span>(),</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>                                <span class="at">cohortDiagnostics =</span> <span class="fu">list</span>(),</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>                                <span class="at">populationDiagnostics =</span> <span class="fu">list</span>(),</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>                                <span class="at">stagingDirectory =</span> <span class="cn">NULL</span>)</span></code></pre></div>
+<p>Notice that we can specify the directory where to save a log file so
+we can keep track on which incremental results are being run at each
+time.</p>
+<p>If we don’t want to run one of the diagnostics we can switch it off
+by setting it to NULL.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">phenotypeDiagnostics</span>(cdm<span class="sc">$</span>my_cohort,</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>                     <span class="at">databaseDiagnostics =</span> <span class="fu">list</span>(),</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>                     <span class="at">codelistDiagnostics =</span> <span class="cn">NULL</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>                     <span class="at">cohortDiagnostics =</span> <span class="fu">list</span>(),</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>                     <span class="at">populationDiagnostics =</span> <span class="cn">NULL</span>)</span></code></pre></div>
+<p>Or if we want to change the settings we can include arguments used in
+the sub-functions in a list. For example, survial analysis is not run by
+default (cohortSuvival is set by default to FALSE in
+<code>cohortDiagnotics()</code>). We can run this, leaving other
+arguments as their defaults, like so:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>diagnostics <span class="ot">&lt;-</span> <span class="fu">phenotypeDiagnostics</span>(cdm<span class="sc">$</span>my_cohort,</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>                                <span class="at">databaseDiagnostics =</span> <span class="fu">list</span>(),</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>                                <span class="at">codelistDiagnostics =</span> <span class="fu">list</span>(),</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>                                <span class="at">cohortDiagnostics =</span> <span class="fu">list</span>(<span class="st">&quot;cohortSurvival&quot;</span> <span class="ot">=</span> <span class="cn">TRUE</span>),</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>                                <span class="at">populationDiagnostics =</span> <span class="fu">list</span>())</span></code></pre></div>
+<div id="database-diagnostics" class="section level3">
+<h3>Database diagnostics</h3>
+<p>Although we may have created our study cohort, to inform analytic
+decisions and interpretation of results requires an understanding of the
+dataset from which it has been derived. The database diagnostics builds
+on <a href="https://ohdsi.github.io/OmopSketch/index.html">OmopSketch</a>
+package to perform the following analyses:</p>
 <ul>
-<li><code>populationSample</code>: It allows to specify a number of
-people that randomly will be extracted from the CDM to perform the
-<strong>Population diagnostics</strong> analysis. If NULL, all the
-participants in the CDM will be included. It helps to reduce the
-computational time. This is particularly useful when outcomes of
-interest are relatively common, but when they are rarer we may wish to
-maximise statistical power and calculate estimates for the dataset as a
-whole in which case we would set this argument to NULL.</li>
-<li><code>populationDateRange</code>: We can use it to specify the time
-period when we want to perform our <strong>Population
-diagnostics</strong> analysis.</li>
-<li><code>cohortSample</code>: This argument will subset a random sample
-of people from our cohort and performs the cohortDiagnostics on this
-sample (notice that the attrition and the cohort counts will be
-calculated from the original cohorts, not the sampled ones). If the
-sample specified is bigger than the number of individuals in the cohort,
-no sampling will be performed. We recommend to use this option when
-there are cohorts bigger than 20,000 individuals.</li>
-<li><code>matchedSample</code>: Similar to populationSample, this
-arguments subsets a random sample of people from our cohort and performs
-the matched analysis on this sample. If the sample specified is bigger
-than the size of the cohort, no sampling will be performed. If we have
-specified a cohortSample, the sampling will be performed on top of the
-sampled cohorts. If we do not want to create matched cohorts, we can
-define <code>matchedSample = 0</code>.</li>
+<li><strong>Snapshot:</strong> Summarises the meta data of a CDM object
+by using <a href="https://ohdsi.github.io/OmopSketch/reference/summariseOmopSnapshot.html">summariseOmopSnapshot()</a></li>
+<li><strong>Person table:</strong> Summarises the person table by using
+<a href="https://ohdsi.github.io/OmopSketch/reference/summarisePerson.html">summarisePerson()</a>.
+This provides demographic information including sex, race, ethnicity,
+year/month/day of birth distributions, and location/provider/care site
+information.</li>
+<li><strong>Observation periods:</strong> Summarises the observation
+period table by using <a href="https://ohdsi.github.io/OmopSketch/reference/summariseObservationPeriod.html">summariseObservationPeriod()</a>.
+This will allow us to see if there are individuals with multiple,
+non-overlapping, observation periods and how long each observation
+period lasts on average.</li>
+<li><strong>Clinical Records</strong>: The diagnostics will detect which
+domains appear to the codelist associated to your cohort (i.e., Drug),
+and use <a href="https://ohdsi.github.io/OmopSketch/reference/summariseClinicalRecords.html">summariseClinicalRecords()</a>
+to summarise the associated clinical table (i.e., “drug_exposure”).</li>
 </ul>
+</div>
+<div id="codelist-diagnostics" class="section level3">
+<h3>Codelist diagnostics</h3>
+<p>Codelist diagnostics builds on <a href="https://darwin-eu.github.io/CodelistGenerator/">CodelistGenerator</a>
+and <a href="https://ohdsi.github.io/MeasurementDiagnostics/">MeasurementDiagnostics</a>
+R packages to perform the following analyses:</p>
+<ul>
+<li><strong>Achilles code use:</strong> Which summarises the counts of
+our codes in our database based on achilles results using <a href="https://darwin-eu.github.io/CodelistGenerator/reference/summariseAchillesCodeUse.html">summariseAchillesCodeUse()</a>.
+Notice that it will only run if ACHILLES tables are present in your
+CDM.</li>
+<li><strong>Orphan code use:</strong> Orphan codes refer to codes that
+we did not include in our cohort definition, but that have any
+relationship with the codes in our codelist. So, although many can be
+false positives, we may identify some codes that we may want to use in
+our cohort definitions. This analysis uses <a href="https://darwin-eu.github.io/CodelistGenerator/reference/summariseOrphanCodes.html">summariseOrphanCodes()</a>.
+Notice that it will only run if ACHILLES tables are present in your
+CDM.</li>
+<li><strong>Cohort code use:</strong> Summarises the cohort code use in
+our cohort using <a href="https://darwin-eu.github.io/CodelistGenerator/reference/summariseCohortCodeUse.html">summariseCohortCodeUse()</a>.</li>
+<li><strong>Measurement diagnostics:</strong> If any of the concepts
+used in our codelist is a measurement, it summarises its code use using
+<a href="https://ohdsi.github.io/MeasurementDiagnostics/reference/summariseCohortMeasurementUse.html">summariseCohortMeasurementUse()</a>.</li>
+<li><strong>Drug diagnostics:</strong> If any of the concepts used in
+our codelist is a drug, it summarises its code use, including a summary
+of the exposure duration, the days between records, the daily dose, and
+the quantity.</li>
+</ul>
+</div>
+<div id="cohort-diagnostics" class="section level3">
+<h3>Cohort diagnostics</h3>
+<p>Cohort diagnostics builds on <a href="https://darwin-eu.github.io/CohortCharacteristics/">CohortCharacteristics</a>
+and <a href="https://darwin-eu-dev.github.io/CohortSurvival/">CohortSurvival</a>
+R packages to perform the following analyses on our cohorts:</p>
+<ul>
+<li><strong>Cohort count:</strong> Summarises the number of records and
+persons in each one of the cohorts using <a href="https://darwin-eu.github.io/CohortCharacteristics/reference/summariseCohortCount.html">summariseCohortCount()</a>
+and summarises the attrition associated with the cohorts using <a href="https://darwin-eu.github.io/CohortCharacteristics/reference/summariseCohortAttrition.html">summariseCohortAttrition()</a>.</li>
+<li><strong>Cohort characteristics:</strong> Summarises cohort baseline
+characteristics using <a href="https://darwin-eu.github.io/CohortCharacteristics/reference/summariseCharacteristics.html">summariseCharacteristics()</a>.
+Results are stratified by sex and by age group (0 to 17, 18 to 64, 65 to
+150). Age groups cannot be modified.</li>
+<li><strong>Cohort large scale characteristics:</strong> Summarises
+cohort large scale characteristics using <a href="https://darwin-eu.github.io/CohortCharacteristics/reference/summariseLargeScaleCharacteristics.html">summariseLargeScaleCharacteristics()</a>.
+Results are stratified by sex and by age group (0 to 17, 18 to 64, 65 to
+150). Time windows (relative to cohort entry) included are: -Inf to -1,
+-Inf to -366, -365 to -31, -30 to -1, 0, 1 to 30, 31 to 365, 366 to Inf,
+and 1 to Inf. The analysis is perform at standard and source code
+level.</li>
+<li><strong>Compare cohort:</strong> If there is more than one cohort in
+the cohort table supplied, it summarises the overlap between them using
+<a href="https://darwin-eu.github.io/CohortCharacteristics/reference/summariseCohortOverlap.html">summariseCohortOverlap()</a>
+and the timing between them <a href="https://darwin-eu.github.io/CohortCharacteristics/reference/summariseCohortTiming.html">summariseCohortTiming()</a>.</li>
+<li><strong>Cohort survival:</strong> Summarises the survival until the
+event of death (if death table is present in the CDM) using<br />
+<a href="https://darwin-eu-dev.github.io/CohortSurvival/reference/estimateSingleEventSurvival.html">estimateSingleEventSurvival()</a>.</li>
+</ul>
+<p>For computational efficiency, cohort diagnostics will take a joint
+random sample of 20,000 people from across the study cohorts for
+describing cohort charateristics. The number sampled can be changed by
+altering the <code>cohortSample</code> argument
+(e.g. <code>cohortSample = 40000</code> to double the number). Sampling
+can be switched off by setting <code>cohortSample = NULL</code>.</p>
+<p>For each of the input cohorts, cohort diagnostics are also run on a
+set of age and sex matched controls taken from the dataset as a whole.
+Again random sampling is used for efficiency. By default 1,000 age and
+sex matched controls are identified for 1,000 individuals from each of
+the study cohorts. The number matched can be changed by altering the
+<code>matchedSample</code> argument
+(e.g. <code>matchedSample = 2000</code> to double the number). Sampling
+can be switched off by setting <code>matchedSample = NULL</code>.
+Creation of age and sex matched controls can be skipped by setting
+<code>matchedSample = 0</code>.</p>
+</div>
+<div id="population-diagnostics" class="section level3">
+<h3>Population diagnostics</h3>
+<p>Population diagnostics builds on <a href="https://darwin-eu.github.io/IncidencePrevalence/index.html">IncidencePrevalence</a>
+R package to perform the following analyses:</p>
+<ul>
+<li><strong>Incidence:</strong> It estimates the incidence of our
+cohorts using <a href="https://darwin-eu.github.io/IncidencePrevalence/reference/estimateIncidence.html">estimateIncidence()</a>.</li>
+<li><strong>Period Prevalence:</strong> It estimates the period
+prevalence of our cohort on a year basis using <a href="https://darwin-eu.github.io/IncidencePrevalence/reference/estimatePeriodPrevalence.html">estimatePeriodPrevalence()</a>.</li>
+</ul>
+<p>By default, these analyses are performed for:</p>
+<ul>
+<li>Overall, stratified by age groups (0 to 17, 18 to 64, 65 to 150) and
+by sex (Female, Male).</li>
+<li>Including all individuals, and restricting the denominator
+population to those with 0 and 365 of days of prior observation.</li>
+</ul>
+<p>By default incidence rates and period prevalence will be calculated
+for all years captured in the dataset (based on earliest observation
+period start date and latest observation period end date). The date
+range can though be limited by using the
+<code>populationDateRange</code> argument.</p>
+<p>These analyses are also conducted on a random sample of the
+population captured in the dataset. By default this sample is set to
+100,000 individuals and so will only be relevant for particularly large
+datasets. The sampling number can be changed via the
+<code>populationSample</code> argument
+(e.g. <code>populationSample = 200000</code> to double the number) or
+switched off by setting <code>populationSample = NULL</code>.</p>
+</div>
 </div>
 <div id="save-the-results" class="section level2">
 <h2>Save the results</h2>
-<p>To save the results, we can use <a href="https://darwin-eu.github.io/omopgenerics/reference/exportSummarisedResult.html">exportSummarisedResult</a>
+<p>To save our diagnositics results, we can use <a href="https://darwin-eu.github.io/omopgenerics/reference/exportSummarisedResult.html">exportSummarisedResult</a>
 function from <a href="https://darwin-eu.github.io/omopgenerics/index.html">omopgenerics</a>
 R Package:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">exportSummarisedResult</span>(result, <span class="at">path =</span> here<span class="sc">::</span><span class="fu">here</span>(), <span class="at">minCellCount =</span> <span class="dv">5</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">exportSummarisedResult</span>(diagnostics, <span class="at">path =</span> here<span class="sc">::</span><span class="fu">here</span>(), <span class="at">minCellCount =</span> <span class="dv">5</span>)</span></code></pre></div>
 </div>
 <div id="visualisation-of-the-results" class="section level2">
 <h2>Visualisation of the results</h2>
 <p>Once we get our <strong>Phenotype diagnostics</strong> result, we can
 use <code>shinyDiagnostics</code> to easily create a shiny app and
 visualise our results:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">shinyDiagnostics</span>(result,</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>                 <span class="at">directory =</span> <span class="fu">tempdir</span>(),</span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>                 <span class="at">minCellCount =</span> <span class="dv">5</span>, </span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>                 <span class="at">open =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">shinyDiagnostics</span>(diagnostics,</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>                 <span class="at">directory =</span> <span class="fu">tempdir</span>(),</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>                 <span class="at">minCellCount =</span> <span class="dv">5</span>, </span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>                 <span class="at">open =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <p>Notice that we have specified the minimum number of counts
 (<code>minCellCount</code>) for suppression to be shown in the shiny
 app, and also that we want the shiny to be launched in a new R session

@@ -6,59 +6,54 @@
 \usage{
 phenotypeDiagnostics(
   cohort,
-  diagnostics = c("databaseDiagnostics", "codelistDiagnostics", "cohortDiagnostics",
-    "populationDiagnostics"),
-  clinicalTableSample = NULL,
-  measurementSample = 20000,
-  drugExposureSample = 20000,
-  survival = FALSE,
-  cohortSample = 20000,
-  matchedSample = 1000,
-  populationSample = 1e+06,
-  populationDateRange = as.Date(c(NA, NA))
+  databaseDiagnostics = list(),
+  codelistDiagnostics = list(),
+  cohortDiagnostics = list(),
+  populationDiagnostics = list(),
+  stagingDirectory = NULL
 )
 }
 \arguments{
 \item{cohort}{Cohort table in a cdm reference}
 
-\item{diagnostics}{Vector indicating which diagnostics to perform. Options
-include: `databaseDiagnostics`, `codelistDiagnostics`, `cohortDiagnostics`,
-and `populationDiagnostics`.}
+\item{databaseDiagnostics}{A list of arguments that uses `databaseDiagnostics`.
+If the list is empty, the default values will be used.
+Example:
+In the following example, all diagnostics will be run except *person table summary* from
+databaseDiagnostics:
+*databaseDiagnostics = list(
+"personTableSummary" = FALSE
+ )}
 
-\item{clinicalTableSample}{The number of records to take a random sample for
-database diagnostics. If `clinicalTableSample = NULL`, no sampling will be
-performed. If `clinicalTableSample = 0` clinical table summaries will not be
-run.}
+\item{codelistDiagnostics}{A list of arguments that uses `codelistDiagnostics`.
+If the list is empty, the default values will be used.
+Example:
+In the below example, all diagnostics will be run, and a subsample of 1,000 participants will
+be used to run measurement diagnostics and another independent subsample of 500 participants
+will be used to run drug diagnostics:
+*codelistDiagnostics = list(
+ "measurementDiagnosticsSample" = 1000,
+ "drugDiagnosticsSample" = 500
+  )}
 
-\item{measurementSample}{The number of people to take a random sample for
-measurement diagnostics. If `measurementSample = NULL`, no sampling will be
-performed. If `measurementSample = 0` measurement diagnostics will not be
-run.}
+\item{cohortDiagnostics}{A list of arguments that uses `cohortDiagnostics`.
+If the list is empty,
+the default values will be used.
+Example:
+*cohortDiagnostics = list(
+ "cohortSurvival" = TRUE
+ )}
 
-\item{drugExposureSample}{The number of people to take a random sample for
-drug diagnostics. If `drugExposureSample = NULL`, no sampling will be
-performed. If `drugExposureSample = 0` drug diagnostics will not be
-run.}
+\item{populationDiagnostics}{A list of arguments that uses `populationDiagnostics`.
+If the list is empty, the default values will be used.
+Example:
+In the below example, all diagnostics will be run and a subsample of 100,000 participants
+will be used to run populationDiagnostics.
+*populationDiagnostics = list(
+ "populationSample" = 100000
+ )}
 
-\item{survival}{TRUE or FALSE. Whether to conduct survival analysis (TRUE)
-or not (FALSE).}
-
-\item{cohortSample}{The number of people to take a random sample for cohortDiagnostics. If `cohortSample = NULL`, no sampling will be performed.}
-
-\item{matchedSample}{The number of people to take a random sample for
-matching. If `matchedSample = NULL`, no sampling will be performed. If `matchedSample = 0`, no
-matched cohorts will be created.}
-
-\item{populationSample}{Number of people from the cdm to sample. If NULL no
-sampling will be performed. Sample will be within populationDateRange if
-specified.}
-
-\item{populationDateRange}{Two dates. The first indicating the earliest cohort
-start date and the second indicating the latest possible cohort end date. If
-NULL or the first date is set as missing, the earliest observation_start_date
-in the observation_period table will be used for the former. If  NULL or the
-second date is set as missing, the latest observation_end_date in the
-observation_period table will be used for the latter.}
+\item{stagingDirectory}{Path to folder to save incremental results and log file}
 }
 \value{
 A summarised result
@@ -66,11 +61,12 @@ A summarised result
 \description{
 This comprises all the diagnostics that are being offered in this package,
 this includes:
-
-* A diagnostics on the database via `databaseDiagnostics`.
-* A diagnostics on the cohort_codelist attribute of the cohort via `codelistDiagnostics`.
-* A diagnostics on the cohort via `cohortDiagnostics`.
-* A diagnostics on the population via `populationDiagnostics`.
+\itemize{
+  \item A diagnostic on the OMOP CDM dataset as a whole via \code{databaseDiagnostics}.
+  \item A diagnostic on the codelists associated with cohorts via \code{codelistDiagnostics}.
+  \item A diagnostic on the cohort itself via \code{cohortDiagnostics}.
+  \item A diagnostic on the frequency of the cohort in the dataset population via \code{populationDiagnostics}.
+}
 }
 \examples{
 \donttest{
@@ -83,7 +79,7 @@ cdm$warfarin <- conceptCohort(cdm,
                               conceptSet =  list(warfarin = c(1310149L,
                                                               40163554L)),
                               name = "warfarin")
+result <- phenotypeDiagnostics(cdm$warfarin)
 
-result <- phenotypeDiagnostics(cdm$warfarin, populationSample = 100000)
 }
 }

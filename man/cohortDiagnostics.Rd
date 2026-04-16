@@ -6,7 +6,12 @@
 \usage{
 cohortDiagnostics(
   cohort,
-  survival = FALSE,
+  cohortId = NULL,
+  cohortCount = TRUE,
+  cohortCharacteristics = TRUE,
+  largeScaleCharacteristics = TRUE,
+  compareCohorts = TRUE,
+  cohortSurvival = FALSE,
   cohortSample = 20000,
   matchedSample = 1000
 )
@@ -14,8 +19,24 @@ cohortDiagnostics(
 \arguments{
 \item{cohort}{Cohort table in a cdm reference}
 
-\item{survival}{TRUE or FALSE. Whether to conduct survival analysis (TRUE)
+\item{cohortId}{Specific cohort definition ID for which to run cohort
+diagnostics.}
+
+\item{cohortCount}{Whether to run `CohortCharacteristics::summariseCohortCount()` and
+`CohortCharacteristics::summariseCohortAttrition()` (TRUE) or not (FALSE).}
+
+\item{cohortCharacteristics}{Whether to run `CohortCharacteristics::summariseCharacteristics()` and
+summarise age density (TRUE) or not (FALSE).}
+
+\item{largeScaleCharacteristics}{Whether to run `CohortCharacteristics::summariseLargeScaleCharacteristics()` (TRUE)
 or not (FALSE).}
+
+\item{compareCohorts}{Whether to run `CohortCharacteristics::summariseCohortOverlap()` and
+`CohortCharacteristics::summariseCohortTiming()` (TRUE) or not (FALSE). Notice that,
+if set to TRUE, the diagnostics will only be run when there are more than one cohort.}
+
+\item{cohortSurvival}{Whether to run `CohortSurvival::estimateSingleEventSurvival()` (TRUE) or
+not (FALSE).}
 
 \item{cohortSample}{The number of people to take a random sample for cohortDiagnostics. If `cohortSample = NULL`, no sampling will be performed.}
 
@@ -32,7 +53,7 @@ The diganostics include:
 * Age groups and sex summarised.
 * A summary of visits of everyone in the cohort using visit_occurrence table.
 * A summary of age and sex density of the cohort.
-* Attritions of the cohorts.
+* Attrition of the cohorts.
 * Overlap between cohorts (if more than one cohort is being used).
 }
 \examples{
@@ -40,6 +61,7 @@ The diganostics include:
 library(omock)
 library(CohortConstructor)
 library(PhenotypeR)
+library(CDMConnector)
 
 cdm <- mockCdmFromDataset(source = "duckdb")
 cdm$warfarin <- conceptCohort(cdm,
@@ -48,5 +70,7 @@ cdm$warfarin <- conceptCohort(cdm,
                               name = "warfarin")
 
 result <- cohortDiagnostics(cdm$warfarin)
+
+cdmDisconnect(cdm)
 }
 }

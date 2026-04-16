@@ -394,10 +394,15 @@ the requisite clinical knowledge and is often time-consuming, especially
 if we have many cohorts and start considering the many different
 estimates from phenotype diagnostics.</p>
 <p>To speed up the process we can use an LLM to help us draft our
-expectations. We could use this to create a custom set. Here for example
-we’ll use Google Gemini to populate our expectations.</p>
+expectations. To help us create a consistent set of phenotype
+expectations from LLMs, PhenotypeR provides the
+<code>getCohortExpectations()</code>. This function will generate a set
+of expectations that are associated with the various cohort diagnostic
+function results.</p>
 <p>Notice that you may need first to create a Gemini API to run the
-example. You can do that following this link: <a href="https://aistudio.google.com/app/apikey" class="uri">https://aistudio.google.com/app/apikey</a>. And then add the
+below example (or if using a different model see ellmer documentation
+for creating the chat object for different providers). You can do that
+following this link: <a href="https://aistudio.google.com/app/apikey" class="uri">https://aistudio.google.com/app/apikey</a>. And then add the
 API in your R environment:</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>usethis<span class="sc">::</span><span class="fu">edit_r_environ</span>()</span>
 <span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a></span>
@@ -408,57 +413,45 @@ API in your R environment:</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">library</span>(ellmer)</span>
 <span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a></span>
 <span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>chat <span class="ot">&lt;-</span> <span class="fu">chat</span>(<span class="st">&quot;google_gemini&quot;</span>)</span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>llm_expectation <span class="ot">&lt;-</span> chat<span class="sc">$</span><span class="fu">chat</span>(</span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>    <span class="fu">interpolate</span>(<span class="st">&quot;What are the typical characteristics we can expect to see in our real-world data for a cohort of people with an ankle sprain (average age, proportion male vs female, subsequent medications, etc)? Be brief and provide summar with a few sentences.&quot;</span>)) </span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a></span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="fu">tibble</span>(<span class="at">cohort_name =</span> <span class="st">&quot;diagnosis_of_ankle_sprain&quot;</span>,</span>
-<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>       <span class="at">estimate =</span> <span class="st">&quot;General summary&quot;</span>,</span>
-<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>       <span class="at">value =</span> llm_expectation,</span>
-<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>       <span class="at">source =</span> <span class="st">&quot;llm&quot;</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>  <span class="fu">tableCohortExpectations</span>()</span></code></pre></div>
-<p>To help us create a consistent set of phenotype expectations from
-LLMs, PhenotypeR provides the <code>getCohortExpectations()</code>. This
-function will generate a set of expectations that are associated with
-the various cohort diagnostic function results.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">getCohortExpectations</span>(<span class="at">chat =</span> chat, </span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>                      <span class="at">phenotypes =</span> <span class="fu">c</span>(<span class="st">&quot;diagnosis_of_ankle_sprain&quot;</span>, </span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>                                     <span class="st">&quot;diagnosis_of_prostate_cancer&quot;</span>, </span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>                                     <span class="st">&quot;new_user_of_morphine&quot;</span>)) <span class="sc">|&gt;</span> </span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>  <span class="fu">tableCohortExpectations</span>()</span></code></pre></div>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="fu">getCohortExpectations</span>(<span class="at">chat =</span> chat, </span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>                      <span class="at">phenotypes =</span> <span class="fu">c</span>(<span class="st">&quot;diagnosis_of_ankle_sprain&quot;</span>, </span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>                                     <span class="st">&quot;diagnosis_of_prostate_cancer&quot;</span>, </span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>                                     <span class="st">&quot;new_user_of_morphine&quot;</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>  <span class="fu">tableCohortExpectations</span>()</span></code></pre></div>
 <p>Instead of passing our cohort names, we could instead pass our
 results set from <code>phenotypeDiagnostics()</code> instead. In this
 case we’ll automatically get expectations for each of the study cohorts
 in our results.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">library</span>(DBI)</span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="fu">library</span>(duckdb)</span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="fu">library</span>(CDMConnector)</span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="fu">library</span>(CohortConstructor)</span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a></span>
-<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(<span class="fu">duckdb</span>(), <span class="at">dbdir =</span> <span class="fu">eunomiaDir</span>())</span>
-<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>cdm <span class="ot">&lt;-</span> <span class="fu">cdmFromCon</span>(</span>
-<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>    <span class="at">con =</span> con, <span class="at">cdmSchema =</span> <span class="st">&quot;main&quot;</span>, <span class="at">writeSchema =</span> <span class="st">&quot;main&quot;</span>, <span class="at">cdmName =</span> <span class="st">&quot;Eunomia&quot;</span></span>
-<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>  )</span>
-<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a></span>
-<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>codes <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="st">&quot;diagnosis_of_ankle_sprain&quot;</span> <span class="ot">=</span> <span class="dv">81151</span>,</span>
-<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a>              <span class="st">&quot;diagnosis_of_prostate_cancer&quot;</span> <span class="ot">=</span> <span class="dv">4163261</span>,</span>
-<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a>              <span class="st">&quot;new_user_of_morphine&quot;</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">1110410</span><span class="dt">L</span>, <span class="dv">35605858</span><span class="dt">L</span>, <span class="dv">40169988</span><span class="dt">L</span>))</span>
-<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a></span>
-<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a>cdm<span class="sc">$</span>my_cohort <span class="ot">&lt;-</span> <span class="fu">conceptCohort</span>(<span class="at">cdm =</span> cdm,</span>
-<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a>                                 <span class="at">conceptSet =</span> codes,</span>
-<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a>                                 <span class="at">exit =</span> <span class="st">&quot;event_end_date&quot;</span>,</span>
-<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a>                                 <span class="at">name =</span> <span class="st">&quot;my_cohort&quot;</span>)</span>
-<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a></span>
-<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a>diag_results <span class="ot">&lt;-</span> <span class="fu">phenotypeDiagnostics</span>(cdm<span class="sc">$</span>my_cohort)</span>
-<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a></span>
-<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a><span class="fu">getCohortExpectations</span>(<span class="at">chat =</span> chat, </span>
-<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a>                      <span class="at">phenotypes =</span> diag_results) <span class="sc">|&gt;</span> </span>
-<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a>  <span class="fu">tableCohortExpectations</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">library</span>(DBI)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="fu">library</span>(duckdb)</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="fu">library</span>(CDMConnector)</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="fu">library</span>(CohortConstructor)</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(<span class="fu">duckdb</span>(), <span class="at">dbdir =</span> <span class="fu">eunomiaDir</span>())</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>cdm <span class="ot">&lt;-</span> <span class="fu">cdmFromCon</span>(</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>    <span class="at">con =</span> con, <span class="at">cdmSchema =</span> <span class="st">&quot;main&quot;</span>, <span class="at">writeSchema =</span> <span class="st">&quot;main&quot;</span>, <span class="at">cdmName =</span> <span class="st">&quot;Eunomia&quot;</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>  )</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>codes <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="st">&quot;diagnosis_of_ankle_sprain&quot;</span> <span class="ot">=</span> <span class="dv">81151</span>,</span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>              <span class="st">&quot;diagnosis_of_prostate_cancer&quot;</span> <span class="ot">=</span> <span class="dv">4163261</span>,</span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a>              <span class="st">&quot;new_user_of_morphine&quot;</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">1110410</span><span class="dt">L</span>, <span class="dv">35605858</span><span class="dt">L</span>, <span class="dv">40169988</span><span class="dt">L</span>))</span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a>cdm<span class="sc">$</span>my_cohort <span class="ot">&lt;-</span> <span class="fu">conceptCohort</span>(<span class="at">cdm =</span> cdm,</span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a>                                 <span class="at">conceptSet =</span> codes,</span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a>                                 <span class="at">exit =</span> <span class="st">&quot;event_end_date&quot;</span>,</span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a>                                 <span class="at">name =</span> <span class="st">&quot;my_cohort&quot;</span>)</span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a>diag_results <span class="ot">&lt;-</span> <span class="fu">phenotypeDiagnostics</span>(cdm<span class="sc">$</span>my_cohort)</span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a></span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a><span class="fu">getCohortExpectations</span>(<span class="at">chat =</span> chat, </span>
+<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a>                      <span class="at">phenotypes =</span> diag_results) <span class="sc">|&gt;</span> </span>
+<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a>  <span class="fu">tableCohortExpectations</span>()</span></code></pre></div>
 <p>Instead of Google Gemini we could use Mistral instead.</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>chat <span class="ot">&lt;-</span> ellmer<span class="sc">::</span><span class="fu">chat</span>(<span class="st">&quot;mistral&quot;</span>)</span>
-<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>diag_results <span class="ot">&lt;-</span> <span class="fu">phenotypeDiagnostics</span>(cdm<span class="sc">$</span>my_cohort)</span>
-<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="fu">getCohortExpectations</span>(<span class="at">chat =</span> chat, </span>
-<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>                      <span class="at">phenotypes =</span> diag_results) <span class="sc">|&gt;</span> </span>
-<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>  <span class="fu">tableCohortExpectations</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>chat <span class="ot">&lt;-</span> ellmer<span class="sc">::</span><span class="fu">chat</span>(<span class="st">&quot;mistral&quot;</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>diag_results <span class="ot">&lt;-</span> <span class="fu">phenotypeDiagnostics</span>(cdm<span class="sc">$</span>my_cohort)</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="fu">getCohortExpectations</span>(<span class="at">chat =</span> chat, </span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>                      <span class="at">phenotypes =</span> diag_results) <span class="sc">|&gt;</span> </span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>  <span class="fu">tableCohortExpectations</span>()</span></code></pre></div>
 <p>It is important to note the importance of a descriptive cohort name.
 These are the names passed to the LLM and so the more informative the
 name, the better we can expect the LLM to do when generating our

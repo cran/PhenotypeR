@@ -6,12 +6,24 @@
 \usage{
 populationDiagnostics(
   cohort,
-  populationSample = 1e+06,
+  cohortId = NULL,
+  incidence = TRUE,
+  periodPrevalence = TRUE,
+  populationSample = 1e+05,
   populationDateRange = as.Date(c(NA, NA))
 )
 }
 \arguments{
 \item{cohort}{Cohort table in a cdm reference}
+
+\item{cohortId}{Specific cohort definition ID for which to run population
+diagnostics.}
+
+\item{incidence}{Whether to run `IncidencePrevalence::estimateIncidence()` (TRUE)
+or not (FALSE).}
+
+\item{periodPrevalence}{Whether to run `IncidencePrevalence::estimatePeriodPrevalence()` (TRUE)
+or not (FALSE).}
 
 \item{populationSample}{Number of people from the cdm to sample. If NULL no
 sampling will be performed. Sample will be within populationDateRange if
@@ -28,17 +40,18 @@ observation_period table will be used for the latter.}
 A summarised result
 }
 \description{
-phenotypeR diagnostics on the cohort of input with relation to a denomination
+PhenotypeR diagnostics on the cohort of input with relation to a denomination
 population. Diagnostics include:
 
 * Incidence
-* Prevalence
+* Period Prevalence
 }
 \examples{
 \donttest{
 library(omock)
 library(CohortConstructor)
 library(PhenotypeR)
+library(CDMConnector)
 
 cdm <- mockCdmFromDataset(source = "duckdb")
 cdm$warfarin <- conceptCohort(cdm,
@@ -49,6 +62,6 @@ cdm$warfarin <- conceptCohort(cdm,
 result <- cdm$warfarin |>
   populationDiagnostics(populationSample = 100000)
 
-CDMConnector::cdmDisconnect(cdm = cdm)
+cdmDisconnect(cdm = cdm)
 }
 }
