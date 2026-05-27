@@ -534,6 +534,31 @@ the study cohorts. The number matched can be changed by altering the
 can be switched off by setting <code>matchedSample = NULL</code>.
 Creation of age and sex matched controls can be skipped by setting
 <code>matchedSample = 0</code>.</p>
+<div id="modify-windows-event-in-windows-and-episodes-in-window" class="section level4">
+<h4>Modify windows, event in windows, and episodes in window</h4>
+<p>By default, CohortDiagnostics uses the following predefined
+<code>window</code>, <code>eventInWindow</code>, and
+<code>episodesInWindow</code> settings for the large-scale
+characterisation analysis:</p>
+<ul>
+<li><p><code>window = list(c(-365, -31), c(-30, -1), c(0, 0), c(1, 30), c(31, 365))</code></p></li>
+<li><p><code>tableEvents = c(&quot;condition_occurrence&quot;, &quot;measurement&quot;, &quot;procedure_occurrence&quot;, &quot;device_exposure&quot;, &quot;observation&quot;)</code></p></li>
+<li><p><code>tableEpisodes = c(&quot;drug_exposure&quot;, &quot;drug_era&quot;, &quot;visit_occurrence&quot;)</code></p></li>
+</ul>
+<p><em>*(see the <code>window</code>, <code>eventInWindow</code>, and
+<code>episodeInWindow</code> arguments of the
+<strong>summariseLargeScaleCharacteristics</strong> function in
+CohortCharacteristics R package for further details)</em></p>
+<p>These defaults can be overwritten by setting global options. For
+example, to restrict the large-scale characterisation to only the index
+date (i.e., modifying the <code>window</code> parameter), use:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">options</span>(<span class="st">&quot;PhenotypeR_summariseLargeScaleCharacteristics_window&quot;</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>)))</span></code></pre></div>
+<p>Alternatively, to include only events from the
+<em>condition_occurrence</em> table and episodes from the
+<em>drug_exposure</em> table, use:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">options</span>(<span class="st">&quot;PhenotypeR_summariseLargeScaleCharacteristics_eventInWindow&quot;</span>   <span class="ot">=</span> <span class="fu">c</span>(<span class="st">&quot;condition_occurrence&quot;</span>))</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="fu">options</span>(<span class="st">&quot;PhenotypeR_summariseLargeScaleCharacteristics_episodeInWindow&quot;</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="st">&quot;drug_exposure&quot;</span>))</span></code></pre></div>
+</div>
 </div>
 <div id="population-diagnostics" class="section level3">
 <h3>Population diagnostics</h3>
@@ -571,17 +596,17 @@ switched off by setting <code>populationSample = NULL</code>.</p>
 <p>To save our diagnositics results, we can use <a href="https://darwin-eu.github.io/omopgenerics/reference/exportSummarisedResult.html">exportSummarisedResult</a>
 function from <a href="https://darwin-eu.github.io/omopgenerics/index.html">omopgenerics</a>
 R Package:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">exportSummarisedResult</span>(diagnostics, <span class="at">path =</span> here<span class="sc">::</span><span class="fu">here</span>(), <span class="at">minCellCount =</span> <span class="dv">5</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">exportSummarisedResult</span>(diagnostics, <span class="at">path =</span> here<span class="sc">::</span><span class="fu">here</span>(), <span class="at">minCellCount =</span> <span class="dv">5</span>)</span></code></pre></div>
 </div>
 <div id="visualisation-of-the-results" class="section level2">
 <h2>Visualisation of the results</h2>
 <p>Once we get our <strong>Phenotype diagnostics</strong> result, we can
 use <code>shinyDiagnostics</code> to easily create a shiny app and
 visualise our results:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">shinyDiagnostics</span>(diagnostics,</span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>                 <span class="at">directory =</span> <span class="fu">tempdir</span>(),</span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>                 <span class="at">minCellCount =</span> <span class="dv">5</span>, </span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>                 <span class="at">open =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">shinyDiagnostics</span>(diagnostics,</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>                 <span class="at">directory =</span> <span class="fu">tempdir</span>(),</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>                 <span class="at">minCellCount =</span> <span class="dv">5</span>, </span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>                 <span class="at">open =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <p>Notice that we have specified the minimum number of counts
 (<code>minCellCount</code>) for suppression to be shown in the shiny
 app, and also that we want the shiny to be launched in a new R session

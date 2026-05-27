@@ -44,13 +44,13 @@
 #' }
 codelistDiagnostics <- function(cohort,
                                 cohortId = NULL,
-                                achillesCodeUse = TRUE,
+                                achillesCodeUse = FALSE,
                                 orphanCodeUse = TRUE,
                                 cohortCodeUse = TRUE,
-                                drugDiagnostics = TRUE,
-                                measurementDiagnostics = TRUE,
-                                measurementDiagnosticsSample = 20000,
-                                drugDiagnosticsSample = 20000){
+                                drugDiagnostics = FALSE,
+                                drugDiagnosticsSample = 20000,
+                                measurementDiagnostics = FALSE,
+                                measurementDiagnosticsSample = 20000){
 
   cohort <- omopgenerics::validateCohortArgument(cohort = cohort)
   cohortId <- omopgenerics::validateCohortIdArgument(cohortId = cohortId, cohort = cohort)

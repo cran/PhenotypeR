@@ -444,53 +444,104 @@ server <- function(input, output, session) {
     req(shared_cdm_names())
     req(inputs_initialized())
 
-    info <- database_descriptions |>
-      dplyr::filter(.data$database %in% shared_cdm_names())
+    if(length(shared_cdm_names()) == 0){
+      shiny::validate("No databases selected")
+    }
+
+    if(length(database_descriptions) == 0){
+      shiny::validate("No database descriptions found")
+    }
+
+    info <- database_descriptions[tolower(names(database_descriptions)) %in% tolower(shared_cdm_names())]
 
     return(info)
   })
 
   output$database_text <- renderUI({
+    req(shared_cohort_names())
+    req(inputs_initialized())
+
     info <- database_description()
+    working_dbs <- shared_cdm_names()
+    lapply(1:length(working_dbs), function(i) {
+      working_info <- info[[working_dbs[i]]]
 
-    info$author[which(info$author == "")] <- "Unknown author"
-    info$date[which(info$date == "")]     <- "Unknown date"
-    info$key_sources[which(info$key_sources == "")] <- "Unknown key sources"
+      admin_bullets <- working_info$administrative_details
+      if(!is.null(admin_bullets)){
+        names(admin_bullets) <- stringr::str_to_sentence(gsub("_", " ", names(admin_bullets)))
+        names(admin_bullets) <- ifelse(names(admin_bullets) == "Hma ema catalogue",
+                                       "HMA-EMA catalogue entry",
+                                       names(admin_bullets))
+      }
+      admin_bullets <- lapply(names(admin_bullets), function(key) {
+        tags$li(tags$b(key, ": "), admin_bullets[[key]])
+      })
 
-    info <- info |>
-      dplyr::mutate("metadata" = paste0("Author: ", author, " (Date: ", date, ")<br>Sources: ", key_sources))
+      data_collection_body <- working_info$data_collection
+      if(!is.null(data_collection_body)){
+        names(data_collection_body) <- stringr::str_to_sentence(gsub("_", " ", names(data_collection_body)))
+        names(data_collection_body) <- ifelse(names(data_collection_body) == "Healthcare setting type of data",
+                                              "Healthcare setting / type of data",
+                                              names(data_collection_body))
+      }
+      data_collection_body <- lapply(names(data_collection_body), function(key) {
+        tagList(
+          tags$h6(key,
+                  style = "font-weight: bold; margin-bottom: 2px;"),
+          tags$div(data_collection_body[[key]],
+                   style = "margin-bottom: 12px;")
+        )
+      })
 
-    info$description <-  purrr::map(info$description,
-                                    function(info) {paste0("<lbr>", info, "</br>")})
+      omop_standardisation_body <- working_info$omop_standardisation
+      if(!is.null(omop_standardisation_body)){
+        names(omop_standardisation_body) <- stringr::str_to_sentence(gsub("_", " ", names(omop_standardisation_body)))
+        names(omop_standardisation_body) <- ifelse(names(omop_standardisation_body) == "Omop mapping",
+                                                   "Mapping to the OMOP Common Data Model",
+                                                   names(omop_standardisation_body))
+        names(omop_standardisation_body) <- ifelse(names(omop_standardisation_body) == "Omop quality control",
+                                                   "Data quality control for OMOP Common Data Model mapping",
+                                                   names(omop_standardisation_body))
+      }
 
-    lapply(1:nrow(info), function(i) {
-      row <- info[i, ]
-
-      has_meta <- !is.na(row$author) && !is.na(row$date) && !is.na(row$key_sources)
+      omop_standardisation_body <- lapply(names(omop_standardisation_body), function(key) {
+        tagList(
+          tags$h6(key,
+                  style = "font-weight: bold; margin-bottom: 2px;"),
+          tags$div(omop_standardisation_body[[key]],
+                   style = "margin-bottom: 12px;")
+        )
+      })
 
       tags$details(
-        tags$summary(row$database),
+        tags$summary(working_dbs[i]),
         tags$div(
           class = "content-box",
-
-          if (has_meta) {
+          if(!is.null(working_info$administrative_details)){
             tagList(
               tags$div(
-                style = "padding: 15px; border-left: 4px solid #750075; color = grey; background: #E9E9E9; font-style: italic;",
-                shiny::HTML(row$metadata)
-              ),
-              tags$div(
                 style = "padding: 15px; border-left: 4px solid #750075; background: #E9E9E9; font-weight: normal;",
-                shiny::HTML(row$description[[1]])
+                tags$h5("Summary",
+                        style = "font-weight: bold; margin-bottom: 2px; color: #750075;"),
+                tags$ul(admin_bullets),
+                tags$br(),
+                tags$h5("Data collection",
+                        style = "font-weight: bold; margin-bottom: 2px; color: #750075;"),
+                data_collection_body,
+                tags$h5("OMOP CDM transformation",
+                        style = "font-weight: bold; margin-bottom: 2px; color: #750075;"),
+                omop_standardisation_body
               )
             )
           } else{
             tags$div(style = "padding: 15px; border-left: 4px solid #750075; background: #E9E9E9; font-weight: normal;",
-                     "No database description for this database")
+                     "No clinical description found for this cohort")
           }
         )
       )
     })
+
+
   })
 
   # clinical description ----
@@ -498,61 +549,76 @@ server <- function(input, output, session) {
     req(shared_cohort_names())
     req(inputs_initialized())
 
-    info <- clinical_descriptions |>
-      dplyr::filter(.data$phenotype %in% shared_cohort_names()) |>
-      dplyr::rename("description" = input$phenotypes_section)
+    if(length(shared_cdm_names()) == 0){
+      shiny::validate("No cohorts selected")
+    }
+
+    if(length(clinical_descriptions) == 0){
+      shiny::validate("No clinical descriptions found")
+    }
+
+    info <- clinical_descriptions[tolower(names(clinical_descriptions)) %in% tolower(shared_cohort_names())]
 
     return(info)
   })
 
   output$clinical_text <- renderUI({
+    req(shared_cohort_names())
+    req(inputs_initialized())
+
     info <- clinical_description()
-    info$author[which(info$author == "")] <- "Unknown author"
-    info$date[which(info$date == "")]     <- "Unknown date"
-    info$key_sources[which(info$key_sources == "")] <- "Unknown key sources"
+    working_cohorts <- shared_cohort_names()
+    lapply(1:length(working_cohorts), function(i) {
+      working_info <- info[[working_cohorts[i]]]
 
-    info <- info |>
-      dplyr::mutate("metadata" = paste0("Author: ", author, " (Date: ", date, ")<br>Sources: ", key_sources))
+      meta_bullets <- working_info$metadata
+      meta_bullets <- lapply(names(meta_bullets), function(key) {
+        tags$li(tags$b(stringr::str_to_sentence(gsub("_", " ", key)), ": "), meta_bullets[[key]])
+      })
 
-    info$description <-  purrr::map(info$description,
-                                    function(info) {paste0("<lbr>", info, "</br>")})
+      profile_body <- working_info$clinical_profile
+      profile_body <- lapply(names(profile_body), function(key) {
+        tagList(
+          tags$h6(stringr::str_to_sentence(gsub("_", " ", key)),
+                  style = "font-weight: bold; margin-bottom: 2px;"),
+          tags$div(profile_body[[key]],
+                   style = "margin-bottom: 12px;")
+        )
+      })
 
-    lapply(1:nrow(info), function(i) {
-      row <- info[i, ]
-
-      has_meta <- !is.na(row$author) && !is.na(row$date) && !is.na(row$key_sources)
 
       tags$details(
-        tags$summary(row$phenotype),
+        tags$summary(working_cohorts[i]),
         tags$div(
           class = "content-box",
-
-          if (has_meta) {
+          if(!is.null(working_info$metadata)){
             tagList(
               tags$div(
-                style = "padding: 15px; border-left: 4px solid #750075; color = grey; background: #E9E9E9; font-style: italic;",
-                shiny::HTML(row$metadata)
-              ),
-              tags$div(
                 style = "padding: 15px; border-left: 4px solid #750075; background: #E9E9E9; font-weight: normal;",
-                shiny::HTML(row$description[[1]])
+                tags$h5("Metadata",
+                        style = "font-weight: bold; margin-bottom: 2px; color: #750075;"),
+                tags$ul(meta_bullets),
+                tags$br(),
+                tags$h5("Clinical profile",
+                        style = "font-weight: bold; margin-bottom: 2px; color: #750075;"),
+                profile_body
               )
             )
           } else{
-            tags$div(
-              style = "padding: 15px; border-left: 4px solid #750075; background: #E9E9E9; font-weight: normal;",
-              "No description for this cohort")
-
+            tags$div(style = "padding: 15px; border-left: 4px solid #750075; background: #E9E9E9; font-weight: normal;",
+                     "No clinical description found for this cohort")
           }
         )
       )
     })
+
+
   })
 
   # summarise_omop_snapshot -----
   filterOmopSnapshot <- eventReactive(input$updateSnapshot, ({
     if (is.null(dataFiltered$summarise_omop_snapshot)) {
-      validate("No snapshot in results")
+      shiny::validate("No snapshot in results")
     }
 
     result <- dataFiltered$summarise_omop_snapshot |>
@@ -585,11 +651,15 @@ server <- function(input, output, session) {
       gt::gtsave(data = createTableOmopSnapshot(), filename = file)
     }
   )
+  output$summarise_omop_snapshot_settings <- gt::render_gt({
+    settingsFiltered[["summarise_omop_snapshot"]] |>
+      visOmopResults::visTable()
+  })
 
   # summarise_person -----
   filterPerson <- eventReactive(input$updatePerson, ({
     if (is.null(dataFiltered$summarise_person)) {
-      validate("No person summary in results")
+      shiny::validate("No person summary in results")
     }
 
     result <- dataFiltered$summarise_person |>
@@ -624,11 +694,15 @@ server <- function(input, output, session) {
     }
   )
 
+  output$summarise_person_settings <- gt::render_gt({
+    settingsFiltered[["summarise_person"]] |>
+      visOmopResults::visTable()
+  })
 
   ## Plot date of birth ----
   filterPersonDob <- eventReactive(input$updatePerson, ({
     if (is.null(dataFiltered$summarise_dob_density)) {
-      validate("No date of birth summary in results")
+      shiny::validate("No date of birth summary in results")
     }
 
     result <- dataFiltered$summarise_dob_density |>
@@ -665,7 +739,7 @@ server <- function(input, output, session) {
   # summarise_observation_period -----
   filterObservationPeriod <- eventReactive(input$updateObservationPeriod, ({
     if (is.null(dataFiltered$summarise_observation_period)) {
-      validate("No observation period summary in results")
+      shiny::validate("No observation period summary in results")
     }
 
     result <- dataFiltered$summarise_observation_period |>
@@ -700,10 +774,15 @@ server <- function(input, output, session) {
     }
   )
 
-  ## Plot obs start end ----
+  output$summarise_observation_period_settings <- gt::render_gt({
+    settingsFiltered[["summarise_observation_period"]] |>
+      visOmopResults::visTable()
+  })
+
+  ## Plot summarise observation period plot obs start end ----
   filterObs <- eventReactive(input$updateObservationPeriod, ({
     if (is.null(dataFiltered$summarise_obs_density)) {
-      validate("No date of observation period distributions in results")
+      shiny::validate("No date of observation period distributions in results")
     }
 
     result <- dataFiltered$summarise_obs_density |>
@@ -755,7 +834,7 @@ server <- function(input, output, session) {
   # summarise_clinical_records ----
   filterClinicalRecords <- eventReactive(input$updateClinicalRecords, ({
     if (is.null(dataFiltered$summarise_clinical_records)) {
-      validate("No clinical records summary in results")
+      shiny::validate("No clinical records summary in results")
     }
     result <- dataFiltered$summarise_clinical_records |>
       dplyr::filter(cdm_name %in% shared_cdm_names(),
@@ -790,10 +869,15 @@ server <- function(input, output, session) {
     }
   )
 
+  output$summarise_clinical_records_settings <- gt::render_gt({
+    settingsFiltered[["summarise_clinical_records"]] |>
+      visOmopResults::visTable()
+  })
+
   ## Plot clinical record trends -----
   filterClinicalRecordTrends <- eventReactive(input$updateClinicalRecords, ({
     if (is.null(dataFiltered$summarise_trend)) {
-      validate("No clinical records summary in results")
+      shiny::validate("No clinical records summary in results")
     }
 
     result <- dataFiltered$summarise_trend |>
@@ -844,7 +928,7 @@ server <- function(input, output, session) {
     req(inputs_initialized())
 
     if (is.null(dataFiltered$achilles_code_use)) {
-      validate("No achilles code use in results")
+      shiny::validate("No achilles code use in results")
     }
 
     achillesFiltered <- dataFiltered$achilles_code_use  |>
@@ -908,9 +992,13 @@ server <- function(input, output, session) {
       tbl <- createAchillesCodeUseInteractive()
 
       # column ordering by codelist and first column with a count
-      order <- list("Codelist name"  = "asc",
-                    "count" = "desc")
-      names(order)[2] <- names(tbl)[ncol(tbl)]
+      if(length(names(tbl))>=11){
+        order <- list("Codelist name"  = "asc",
+                      "count" = "desc")
+        names(order)[2] <- names(tbl)[11]
+      } else {
+        order <- list("Codelist name"  = "asc")
+      }
 
       # suppressed to NA
       tbl <- tbl |>
@@ -959,13 +1047,17 @@ server <- function(input, output, session) {
     }
   )
 
+  output$achilles_code_use_settings <- gt::render_gt({
+    settingsFiltered[["achilles_code_use"]] |>
+      visOmopResults::visTable()
+  })
 
   # orphan_codes -----
   filterOrphanCodes <-  eventReactive(input$updateOrphanCodeUse, ({
     req(shared_cdm_names())
     req(inputs_initialized())
     if (is.null(dataFiltered$orphan_code_use)) {
-      validate("No orphan codes in results")
+      shiny::validate("No orphan codes in results")
     }
 
     result <- dataFiltered$orphan_code_use |>
@@ -976,6 +1068,7 @@ server <- function(input, output, session) {
       result <- result  |>
         filter(estimate_name != "person_count")
     }
+
     if(isFALSE(input$orphan_record_count)){
       result <- result  |>
         filter(estimate_name != "record_count")
@@ -1082,13 +1175,18 @@ server <- function(input, output, session) {
     }
   )
 
+  output$orphan_code_use_settings <- gt::render_gt({
+    settingsFiltered[["orphan_code_use"]] |>
+      visOmopResults::visTable()
+  })
+
   # cohort_code_use -----
   filterCohortCodeUse <- eventReactive(input$updateCohortCodeUse, ({
     req(shared_cdm_names())
     req(shared_cohort_names())
     req(inputs_initialized())
     if (is.null(dataFiltered$cohort_code_use)) {
-      validate("No cohort code use in results")
+      shiny::validate("No cohort code use in results")
     }
 
     result <- dataFiltered$cohort_code_use |>
@@ -1218,13 +1316,18 @@ server <- function(input, output, session) {
     }
   )
 
+  output$cohort_code_use_settings <- gt::render_gt({
+    settingsFiltered[["cohort_code_use"]] |>
+      visOmopResults::visTable()
+  })
+
   # summarise measurement diagnostics -----
   filterMeasurementSummary <- eventReactive(input$updateMeasurementCodeUse, ({
     req(shared_cdm_names())
     req(shared_cohort_names())
     req(inputs_initialized())
     if (is.null(dataFiltered$measurement_summary)) {
-      validate("No measurement summary in results")
+      shiny::validate("No measurement summary in results")
     }
 
     result <- dataFiltered$measurement_summary |>
@@ -1264,6 +1367,12 @@ server <- function(input, output, session) {
       gt::gtsave(data = createMeasurementSummaryGT(), filename = file)
     }
   )
+
+  output$measurement_summary_table_settings <- gt::render_gt({
+    settingsFiltered[["measurement_summary"]] |>
+      visOmopResults::visTable()
+  })
+
   ## Plot measurement_summary ----
   getPlotMeasurementSummary <- shiny::reactive({
     result <- filterMeasurementSummary()
@@ -1296,11 +1405,16 @@ server <- function(input, output, session) {
     }
   )
 
+  output$measurement_summary_plot_settings <- gt::render_gt({
+    settingsFiltered[["measurement_summary"]] |>
+      visOmopResults::visTable()
+  })
+
   # summarise measurement value as concept
   filterMeasurementValueAsConcept <- eventReactive(input$updateMeasurementCodeUse, ({
 
     if (is.null(dataFiltered$measurement_value_as_concept)) {
-      validate("No measurement value as concept in results")
+      shiny::validate("No measurement value as concept in results")
     }
 
     result <- dataFiltered$measurement_value_as_concept |>
@@ -1341,6 +1455,12 @@ server <- function(input, output, session) {
       gt::gtsave(data = createMeasurementValueAsConceptGT(), filename = file)
     }
   )
+
+  output$measurement_value_as_concept_table_settings <- gt::render_gt({
+    settingsFiltered[["measurement_value_as_concept"]] |>
+      visOmopResults::visTable()
+  })
+
   ## Plot measurement_value_as_concept ----
   getPlotMeasurementValueAsConcept <- shiny::reactive({
     result <- filterMeasurementValueAsConcept()
@@ -1374,11 +1494,17 @@ server <- function(input, output, session) {
     }
   )
 
+  output$measurement_value_as_concept_plot_settings <- gt::render_gt({
+    settingsFiltered[["measurement_value_as_concept"]] |>
+      visOmopResults::visTable()
+  })
+
+
   # summarise measurement value as number
   filterMeasurementValueAsNumber <- eventReactive(input$updateMeasurementCodeUse, ({
 
     if (is.null(dataFiltered$measurement_value_as_number)) {
-      validate("No measurement value as number in results")
+      shiny::validate("No measurement value as number in results")
     }
 
     result <- dataFiltered$measurement_value_as_number |>
@@ -1419,6 +1545,11 @@ server <- function(input, output, session) {
       gt::gtsave(data = createMeasurementValueAsNumberGT(), filename = file)
     }
   )
+  output$measurement_value_as_number_table_settings <- gt::render_gt({
+    settingsFiltered[["measurement_value_as_number"]] |>
+      visOmopResults::visTable()
+  })
+
   ## Plot measurement_value_as_number ----
   getPlotMeasurementValueAsNumber <- shiny::reactive({
     result <- filterMeasurementValueAsNumber()
@@ -1451,6 +1582,10 @@ server <- function(input, output, session) {
     }
   )
 
+  output$measurement_value_as_number_plot_settings <- gt::render_gt({
+    settingsFiltered[["measurement_value_as_number"]] |>
+      visOmopResults::visTable()
+  })
 
   # summarise drug diagnostics -----
   filterDrugDiagnostics<- eventReactive(input$updateDrugDiagnostics, ({
@@ -1458,7 +1593,7 @@ server <- function(input, output, session) {
     req(shared_cohort_names())
     req(inputs_initialized())
     if (is.null(dataFiltered$summarise_drug_use)) {
-      validate("No drug diagnostics in results")
+      shiny::validate("No drug diagnostics in results")
     }
 
     result <- dataFiltered$summarise_drug_use |>
@@ -1578,13 +1713,18 @@ server <- function(input, output, session) {
     }
   )
 
+  output$drug_diagnostics_settings <- gt::render_gt({
+    settingsFiltered[["summarise_drug_use"]] |>
+      visOmopResults::visTable()
+  })
+
   # summarise_cohort_count -----
   filterCohortCount <- eventReactive(input$updateCohortCount, ({
     req(shared_cdm_names())
     req(shared_cohort_names())
     req(inputs_initialized())
     if (is.null(dataFiltered$summarise_cohort_count)) {
-      validate("No cohort count in results")
+      shiny::validate("No cohort count in results")
     }
 
     result <- dataFiltered$summarise_cohort_count |>
@@ -1631,13 +1771,18 @@ server <- function(input, output, session) {
     }
   )
 
+  output$summarise_cohort_count_settings <- gt::render_gt({
+    settingsFiltered[["summarise_cohort_count"]] |>
+      visOmopResults::visTable()
+  })
+
   # summarise_cohort_attrition -----
   filterCohortAttrition <- eventReactive(input$updateCohortCount,({
     req(shared_cdm_names())
     req(shared_cohort_names())
     req(inputs_initialized())
     if (is.null(dataFiltered$summarise_cohort_attrition)) {
-      validate("No cohort attrition in results")
+      shiny::validate("No cohort attrition in results")
     }
 
     result <- dataFiltered$summarise_cohort_attrition |>
@@ -1680,6 +1825,12 @@ server <- function(input, output, session) {
       gt::gtsave(data = obj, filename = file)
     }
   )
+
+  output$summarise_cohort_attrition_settings <- gt::render_gt({
+    settingsFiltered[["summarise_cohort_attrition"]] |>
+      visOmopResults::visTable()
+  })
+
   ## Diagram summarise_cohort_attrition -----
   createDiagramCohortAttrition <- shiny::reactive({
     result <- filterCohortAttrition()
@@ -1709,6 +1860,10 @@ server <- function(input, output, session) {
     }
   )
 
+  output$summarise_cohort_attrition_flowchart_settings <- gt::render_gt({
+    settingsFiltered[["summarise_cohort_attrition"]] |>
+      visOmopResults::visTable()
+  })
 
   # summarise_characteristics -----
   filterSummariseCharacteristics <- eventReactive(input$updateCohortCharacteristics, ({
@@ -1716,7 +1871,7 @@ server <- function(input, output, session) {
     req(shared_cohort_names())
     req(inputs_initialized())
     if (is.null(dataFiltered$summarise_characteristics)) {
-      validate("No cohort characteristics in results")
+      shiny::validate("No cohort characteristics in results")
     }
 
     selectedCohorts <- shared_cohort_names()
@@ -1764,6 +1919,11 @@ server <- function(input, output, session) {
     }
   )
 
+  output$summarise_characteristics_settings <- gt::render_gt({
+    settingsFiltered[["summarise_characteristics"]] |>
+      visOmopResults::visTable()
+  })
+
   ## Plot age_pyramid ----
   createAgePyramid <- eventReactive(input$updateCohortCharacteristics, ({
     summarise_characteristics <- filterSummariseCharacteristics()
@@ -1780,12 +1940,7 @@ server <- function(input, output, session) {
       arrange(group_level)
 
     if (nrow(summarise_table) == 0 || nrow(summarise_characteristics) == 0 ) {
-      validate("No results found for selected inputs")
-    }
-
-
-    if (nrow(summarise_table) == 0 || nrow(summarise_characteristics) == 0 ) {
-      validate("No results found for selected inputs")
+      shiny::validate("No results found for selected inputs. Note that age distributions are only calculated for cohorts with at least 100 individuals.")
     }
 
     plotAgeDensity(summarise_table, summarise_characteristics, input$summarise_characteristics_add_interquantile_range)
@@ -1811,13 +1966,18 @@ server <- function(input, output, session) {
     }
   )
 
+  output$summarise_age_pyramid_settings <- gt::render_gt({
+    settingsFiltered[["summarise_characteristics"]] |>
+      visOmopResults::visTable()
+  })
+
   # summarise_large_scale_characteristics -----
   filterLargeScaleCharacteristics <- eventReactive(input$updateLSC, ({
     req(shared_cdm_names())
     req(shared_cohort_names())
     req(inputs_initialized())
     if (is.null(dataFiltered$summarise_large_scale_characteristics)) {
-      validate("No large scale characteristics in results")
+      shiny::validate("No large scale characteristics in results")
     }
 
     lsc_data <- dataFiltered$summarise_large_scale_characteristics |>
@@ -1930,6 +2090,12 @@ server <- function(input, output, session) {
         readr::write_csv(file = file)
     }
   )
+
+  output$summarise_large_scale_characteristics_settings <- gt::render_gt({
+    settingsFiltered[["summarise_large_scale_characteristics"]] |>
+      visOmopResults::visTable()
+  })
+
   ## Table summarise_large_scale_characteristics -----
   createTableLargeScaleCharacteristics <- shiny::reactive({
 
@@ -1957,6 +2123,11 @@ server <- function(input, output, session) {
     }
   )
 
+  output$summarise_large_scale_characteristics_table_settings <- gt::render_gt({
+    settingsFiltered[["summarise_large_scale_characteristics"]] |>
+      visOmopResults::visTable()
+  })
+
   # compare large_scale_characteristics ----
   getComparedCohorts <- eventReactive(input$updateCompareLSC, ({
     req(shared_cdm_names())
@@ -1965,10 +2136,10 @@ server <- function(input, output, session) {
     cohort <- shared_cohort_names()
 
     if(length(cohort) > 1){
-      validate("Please select only one cohort")
+      shiny::validate("Please select only one cohort")
     }
     if(length(cohort) == 0){
-      validate("Please select a cohort")
+      shiny::validate("Please select a cohort")
     }
 
     cohort1 <- switch(input$compare_large_scale_characteristics_cohort_1,
@@ -1982,10 +2153,10 @@ server <- function(input, output, session) {
                       "matched" = paste0(input$compare_large_scale_characteristics_cohort_compare,"_matched"))
 
     if(length(cohort2) > 1){
-      validate("Please select only one comparator cohort")
+      shiny::validate("Please select only one comparator cohort")
     }
     if(length(cohort2) == 0){
-      validate("Please select a comparator cohort")
+      shiny::validate("Please select a comparator cohort")
     }
 
     return(list("cohort1" = cohort1,
@@ -2001,7 +2172,7 @@ server <- function(input, output, session) {
     })
 
     if (is.null(dataFiltered$summarise_large_scale_characteristics)) {
-      validate("No large scale characteristics in results")
+      shiny::validate("No large scale characteristics in results")
     }
 
     cohorts <- getComparedCohorts()
@@ -2156,6 +2327,11 @@ server <- function(input, output, session) {
     }
   )
 
+  output$compare_large_scale_characteristics_table_settings <- gt::render_gt({
+    settingsFiltered[["summarise_large_scale_characteristics"]] |>
+      visOmopResults::visTable()
+  })
+
   ## Plot compare large_scale_characteristics ----
   getPlotlyCompareLsc <- shiny::reactive({
     cohorts <- getComparedCohorts()
@@ -2185,14 +2361,17 @@ server <- function(input, output, session) {
       )
     }
   )
-
+  output$compare_large_scale_characteristics_plot_settings <- gt::render_gt({
+    settingsFiltered[["summarise_large_scale_characteristics"]] |>
+      visOmopResults::visTable()
+  })
   # summarise_cohort_overlap -----
   filterCohortOverlap <- eventReactive(input$updateCompareCohorts, ({
     req(shared_cdm_names())
     req(shared_cohort_names())
     req(inputs_initialized())
     if (is.null(dataFiltered$summarise_cohort_overlap)) {
-      validate("No cohort overlap in results")
+      shiny::validate("No cohort overlap in results")
     }
 
     result <- dataFiltered$summarise_cohort_overlap |>
@@ -2240,6 +2419,11 @@ server <- function(input, output, session) {
     }
   )
 
+  output$cohort_overlap_table_settings <- gt::render_gt({
+    settingsFiltered[["summarise_cohort_overlap"]] |>
+      visOmopResults::visTable()
+  })
+
   ## Plot cohort_overlap -----
   createPlotCohortOverlap <- shiny::reactive({
     result <- filterCohortOverlap()
@@ -2269,13 +2453,18 @@ server <- function(input, output, session) {
     }
   )
 
+  output$cohort_overlap_plot_settings <- gt::render_gt({
+    settingsFiltered[["summarise_cohort_overlap"]] |>
+      visOmopResults::visTable()
+  })
+
   # summarise_cohort_timing ----
   filterCohortTiming <- eventReactive(input$updateCompareCohorts, ({
     req(shared_cdm_names())
     req(shared_cohort_names())
     req(inputs_initialized())
     if (is.null(dataFiltered$summarise_cohort_timing)) {
-      validate("No cohort timing in results")
+      shiny::validate("No cohort timing in results")
     }
 
     result <- dataFiltered$summarise_cohort_timing |>
@@ -2319,6 +2508,11 @@ server <- function(input, output, session) {
     }
   )
 
+  output$cohort_timing_table_settings <- gt::render_gt({
+    settingsFiltered[["summarise_cohort_timing"]] |>
+      visOmopResults::visTable()
+  })
+
   ## Plot cohort_timing -----
   createPlotCohortTiming <- shiny::reactive({
     CohortCharacteristics::plotCohortTiming(
@@ -2330,9 +2524,11 @@ server <- function(input, output, session) {
       colour = input$summarise_cohort_timing_plot_colour
     )
   })
+
   output$summarise_cohort_timing_plot <- shiny::renderUI({
     renderPlot(createPlotCohortTiming())
   })
+
   output$summarise_cohort_timing_plot_download <- shiny::downloadHandler(
     filename = "summarise_cohort_timing_plot.png",
     content = function(file) {
@@ -2347,13 +2543,19 @@ server <- function(input, output, session) {
       )
     }
   )
+
+  output$cohort_timing_plot_settings <- gt::render_gt({
+    settingsFiltered[["summarise_cohort_timing"]] |>
+      visOmopResults::visTable()
+  })
+
   # summarise cohort survival -----
   filterCohortSurvival <- eventReactive(input$updateCohortSurvival, ({
     req(shared_cdm_names())
     req(shared_cohort_names())
     req(inputs_initialized())
     if (is.null(dataFiltered$survival_estimates)) {
-      validate("No survival in results")
+      shiny::validate("No survival in results")
     }
 
     if(input$survival_porbability_include_matches){
@@ -2408,6 +2610,11 @@ server <- function(input, output, session) {
     }
   )
 
+  output$cohort_survival_table_settings <- gt::render_gt({
+    settingsFiltered[["survival_summary"]] |>
+      visOmopResults::visTable()
+  })
+
   ## Plot cohort survival ----
   createPlotSurvival <- shiny::reactive({
     result <- filterCohortSurvival()
@@ -2445,6 +2652,10 @@ server <- function(input, output, session) {
       )
     }
   )
+  output$cohort_survival_plot_settings <- gt::render_gt({
+    settingsFiltered[["survival_summary"]] |>
+      visOmopResults::visTable()
+  })
 
   # incidence -----
   filterIncidence <- eventReactive(input$updateIncidence, ({
@@ -2452,7 +2663,7 @@ server <- function(input, output, session) {
     req(shared_cohort_names())
     req(inputs_initialized())
     if (is.null(dataFiltered$incidence)) {
-      validate("No incidence in results")
+      shiny::validate("No incidence in results")
     }
 
     result <- dataFiltered$incidence |>
@@ -2501,6 +2712,10 @@ server <- function(input, output, session) {
       gt::gtsave(data = obj, filename = file)
     }
   )
+  output$incidence_table_settings <- gt::render_gt({
+    settingsFiltered[["incidence"]] |>
+      visOmopResults::visTable()
+  })
   ## Plot incidence -----
   createPlotIncidence <- shiny::reactive({
     result <- filterIncidence()
@@ -2522,6 +2737,10 @@ server <- function(input, output, session) {
       )
       plot$data <- plot$data |>
         filter(incidence_100000_pys > 0)
+
+      if (nrow(plot$data) == 0) {
+        shiny::validate("No positive estimates in results")
+      }
 
       if(!is.null(facet) && isTRUE(facet_free)){
         plot <- plot +
@@ -2578,14 +2797,17 @@ server <- function(input, output, session) {
       )
     }
   )
-
+  output$incidence_plot_settings <- gt::render_gt({
+    settingsFiltered[["incidence"]] |>
+      visOmopResults::visTable()
+  })
   # prevalence -----
   filterPrevalence <- eventReactive(input$updatePrevalence, ({
     req(shared_cdm_names())
     req(shared_cohort_names())
     req(inputs_initialized())
     if (is.null(dataFiltered$prevalence)) {
-      validate("No prevalence in results")
+      shiny::validate("No prevalence in results")
     }
 
     result <- dataFiltered$prevalence |>
@@ -2635,6 +2857,10 @@ server <- function(input, output, session) {
       gt::gtsave(data = obj, filename = file)
     }
   )
+  output$prevalence_table_settings <- gt::render_gt({
+    settingsFiltered[["prevalence"]] |>
+      visOmopResults::visTable()
+  })
   ## Plot prevalence ----
   createPlotPrevalence <- shiny::reactive({
     result <- filterPrevalence()
@@ -2713,10 +2939,15 @@ server <- function(input, output, session) {
       )
     }
   )
+  output$prevalence_plot_settings <- gt::render_gt({
+    settingsFiltered[["prevalence"]] |>
+      visOmopResults::visTable()
+  })
 
   # log file -----
   output$summarise_log_file_gt <- gt::render_gt({
-    dataFiltered$summarise_log_file |>
+    log_summary <- dataFiltered$summarise_log_file |>
+      omopgenerics::filterSettings(diagnostic == "Logging") |>
       omopgenerics::tidy() |>
       dplyr::mutate(log_id = as.integer(log_id)) |>
       dplyr::arrange("cdm_name", "log_id")  |>
@@ -2742,7 +2973,12 @@ server <- function(input, output, session) {
       dplyr::rename("task" = "variable_name",
                     estimate_value = "elapsed_time") |>
       dplyr::mutate(estimate_type = "character",
-                    estimate_name = "Time taken") |>
+                    estimate_name = "Time taken")  |>
+      dplyr::filter(!task %in% c("Log file created",
+                                 "Exporting log file"))
+
+
+    log_summary |>
       visOmopResults::visTable(
         header = c("cdm_name", "estimate_name"),
         rename = c("Database name" = "cdm_name"),
@@ -2777,7 +3013,7 @@ server <- function(input, output, session) {
 
       if(nrow(result) == 0){
         section_name_nice <- stringr::str_replace_all(section_name, "_", " ")
-        validate(glue::glue("No expectations for {section_name_nice} results."))
+        shiny::validate(glue::glue("No expectations for {section_name_nice} results."))
       }
       result
     })

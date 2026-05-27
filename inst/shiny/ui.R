@@ -159,6 +159,15 @@ ui <- fluidPage(
           full_screen = TRUE,
           bslib::card_header(
             shiny::downloadButton(outputId = "summarise_omop_snapshot_gt_download", label = ""),
+            bslib::popover(
+              icon("circle-info"),
+              gt::gt_output("summarise_omop_snapshot_settings"),
+              placement = "bottom",
+              options = list(
+                customClass = "log-popover-wide",
+                container = "body"
+              )
+            ),
             class = "text-end"
           ),
           gt::gt_output("summarise_omop_snapshot_gt") |> withSpinner()
@@ -206,6 +215,15 @@ ui <- fluidPage(
               full_screen = TRUE,
               bslib::card_header(
                 shiny::downloadButton(outputId = "summarise_person_gt_download", label = ""),
+                bslib::popover(
+                  icon("circle-info"),
+                  gt::gt_output("summarise_person_settings"),
+                  placement = "bottom",
+                  options = list(
+                    customClass = "log-popover-wide",
+                    container = "body"
+                  )
+                ),
                 class = "text-end"
               ),
               gt::gt_output("summarise_person_gt") |> withSpinner()
@@ -303,6 +321,15 @@ ui <- fluidPage(
               full_screen = TRUE,
               bslib::card_header(
                 shiny::downloadButton(outputId = "summarise_observation_period_gt_download", label = ""),
+                bslib::popover(
+                  icon("circle-info"),
+                  gt::gt_output("summarise_observation_period_settings"),
+                  placement = "bottom",
+                  options = list(
+                    customClass = "log-popover-wide",
+                    container = "body"
+                  )
+                ),
                 class = "text-end"
               ),
               gt::gt_output("summarise_observation_period_gt") |> withSpinner()
@@ -416,6 +443,15 @@ ui <- fluidPage(
                 full_screen = TRUE,
                 bslib::card_header(
                   shiny::downloadButton(outputId = "summarise_clinical_records_gt_download", label = ""),
+                  bslib::popover(
+                    icon("circle-info"),
+                    gt::gt_output("summarise_clinical_records_settings"),
+                    placement = "bottom",
+                    options = list(
+                      customClass = "log-popover-wide",
+                      container = "body"
+                    )
+                  ),
                   class = "text-end"
                 ),
                 gt::gt_output("summarise_clinical_records_gt") |> withSpinner()
@@ -474,176 +510,6 @@ ui <- fluidPage(
     bslib::nav_menu(
       title = "Codelist diagnostics",
       icon = shiny::icon("list"),
-      ## achilles_code_use_start -----
-      bslib::nav_panel(
-        title = "Achilles code use",
-        bslib::accordion(
-          bslib::accordion_panel(
-            title = "Shared inputs",
-            tags$div(
-              style = "background-color: #750075; color: white; padding: 10px; font-weight: bold;  display: flex; flex-wrap: wrap; gap: 10px; gap: 10px; height: auto; align-items: center;",
-              tags$label("Select Database(s):"),
-              tags$div(
-                style = "width: 225px;",
-                tags$div(
-                  style = "margin-top: 15px;",
-                  shinyWidgets::pickerInput(
-                    inputId = "achilles_code_use_cdm_name",
-                    label = NULL,
-                    selected = selected$shared_cdm_name,
-                    choices = choices$shared_cdm_name,
-                    multiple = TRUE,
-                    options = list(`actions-box` = TRUE, `selected-text-format` = "count > 1",
-                                   `deselect-all-text` = "None", `select-all-text` = "All"),
-                    width = "100%"
-                  )
-                )
-              ),
-              tags$div(
-                style = "width: 225px;",
-                actionBttn("updateAchillesCodeUse", "Update",
-                           style = "simple"),
-                width = "100%"
-              )
-            )
-          )),
-        icon = shiny::icon("database"),
-        bslib::layout_sidebar(
-          sidebar = bslib::sidebar(width = 400, open = "closed",
-                                   bslib::accordion(
-                                     bslib::accordion_panel(
-                                       title = "Settings",
-                                       shinyWidgets::pickerInput(
-                                         inputId = "achilles_code_use_codelist_name",
-                                         label = "Codelist name",
-                                         choices = NULL,
-                                         selected = NULL,
-                                         multiple = TRUE,
-                                         options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
-                                       ),
-                                       div(style="display: flex; justify-content: space-between;",
-                                           div(style="flex: 1;", prettyCheckbox(inputId = "achilles_person_count",
-                                                                                label = "Person count",
-                                                                                value = TRUE,
-                                                                                status = "primary",
-                                                                                shape = "curve",
-                                                                                outline = TRUE)),
-                                           div(style="flex: 1;", prettyCheckbox(inputId = "achilles_record_count",
-                                                                                label = "Record count",
-                                                                                value = TRUE,
-                                                                                status = "primary",
-                                                                                shape = "curve",
-                                                                                outline = TRUE))
-                                       )
-                                     ),
-                                     bslib::accordion_panel(
-                                       title = "Table formatting",
-                                       materialSwitch(inputId = "achilles_interactive",
-                                                      value = TRUE,
-                                                      label = "Interactive",
-                                                      status = "primary"),
-                                       uiOutput("achilles_sortable")
-                                     )
-                                   )
-          ),
-          bslib::nav_panel(
-            title = "achilles_code_use",
-            bslib::card(
-              full_screen = TRUE,
-              bslib::card_header(
-                shiny::downloadButton(outputId = "achilles_code_use_download", label = ""),
-                class = "text-end"
-              ),
-              uiOutput("achilles_code_use_tbl") |> withSpinner()
-            )
-          )
-        )
-      ),
-      ## achilles_code_use_end ----
-      ## orphan_code_use_start ----
-      bslib::nav_panel(
-        title = "Orphan codes",
-        bslib::accordion(
-          bslib::accordion_panel(
-            title = "Shared inputs",
-            tags$div(
-              style = "background-color: #750075; color: white; padding: 10px; font-weight: bold;  display: flex; flex-wrap: wrap; gap: 10px; gap: 10px; height: auto; align-items: center;",
-              tags$label("Select Database(s):"), # Explicitly use tags$label
-              tags$div(
-                style = "width: 225px;",
-                tags$div(
-                  style = "margin-top: 15px;",
-                  shinyWidgets::pickerInput(
-                    inputId = "orphan_code_use_cdm_name",
-                    label = NULL,
-                    selected = selected$shared_cdm_name,
-                    choices = choices$shared_cdm_name,
-                    multiple = TRUE,
-                    options = list(`actions-box` = TRUE, `selected-text-format` = "count > 1",
-                                   `deselect-all-text` = "None", `select-all-text` = "All"),
-                    width = "100%"
-                  )
-                )
-              ),
-              tags$div(
-                style = "width: 225px;",
-                actionBttn("updateOrphanCodeUse", "Update",
-                           style = "simple"),
-                width = "100%"
-              )
-            )
-          )),
-        icon = shiny::icon("circle-half-stroke"),
-        bslib::layout_sidebar(
-          sidebar = bslib::sidebar(width = 400, open = "closed",
-                                   bslib::accordion(
-                                     bslib::accordion_panel(
-                                       title = "Settings",
-                                       shinyWidgets::pickerInput(
-                                         inputId = "orphan_code_use_codelist_name",
-                                         label = "Codelist name",
-                                         choices = NULL,
-                                         selected = NULL,
-                                         multiple = TRUE,
-                                         options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
-                                       ),
-                                       div(style="display: flex; justify-content: space-between;",
-                                           div(style="flex: 1;", prettyCheckbox(inputId = "orphan_person_count",
-                                                                                label = "Person count",
-                                                                                value = TRUE,
-                                                                                status = "primary",
-                                                                                shape = "curve",
-                                                                                outline = TRUE)),
-                                           div(style="flex: 1;", prettyCheckbox(inputId = "orphan_record_count",
-                                                                                label = "Record count",
-                                                                                value = TRUE,
-                                                                                status = "primary",
-                                                                                shape = "curve",
-                                                                                outline = TRUE))
-                                       )
-                                     ),
-                                     bslib::accordion_panel(
-                                       title = "Table formatting",
-                                       materialSwitch(inputId = "orphan_interactive",
-                                                      value = TRUE,
-                                                      label = "Interactive",
-                                                      status = "primary"),
-                                       uiOutput("orphan_sortable")
-
-                                     )
-                                   )
-          ),
-          bslib::card(
-            full_screen = TRUE,
-            bslib::card_header(
-              shiny::downloadButton(outputId = "orphan_codes_download", label = ""),
-              class = "text-end"
-            ),
-            uiOutput("orphan_codes_tbl") |> withSpinner()
-          )
-        )
-      ),
-      ## orphan_code_use_end ----
       ## cohort_code_use_start -----
       bslib::nav_panel(
         title = "Cohort code use",
@@ -739,6 +605,15 @@ ui <- fluidPage(
               full_screen = TRUE,
               bslib::card_header(
                 shiny::downloadButton(outputId = "cohort_code_use_download", label = ""),
+                bslib::popover(
+                  icon("circle-info"),
+                  gt::gt_output("cohort_code_use_settings"),
+                  placement = "bottom",
+                  options = list(
+                    customClass = "log-popover-wide",
+                    container = "body"
+                  )
+                ),
                 class = "text-end"
               ),
               uiOutput("cohort_code_use_tbl") |> withSpinner()
@@ -747,6 +622,194 @@ ui <- fluidPage(
         )
       ),
       ## cohort_code_use_end -----
+      ## achilles_code_use_start -----
+      bslib::nav_panel(
+        title = "Achilles code use",
+        bslib::accordion(
+          bslib::accordion_panel(
+            title = "Shared inputs",
+            tags$div(
+              style = "background-color: #750075; color: white; padding: 10px; font-weight: bold;  display: flex; flex-wrap: wrap; gap: 10px; gap: 10px; height: auto; align-items: center;",
+              tags$label("Select Database(s):"),
+              tags$div(
+                style = "width: 225px;",
+                tags$div(
+                  style = "margin-top: 15px;",
+                  shinyWidgets::pickerInput(
+                    inputId = "achilles_code_use_cdm_name",
+                    label = NULL,
+                    selected = selected$shared_cdm_name,
+                    choices = choices$shared_cdm_name,
+                    multiple = TRUE,
+                    options = list(`actions-box` = TRUE, `selected-text-format` = "count > 1",
+                                   `deselect-all-text` = "None", `select-all-text` = "All"),
+                    width = "100%"
+                  )
+                )
+              ),
+              tags$div(
+                style = "width: 225px;",
+                actionBttn("updateAchillesCodeUse", "Update",
+                           style = "simple"),
+                width = "100%"
+              )
+            )
+          )),
+        icon = shiny::icon("database"),
+        bslib::layout_sidebar(
+          sidebar = bslib::sidebar(width = 400, open = "closed",
+                                   bslib::accordion(
+                                     bslib::accordion_panel(
+                                       title = "Settings",
+                                       shinyWidgets::pickerInput(
+                                         inputId = "achilles_code_use_codelist_name",
+                                         label = "Codelist name",
+                                         choices = NULL,
+                                         selected = NULL,
+                                         multiple = TRUE,
+                                         options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
+                                       ),
+                                       div(style="display: flex; justify-content: space-between;",
+                                           div(style="flex: 1;", prettyCheckbox(inputId = "achilles_person_count",
+                                                                                label = "Person count",
+                                                                                value = TRUE,
+                                                                                status = "primary",
+                                                                                shape = "curve",
+                                                                                outline = TRUE)),
+                                           div(style="flex: 1;", prettyCheckbox(inputId = "achilles_record_count",
+                                                                                label = "Record count",
+                                                                                value = TRUE,
+                                                                                status = "primary",
+                                                                                shape = "curve",
+                                                                                outline = TRUE))
+                                       )
+                                     ),
+                                     bslib::accordion_panel(
+                                       title = "Table formatting",
+                                       materialSwitch(inputId = "achilles_interactive",
+                                                      value = TRUE,
+                                                      label = "Interactive",
+                                                      status = "primary"),
+                                       uiOutput("achilles_sortable")
+                                     )
+                                   )
+          ),
+          bslib::nav_panel(
+            title = "achilles_code_use",
+            bslib::card(
+              full_screen = TRUE,
+              bslib::card_header(
+                shiny::downloadButton(outputId = "achilles_code_use_download", label = ""),
+                bslib::popover(
+                  icon("circle-info"),
+                  gt::gt_output("achilles_code_use_settings"),
+                  placement = "bottom",
+                  options = list(
+                    customClass = "log-popover-wide",
+                    container = "body"
+                  )
+                ),
+                class = "text-end"
+              ),
+              uiOutput("achilles_code_use_tbl") |> withSpinner()
+            )
+          )
+        )
+      ),
+      ## achilles_code_use_end ----
+      ## orphan_code_use_start ----
+      bslib::nav_panel(
+        title = "Orphan codes",
+        bslib::accordion(
+          bslib::accordion_panel(
+            title = "Shared inputs",
+            tags$div(
+              style = "background-color: #750075; color: white; padding: 10px; font-weight: bold;  display: flex; flex-wrap: wrap; gap: 10px; gap: 10px; height: auto; align-items: center;",
+              tags$label("Select Database(s):"), # Explicitly use tags$label
+              tags$div(
+                style = "width: 225px;",
+                tags$div(
+                  style = "margin-top: 15px;",
+                  shinyWidgets::pickerInput(
+                    inputId = "orphan_code_use_cdm_name",
+                    label = NULL,
+                    selected = selected$shared_cdm_name,
+                    choices = choices$shared_cdm_name,
+                    multiple = TRUE,
+                    options = list(`actions-box` = TRUE, `selected-text-format` = "count > 1",
+                                   `deselect-all-text` = "None", `select-all-text` = "All"),
+                    width = "100%"
+                  )
+                )
+              ),
+              tags$div(
+                style = "width: 225px;",
+                actionBttn("updateOrphanCodeUse", "Update",
+                           style = "simple"),
+                width = "100%"
+              )
+            )
+          )),
+        icon = shiny::icon("circle-half-stroke"),
+        bslib::layout_sidebar(
+          sidebar = bslib::sidebar(width = 400, open = "closed",
+                                   bslib::accordion(
+                                     bslib::accordion_panel(
+                                       title = "Settings",
+                                       shinyWidgets::pickerInput(
+                                         inputId = "orphan_code_use_codelist_name",
+                                         label = "Codelist name",
+                                         choices = NULL,
+                                         selected = NULL,
+                                         multiple = TRUE,
+                                         options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
+                                       ),
+                                       div(style="display: flex; justify-content: space-between;",
+                                           div(style="flex: 1;", prettyCheckbox(inputId = "orphan_person_count",
+                                                                                label = "Person count",
+                                                                                value = TRUE,
+                                                                                status = "primary",
+                                                                                shape = "curve",
+                                                                                outline = TRUE)),
+                                           div(style="flex: 1;", prettyCheckbox(inputId = "orphan_record_count",
+                                                                                label = "Record count",
+                                                                                value = TRUE,
+                                                                                status = "primary",
+                                                                                shape = "curve",
+                                                                                outline = TRUE))
+                                       )
+                                     ),
+                                     bslib::accordion_panel(
+                                       title = "Table formatting",
+                                       materialSwitch(inputId = "orphan_interactive",
+                                                      value = TRUE,
+                                                      label = "Interactive",
+                                                      status = "primary"),
+                                       uiOutput("orphan_sortable")
+
+                                     )
+                                   )
+          ),
+          bslib::card(
+            full_screen = TRUE,
+            bslib::card_header(
+              shiny::downloadButton(outputId = "orphan_codes_download", label = ""),
+              bslib::popover(
+                icon("circle-info"),
+                gt::gt_output("orphan_code_use_settings"),
+                placement = "bottom",
+                options = list(
+                  customClass = "log-popover-wide",
+                  container = "body"
+                )
+              ),
+              class = "text-end"
+            ),
+            uiOutput("orphan_codes_tbl") |> withSpinner()
+          )
+        )
+      ),
+      ## orphan_code_use_end ----
       ## measurement_diagnostics_start ----
       bslib::nav_panel(
         title = "Measurement Diagnostics",
@@ -805,6 +868,15 @@ ui <- fluidPage(
               full_screen = TRUE,
               bslib::card_header(
                 shiny::downloadButton(outputId = "measurement_summary_gt_download", label = ""),
+                bslib::popover(
+                  icon("circle-info"),
+                  gt::gt_output("measurement_summary_table_settings"),
+                  placement = "bottom",
+                  options = list(
+                    customClass = "log-popover-wide",
+                    container = "body"
+                  )
+                ),
                 class = "text-end"
               ),
               bslib::layout_sidebar(
@@ -845,7 +917,16 @@ ui <- fluidPage(
                     label = "dpi",
                     value = 300
                   ),
-                  shiny::downloadButton(outputId = "plot_measurement_summary_download", label = "Download")
+                  shiny::downloadButton(outputId = "plot_measurement_summary_download", label = "Download"),
+                ),
+                bslib::popover(
+                  icon("circle-info"),
+                  gt::gt_output("measurement_summary_plot_settings"),
+                  placement = "bottom",
+                  options = list(
+                    customClass = "log-popover-wide",
+                    container = "body"
+                  )
                 ),
                 class = "text-end"
               ),
@@ -903,6 +984,15 @@ ui <- fluidPage(
               full_screen = TRUE,
               bslib::card_header(
                 shiny::downloadButton(outputId = "measurement_value_as_concept_gt_download", label = ""),
+                bslib::popover(
+                  icon("circle-info"),
+                  gt::gt_output("measurement_value_as_concept_table_settings"),
+                  placement = "bottom",
+                  options = list(
+                    customClass = "log-popover-wide",
+                    container = "body"
+                  )
+                ),
                 class = "text-end"
               ),
               bslib::layout_sidebar(
@@ -943,7 +1033,16 @@ ui <- fluidPage(
                     label = "dpi",
                     value = 300
                   ),
-                  shiny::downloadButton(outputId = "plot_measurement_value_as_concept_download", label = "Download")
+                  shiny::downloadButton(outputId = "plot_measurement_value_as_concept_download", label = "Download"),
+                ),
+                bslib::popover(
+                  icon("circle-info"),
+                  gt::gt_output("measurement_value_as_concept_plot_settings"),
+                  placement = "bottom",
+                  options = list(
+                    customClass = "log-popover-wide",
+                    container = "body"
+                  )
                 ),
                 class = "text-end"
               ),
@@ -993,6 +1092,15 @@ ui <- fluidPage(
               full_screen = TRUE,
               bslib::card_header(
                 shiny::downloadButton(outputId = "measurement_value_as_number_gt_download", label = ""),
+                bslib::popover(
+                  icon("circle-info"),
+                  gt::gt_output("measurement_value_as_number_table_settings"),
+                  placement = "bottom",
+                  options = list(
+                    customClass = "log-popover-wide",
+                    container = "body"
+                  )
+                ),
                 class = "text-end"
               ),
               bslib::layout_sidebar(
@@ -1033,7 +1141,16 @@ ui <- fluidPage(
                     label = "dpi",
                     value = 300
                   ),
-                  shiny::downloadButton(outputId = "plot_measurement_value_as_number_download", label = "Download")
+                  shiny::downloadButton(outputId = "plot_measurement_value_as_number_download", label = "Download"),
+                ),
+                bslib::popover(
+                  icon("circle-info"),
+                  gt::gt_output("measurement_value_as_number_plot_settings"),
+                  placement = "bottom",
+                  options = list(
+                    customClass = "log-popover-wide",
+                    container = "body"
+                  )
                 ),
                 class = "text-end"
               ),
@@ -1192,6 +1309,15 @@ ui <- fluidPage(
                 full_screen = TRUE,
                 bslib::card_header(
                   shiny::downloadButton(outputId = "drug_diagnostics_gt_download", label = ""),
+                  bslib::popover(
+                    icon("circle-info"),
+                    gt::gt_output("drug_diagnostics_settings"),
+                    placement = "bottom",
+                    options = list(
+                      customClass = "log-popover-wide",
+                      container = "body"
+                    )
+                  ),
                   class = "text-end"
                 ),
                 gt::gt_output("drug_diagnostics_tbl") |> withSpinner()
@@ -1200,7 +1326,7 @@ ui <- fluidPage(
           )
         )
       )
-      ## drug_diagnostics_end
+      ## drug_diagnostics_end ----
     ),
     # codelistDiagnostics_end ----
     # cohortDiagnostics_start -----
@@ -1295,6 +1421,15 @@ ui <- fluidPage(
                 full_screen = TRUE,
                 bslib::card_header(
                   shiny::downloadButton(outputId = "summarise_cohort_count_gt_download", label = ""),
+                  bslib::popover(
+                    icon("circle-info"),
+                    gt::gt_output("summarise_cohort_count_settings"),
+                    placement = "bottom",
+                    options = list(
+                      customClass = "log-popover-wide",
+                      container = "body"
+                    )
+                  ),
                   class = "text-end"
                 ),
                 gt::gt_output("summarise_cohort_count_gt") |> withSpinner()
@@ -1306,6 +1441,15 @@ ui <- fluidPage(
                 full_screen = TRUE,
                 bslib::card_header(
                   shiny::downloadButton(outputId = "summarise_cohort_attrition_gt_download", label = ""),
+                  bslib::popover(
+                    icon("circle-info"),
+                    gt::gt_output("summarise_cohort_attrition_settings"),
+                    placement = "bottom",
+                    options = list(
+                      customClass = "log-popover-wide",
+                      container = "body"
+                    )
+                  ),
                   class = "text-end"
                 ),
                 gt::gt_output("summarise_cohort_attrition_gt") |> withSpinner()
@@ -1329,6 +1473,15 @@ ui <- fluidPage(
                       value = 10
                     ),
                     shiny::downloadButton(outputId = "summarise_cohort_attrition_grViz_download", label = "Download")
+                  ),
+                  bslib::popover(
+                    icon("circle-info"),
+                    gt::gt_output("summarise_cohort_attrition_flowchart_settings"),
+                    placement = "bottom",
+                    options = list(
+                      customClass = "log-popover-wide",
+                      container = "body"
+                    )
                   ),
                   class = "text-end"
                 ),
@@ -1417,6 +1570,15 @@ ui <- fluidPage(
                 full_screen = TRUE,
                 bslib::card_header(
                   shiny::downloadButton(outputId = "summarise_characteristics_gt_download", label = ""),
+                  bslib::popover(
+                    icon("circle-info"),
+                    gt::gt_output("summarise_characteristics_settings"),
+                    placement = "bottom",
+                    options = list(
+                      customClass = "log-popover-wide",
+                      container = "body"
+                    )
+                  ),
                   class = "text-end"
                 ),
                 bslib::layout_sidebar(
@@ -1459,7 +1621,16 @@ ui <- fluidPage(
                       label = "dpi",
                       value = 300
                     ),
-                    shiny::downloadButton(outputId = "plot_age_pyramid_download", label = "Download")
+                    shiny::downloadButton(outputId = "plot_age_pyramid_download", label = "Download"),
+                  ),
+                  bslib::popover(
+                    icon("circle-info"),
+                    gt::gt_output("summarise_age_pyramid_settings"),
+                    placement = "bottom",
+                    options = list(
+                      customClass = "log-popover-wide",
+                      container = "body"
+                    )
                   ),
                   class = "text-end",
                 ),
@@ -1579,7 +1750,16 @@ ui <- fluidPage(
               bslib::card(
                 full_screen = TRUE,
                 bslib::card_header(
-                  shiny::downloadButton(outputId = "summarise_large_scale_characteristics_tidy_download", label = ""),,
+                  shiny::downloadButton(outputId = "summarise_large_scale_characteristics_tidy_download", label = ""),
+                  bslib::popover(
+                    icon("circle-info"),
+                    gt::gt_output("summarise_large_scale_characteristics_settings"),
+                    placement = "bottom",
+                    options = list(
+                      customClass = "log-popover-wide",
+                      container = "body"
+                    )
+                  ),
                   class = "text-end"
                 ),
                 htmltools::tags$p(style = "font-size: 0.75em;", msgCohortSample),
@@ -1592,6 +1772,15 @@ ui <- fluidPage(
                 full_screen = TRUE,
                 bslib::card_header(
                   shiny::downloadButton(outputId = "summarise_large_scale_characteristics_gt_download", label = ""),
+                  bslib::popover(
+                    icon("circle-info"),
+                    gt::gt_output("summarise_large_scale_characteristics_table_settings"),
+                    placement = "bottom",
+                    options = list(
+                      customClass = "log-popover-wide",
+                      container = "body"
+                    )
+                  ),
                   class = "text-end"
                 ),
                 bslib::layout_sidebar(
@@ -1617,8 +1806,6 @@ ui <- fluidPage(
       ## compare_large_scale_characteristics_start -----
       bslib::nav_panel(
         title = "Compare large scale characteristics",
-
-
         bslib::accordion(
           bslib::accordion_panel(
             title = "Shared inputs",
@@ -1749,6 +1936,15 @@ ui <- fluidPage(
                 full_screen = TRUE,
                 bslib::card_header(
                   shiny::downloadButton(outputId = "compare_large_scale_characteristics_tidy_download", label = ""),
+                  bslib::popover(
+                    icon("circle-info"),
+                    gt::gt_output("compare_large_scale_characteristics_table_settings"),
+                    placement = "bottom",
+                    options = list(
+                      customClass = "log-popover-wide",
+                      container = "body"
+                    )
+                  ),
                   class = "text-end"
                 ),
                 htmltools::tags$p(style = "font-size: 0.75em;", msgCohortSample),
@@ -1786,6 +1982,15 @@ ui <- fluidPage(
                       value = 300
                     ),
                     shiny::downloadButton(outputId = "plot_compare_large_scale_characteristics_download", label = "Download")
+                  ),
+                  bslib::popover(
+                    icon("circle-info"),
+                    gt::gt_output("compare_large_scale_characteristics_plot_settings"),
+                    placement = "bottom",
+                    options = list(
+                      customClass = "log-popover-wide",
+                      container = "body"
+                    )
                   ),
                   class = "text-end"
                 ),
@@ -1902,6 +2107,15 @@ ui <- fluidPage(
                 full_screen = TRUE,
                 bslib::card_header(
                   shiny::downloadButton(outputId = "summarise_cohort_overlap_gt_download", label = ""),
+                  bslib::popover(
+                    icon("circle-info"),
+                    gt::gt_output("cohort_overlap_table_settings"),
+                    placement = "bottom",
+                    options = list(
+                      customClass = "log-popover-wide",
+                      container = "body"
+                    )
+                  ),
                   class = "text-end"
                 ),
                 bslib::layout_sidebar(
@@ -1957,6 +2171,15 @@ ui <- fluidPage(
                     ),
                     shiny::downloadButton(outputId = "summarise_cohort_overlap_plot_download", label = "Download")
                   ),
+                  bslib::popover(
+                    icon("circle-info"),
+                    gt::gt_output("cohort_overlap_plot_settings"),
+                    placement = "bottom",
+                    options = list(
+                      customClass = "log-popover-wide",
+                      container = "body"
+                    )
+                  ),
                   class = "text-end"
                 ),
                 bslib::layout_sidebar(
@@ -2002,6 +2225,15 @@ ui <- fluidPage(
                 full_screen = TRUE,
                 bslib::card_header(
                   shiny::downloadButton(outputId = "summarise_cohort_timing_gt_download", label = ""),
+                  bslib::popover(
+                    icon("circle-info"),
+                    gt::gt_output("cohort_timing_table_settings"),
+                    placement = "bottom",
+                    options = list(
+                      customClass = "log-popover-wide",
+                      container = "body"
+                    )
+                  ),
                   class = "text-end"
                 ),
                 bslib::layout_sidebar(
@@ -2056,6 +2288,15 @@ ui <- fluidPage(
                       value = 300
                     ),
                     shiny::downloadButton(outputId = "summarise_cohort_timing_plot_download", label = "Download")
+                  ),
+                  bslib::popover(
+                    icon("circle-info"),
+                    gt::gt_output("cohort_timing_plot_settings"),
+                    placement = "bottom",
+                    options = list(
+                      customClass = "log-popover-wide",
+                      container = "body"
+                    )
                   ),
                   class = "text-end"
                 ),
@@ -2187,6 +2428,15 @@ ui <- fluidPage(
                 full_screen = TRUE,
                 bslib::card_header(
                   shiny::downloadButton(outputId = "summarise_cohort_survival_gt_download", label = ""),
+                  bslib::popover(
+                    icon("circle-info"),
+                    gt::gt_output("cohort_survival_table_settings"),
+                    placement = "bottom",
+                    options = list(
+                      customClass = "log-popover-wide",
+                      container = "body"
+                    )
+                  ),
                   class = "text-end"
                 ),
                 bslib::layout_sidebar(
@@ -2230,6 +2480,15 @@ ui <- fluidPage(
                       value = 300
                     ),
                     shiny::downloadButton(outputId = "summarise_cohort_survival_plot_download", label = "Download")
+                  ),
+                  bslib::popover(
+                    icon("circle-info"),
+                    gt::gt_output("cohort_survival_plot_settings"),
+                    placement = "bottom",
+                    options = list(
+                      customClass = "log-popover-wide",
+                      container = "body"
+                    )
                   ),
                   class = "text-end"
                 ),
@@ -2386,6 +2645,15 @@ ui <- fluidPage(
                 full_screen = TRUE,
                 bslib::card_header(
                   shiny::downloadButton(outputId = "incidence_gt_download", label = ""),
+                  bslib::popover(
+                    icon("circle-info"),
+                    gt::gt_output("incidence_table_settings"),
+                    placement = "bottom",
+                    options = list(
+                      customClass = "log-popover-wide",
+                      container = "body"
+                    )
+                  ),
                   class = "text-end"
                 ),
                 htmltools::tags$p(style = "font-size: 0.75em;", msgPopulationDiag),
@@ -2422,6 +2690,15 @@ ui <- fluidPage(
                       value = 300
                     ),
                     shiny::downloadButton(outputId = "incidence_plot_download", label = "Download")
+                  ),
+                  bslib::popover(
+                    icon("circle-info"),
+                    gt::gt_output("incidence_plot_settings"),
+                    placement = "bottom",
+                    options = list(
+                      customClass = "log-popover-wide",
+                      container = "body"
+                    )
                   ),
                   class = "text-end"
                 ),
@@ -2595,6 +2872,15 @@ ui <- fluidPage(
                 full_screen = TRUE,
                 bslib::card_header(
                   shiny::downloadButton(outputId = "prevalence_gt_download", label = ""),
+                  bslib::popover(
+                    icon("circle-info"),
+                    gt::gt_output("prevalence_table_settings"),
+                    placement = "bottom",
+                    options = list(
+                      customClass = "log-popover-wide",
+                      container = "body"
+                    )
+                  ),
                   class = "text-end"
                 ),
                 htmltools::tags$p(style = "font-size: 0.75em;", gsub("Incidence", "Prevalence", msgPopulationDiag)),
@@ -2631,6 +2917,15 @@ ui <- fluidPage(
                       value = 300
                     ),
                     shiny::downloadButton(outputId = "prevalence_plot_download", label = "Download")
+                  ),
+                  bslib::popover(
+                    icon("circle-info"),
+                    gt::gt_output("prevalence_plot_settings"),
+                    placement = "bottom",
+                    options = list(
+                      customClass = "log-popover-wide",
+                      container = "body"
+                    )
                   ),
                   class = "text-end"
                 ),

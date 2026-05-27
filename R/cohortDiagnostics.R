@@ -31,9 +31,11 @@
 #'
 #' @examples
 #' \donttest{
+#'
 #' library(omock)
 #' library(CohortConstructor)
 #' library(PhenotypeR)
+#' library(omock)
 #' library(CDMConnector)
 #'
 #' cdm <- mockCdmFromDataset(source = "duckdb")
@@ -51,7 +53,7 @@ cohortDiagnostics <- function(cohort,
                               cohortCount = TRUE,
                               cohortCharacteristics = TRUE,
                               largeScaleCharacteristics = TRUE,
-                              compareCohorts = TRUE,
+                              compareCohorts = FALSE,
                               cohortSurvival = FALSE,
                               cohortSample = 20000,
                               matchedSample = 1000){
@@ -93,10 +95,13 @@ cohortDiagnostics <- function(cohort,
       CohortCharacteristics::summariseCohortCount(cohortId = cohortId)
   }
 
-  cohortNameSampled <- paste0(prefix, "sampled")
+  cohortNameSampledIndependent <- paste0(prefix, "sampled_independent")
+  cohortNameSampledJoint <- paste0(prefix, "sampled_joint")
+
   if(is.null(cohortSample)){
-    cdm[[cohortNameSampled]] <- CohortConstructor::copyCohorts(cdm[[cohortName]], cohortId = cohortId, name = cohortNameSampled)
-  }else{
+    cdm[[cohortNameSampledIndependent]] <- CohortConstructor::copyCohorts(cdm[[cohortName]], cohortId = cohortId, name = cohortNameSampledIndependent)
+    cdm[[cohortNameSampledJoint]] <- CohortConstructor::copyCohorts(cdm[[cohortName]], cohortId = cohortId, name = cohortNameSampledJoint)
+    }else{
     # Check cohort sizes
     x <- cohort |>
       omopgenerics::cohortCount() |>
@@ -106,18 +111,28 @@ cohortDiagnostics <- function(cohort,
 
     if(nrow(x) == 0){
       cli::cli_bullets(c(">" = "Skipping cohort sampling as all cohorts have less than {cohortSample} individuals."))
-      cdm[[cohortNameSampled]] <- CohortConstructor::copyCohorts(cdm[[cohortName]], cohortId = cohortId, name = cohortNameSampled)
+      cdm[[cohortNameSampledIndependent]] <- CohortConstructor::copyCohorts(cdm[[cohortName]], cohortId = cohortId, name = cohortNameSampledIndependent)
+      cdm[[cohortNameSampledJoint]] <- CohortConstructor::copyCohorts(cdm[[cohortName]], cohortId = cohortId, name = cohortNameSampledJoint)
+
     }else{
       if (!is.null(getOption("omopgenerics.logFile"))) {
-        omopgenerics::logMessage(paste0("Cohort diagnostics - sampling cohorts to up to ", cohortSample, " individuals"))
+        omopgenerics::logMessage(paste0("Cohort diagnostics - independent sampling cohorts to up to ", cohortSample, " individuals"))
       }
-      cdm[[cohortNameSampled]] <- CohortConstructor::sampleCohorts(cdm[[cohortName]],
-                                                                   cohortId = cohortId,
-                                                                   independent = FALSE,
+      cdm[[cohortNameSampledIndependent]] <- CohortConstructor::sampleCohorts(CohortConstructor::subsetCohorts(cohort, cohortId = cohortId),
+                                                                   independent = TRUE,
                                                                    n = cohortSample,
-                                                                   name = cohortNameSampled)
+                                                                   name = cohortNameSampledIndependent)
+      if(isTRUE(compareCohorts)){
+      if (!is.null(getOption("omopgenerics.logFile"))) {
+        omopgenerics::logMessage(paste0("Cohort diagnostics - dependent sampling cohorts to up to ", cohortSample, " individuals (for cohort comparisons)" ))
+      }
+      cdm[[cohortNameSampledJoint]] <- CohortConstructor::sampleCohorts(CohortConstructor::subsetCohorts(cohort, cohortId = cohortId),
+                                                                              independent = FALSE,
+                                                                              n = cohortSample,
+                                                                              name = cohortNameSampledJoint)
     }
-  }
+    }
+    }
 
   # Compare cohorts ----
   # if there is more than one cohort, we'll get timing and overlap of all together
@@ -125,13 +140,14 @@ cohortDiagnostics <- function(cohort,
     if (!is.null(getOption("omopgenerics.logFile"))) {
       omopgenerics::logMessage("Cohort diagnostics - cohort overlap")
     }
-    results[["cohort_overlap"]] <-  cdm[[cohortNameSampled]] |>
+
+    results[["cohort_overlap"]] <-  cdm[[cohortNameSampledJoint]] |>
       CohortCharacteristics::summariseCohortOverlap()
 
     if (!is.null(getOption("omopgenerics.logFile"))) {
       omopgenerics::logMessage("Cohort diagnostics - cohort timing")
     }
-    results[["cohort_timing"]] <- cdm[[cohortNameSampled]] |>
+    results[["cohort_timing"]] <- cdm[[cohortNameSampledJoint]] |>
       CohortCharacteristics::summariseCohortTiming(estimates = c("median", "q25", "q75", "min", "max", "density"))
   }
 
@@ -140,10 +156,10 @@ cohortDiagnostics <- function(cohort,
     if (!is.null(getOption("omopgenerics.logFile"))) {
       omopgenerics::logMessage("Cohort diagnostics - matched cohorts")
     }
-    cdm <- createMatchedCohorts(cdm, tempCohortName, cohortNameSampled, cohortIds, matchedSample)
-    cdm <- bind(cdm[[cohortNameSampled]], cdm[[tempCohortName]], name = tempCohortName)
+    cdm <- createMatchedCohorts(cdm, tempCohortName, cohortNameSampledIndependent, cohortIds, matchedSample)
+    cdm <- bind(cdm[[cohortNameSampledIndependent]], cdm[[tempCohortName]], name = tempCohortName)
   }else{
-    cdm[[tempCohortName]] <- CohortConstructor::copyCohorts(cdm[[cohortNameSampled]],
+    cdm[[tempCohortName]] <- CohortConstructor::copyCohorts(cdm[[cohortNameSampledIndependent]],
                                                             name = tempCohortName)
   }
 
@@ -176,20 +192,51 @@ cohortDiagnostics <- function(cohort,
     if (!is.null(getOption("omopgenerics.logFile"))) {
       omopgenerics::logMessage("Cohort diagnostics - age density")
     }
-    results[["cohort_density"]] <- cdm[[tempCohortName]] |>
-      PatientProfiles::addCohortName() |>
-      PatientProfiles::summariseResult(
-        counts = FALSE,
-        strata    = "sex",
-        includeOverallStrata = FALSE,
-        group     = "cohort_name",
-        includeOverallGroup  = FALSE,
-        variables = "age",
-        estimates = "density"
-      )
+
+    # Check cohort sizes
+    x <- cdm[[tempCohortName]] |>
+      omopgenerics::settings() |>
+      dplyr::filter(!grepl("_matched", .data$cohort_name)) |>
+      dplyr::pull("cohort_definition_id")
+
+    cohortDefinitionIds <- cdm[[tempCohortName]] |>
+      omopgenerics::cohortCount() |>
+      dplyr::filter(.data$cohort_definition_id %in% x,
+                    .data$number_subjects > 100) |>
+      dplyr::pull("cohort_definition_id")
+
+    if(length(cohortDefinitionIds) >= 1) {
+
+      cohortDefinitionIds <- cdm[[tempCohortName]] |>
+        omopgenerics::cohortCount() |>
+        dplyr::filter(.data$number_subjects >= 100) |>
+        dplyr::pull("cohort_definition_id")
+
+      results[["cohort_density"]] <- cdm[[tempCohortName]] |>
+        CohortConstructor::subsetCohorts(cohortId = cohortDefinitionIds) |>
+        PatientProfiles::addCohortName() |>
+        PatientProfiles::summariseResult(
+          counts = FALSE,
+          strata    = "sex",
+          includeOverallStrata = FALSE,
+          group     = "cohort_name",
+          includeOverallGroup  = FALSE,
+          variables = "age",
+          estimates = "density"
+        )
+
+      x <- setdiff(cdm[[tempCohortName]] |> omopgenerics::settings() |> dplyr::pull("cohort_definition_id"), cohortDefinitionIds)
+      if(length(x) != 0) {
+        names <- omopgenerics::getCohortName(cdm[[tempCohortName]], x)
+        cli::cli_warn("Cohorts {names} have less than 100 subjects. Age distribution will not be calculated for {?this cohort/these cohorts}.")
+      }
+    } else {
+      cli::cli_warn("No cohorts have more than 100 subjects. Age distribution will not be calculated.")
+    }
   }
 
   # Large scale characteristics ----
+  lscCohortName <- tempCohortName
   if(isTRUE(largeScaleCharacteristics)) {
 
     lscWindows <- getOption("PhenotypeR_summariseLargeScaleCharacteristics_window")
@@ -205,7 +252,6 @@ cohortDiagnostics <- function(cohort,
     lscTableEvents <- getOption("PhenotypeR_summariseLargeScaleCharacteristics_eventInWindow")
     if(is.null(lscTableEvents)){
     lscTableEvents<-c("condition_occurrence",
-                      "visit_occurrence",
                       # "visit_detail",  # not currently supported by CohortCharacteristics
                       "measurement",
                       "procedure_occurrence",
@@ -215,12 +261,12 @@ cohortDiagnostics <- function(cohort,
     } else{
       cli::cli_inform("Using user specified event tables for large scale characteristics set via global option: {lscTableEvents}")
     }
-    lscTableEvents<-intersect(lscTableEvents, names(cdm))
+    lscTableEvents <-intersect(lscTableEvents, names(cdm))
 
 
     lscTableEpisodes <- getOption("PhenotypeR_summariseLargeScaleCharacteristics_episodeInWindow")
     if(is.null(lscTableEpisodes)){
-      lscTableEpisodes<- c("drug_exposure", "drug_era")
+      lscTableEpisodes<- c("drug_exposure", "drug_era", "visit_occurrence")
       cli::cli_inform("Using defaults for episode tables for large scale characteristics: {lscTableEpisodes}. These can be changed via passing alternative windows as a global option `PhenotypeR_summariseLargeScaleCharacteristics_episodeInWindow`")
     } else{
       cli::cli_inform("Using user specified episode tables for large scale characteristics set via global option: {lscTableEpisodes}")
@@ -251,8 +297,6 @@ cohortDiagnostics <- function(cohort,
           name = lscCohortName, temporary = FALSE,
           logPrefix = "CohortConstructor_sampleCohorts_first_"
         )
-    } else{
-      lscCohortName <- tempCohortName
     }
 
     results[["lsc_standard"]] <- CohortCharacteristics::summariseLargeScaleCharacteristics(

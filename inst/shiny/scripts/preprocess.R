@@ -20,6 +20,11 @@ library(qs2)
 
 source(here::here("scripts", "functions.R"))
 
+# Background descriptions
+cli::cli_inform("Importing descriptions")
+clinical_descriptions <- PhenotypeR::importClinicalDescription(here::here("data", "raw", "clinical_descriptions"))
+database_descriptions <- PhenotypeR::importDatabaseDescription(here::here("data", "raw", "database_descriptions"))
+
 # Create results list
 cli::cli_inform("Importing results")
 result <- omopgenerics::importSummarisedResult(file.path(getwd(),"data", "raw"), recursive = FALSE)
@@ -48,35 +53,37 @@ resultList <- setNames(lapply(data, function(x) list(result_type = x)), data)
 # Prepare
 dataFiltered <- prepareResult(result, resultList)
 values <- getValues(result, resultList)
+settingsFiltered <- getSettingsResult(result, resultList)
 
 if(length(dataFiltered) > 0){
   diagnostics <- omopgenerics::settings(result) |> dplyr::pull("diagnostic") |> unique()
-  values$shared_cdm_names <- rbind(dataFiltered$summarise_omop_snapshot,
-                                   dataFiltered$cohort_code_use,
-                                   dataFiltered$summarise_cohort_count,
-                                   dataFiltered$incidence) |>
+  values$shared_cdm_names <- result |>
     dplyr::select("cdm_name") |>
     dplyr::distinct() |>
     dplyr::pull("cdm_name") |>
     sort()
-  if((length(diagnostics) > 1 || diagnostics != "databaseDiagnostics")) {
+
+  if((length(diagnostics) >= 1 || diagnostics != "databaseDiagnostics")) {
     # Common variables
     if(length(diagnostics) == 1 && diagnostics == "populationDiagnostics"){
-      values$shared_cohort_names <- dataFiltered$incidence |>
+      values$shared_cohort_names <- result |>
         visOmopResults::splitGroup() |>
         dplyr::pull("outcome_cohort_name") |>
         unique() |>
         sort()
     }else{
-      values$shared_cohort_names <- rbind(dataFiltered$cohort_code_use, dataFiltered$summarise_cohort_count, dataFiltered$incidence) |>
-        dplyr::mutate(group_name = gsub("outcome_cohort_name", "cohort_name", group_name)) |>
+      values$shared_cohort_names <- result |>
         visOmopResults::splitGroup() |>
-        dplyr::select("cohort_name") |>
+        dplyr::select(dplyr::any_of(c("cohort_name", "outcome_cohort_name"))) |>
         dplyr::distinct() |>
-        dplyr::filter(cohort_name != "overall") |>
-        dplyr::pull("cohort_name") |>
+        dplyr::filter(!grepl("_sampled|_matched", cohort_name),
+                      cohort_name != "overall")
+      values$shared_cohort_names  <- c(values$shared_cohort_names$cohort_name,
+                                       values$shared_cohort_names$outcome_cohort_name) |>
+        unique() |>
         sort()
     }
+    values$shared_cohort_names <- values$shared_cohort_names[values$shared_cohort_names != "overall"]
   }
 }else{
   diagnostics <- ""
@@ -117,24 +124,24 @@ if("summarise_dob_density" %in% names(dataFiltered)){
     dplyr::pull("max_dob") |>
     lubridate::ceiling_date(unit = "years")
 } else {
-  minDob <- as.Date(NA)
-  maxDob <- as.Date(NA)
+  minDob <- c(as.Date("1900-01-01"))
+  maxDob <- Sys.Date()
 }
 
-if("summarise_dob_density" %in% names(dataFiltered)){
+if("summarise_obs_density" %in% names(dataFiltered)){
   minObs <- dataFiltered$summarise_obs_density |>
     omopgenerics::tidy() |>
     dplyr::summarise(min_obs = min(density_x, na.rm = TRUE)) |>
     dplyr::pull("min_obs") |>
     lubridate::floor_date(unit = "years")
-  maxObs <- dataFiltered$summarise_dob_density |>
+  maxObs <- dataFiltered$summarise_obs_density |>
     omopgenerics::tidy() |>
     dplyr::summarise(max_obs = max(density_x, na.rm = TRUE)) |>
     dplyr::pull("max_obs") |>
     lubridate::ceiling_date(unit = "years")
 } else {
-  minObs <- as.Date(NA)
-  maxObs <- as.Date(NA)
+  minObs <- c(as.Date("1900-01-01"))
+  maxObs <- Sys.Date()
 }
 
 if("summarise_trend" %in% names(dataFiltered)){
@@ -170,10 +177,10 @@ if("cohortDiagnostics" %in% diagnostics){
   values_subset$compare_large_scale_characteristics_cohort_2 <- c("original", "sampled", "matched")
   values_subset$compare_large_scale_characteristics_cohort_name <- values$shared_cohort_names
   values_subset$compare_large_scale_characteristics_cohort_compare <- values$shared_cohort_names
-  values_subset$compare_large_scale_characteristics_variable_level <- c("-inf to -366", "-365 to -31", "-30 to -1", "0 to 0", "1 to 30", "31 to 365", "366 to inf")
+  values_subset$compare_large_scale_characteristics_variable_level <-values_subset$compare_large_scale_characteristics_variable_level[order(as.numeric(sub(" .*$", "", values_subset$compare_large_scale_characteristics_variable_level)))]
   values <- append(values, values_subset)
 
-  values$summarise_large_scale_characteristics_variable_level <-c("-inf to -366", "-365 to -31", "-30 to -1", "0 to 0", "1 to 30", "31 to 365", "366 to inf")
+  values$summarise_large_scale_characteristics_variable_level <- values_subset$compare_large_scale_characteristics_variable_level
 
   if("summarise_cohort_overlap" %in% names(dataFiltered)){
     values$summarise_cohort_overlap_cohort_comparator <- values$summarise_cohort_overlap_cohort_name_comparator
@@ -207,32 +214,38 @@ if("summarise_drug_use" %in% names(dataFiltered)){
 }
 
 if("cohortDiagnostics" %in% diagnostics){
-  selected$summarise_large_scale_characteristics_variable_level <- "-inf to -366"
-  selected$compare_large_scale_characteristics_variable_level <- "-inf to -366"
-  selected$compare_large_scale_characteristics_table_name     <- "condition_occurrence"
-  selected$compare_large_scale_characteristics_cohort_1  <- "sampled"
-  selected$compare_large_scale_characteristics_cohort_2  <- "matched"
-  selected$compare_large_scale_characteristics_cohort_compare <- values$compare_large_scale_characteristics_cohort_compare[1]
-  if("survival_probability" %in% names(dataFiltered)){
-    selected$survival_probability_cohort_name <- c(paste0(gsub("_matched|sampled", "", selected$survival_probability_cohort_name[1]),"_sampled"),
-                                                   paste0(gsub("_matched|sampled", "", selected$survival_probability_cohort_name[1]),"_matched"))
-
-  }
+  settings_cohort_diagnostics <- omopgenerics::settings(result) |>
+    dplyr::filter(diagnostic == "cohortDiagnostics")
 
   typeCohort <- "original"
-  if("cohort_sample" %in% (omopgenerics::settings(result) |> colnames())){
-    cohort_sample <- as.numeric(omopgenerics::settings(dataFiltered$summarise_large_scale_characteristics) |> dplyr::pull("cohort_sample") |> unique())
+  if("cohort_sample" %in% colnames(settings_cohort_diagnostics)) {
+    cohort_sample <- unique(settings_cohort_diagnostics$cohort_sample)
     cohort_sample <- formatC(cohort_sample, format = "f", digits = 0, big.mark = ",")
     msgCohortSample <- glue::glue("Cohorts were jointly sampled to up to {cohort_sample} participants")
     typeCohort <- "sampled"
   }
 
-  if("matched_sample" %in% (omopgenerics::settings(result) |> colnames())){
-    matched_sample <- as.numeric(omopgenerics::settings(dataFiltered$summarise_large_scale_characteristics) |> dplyr::pull("matched_sample") |> unique())
+  if("matched_sample" %in% colnames(settings_cohort_diagnostics)){
+    matched_sample <-  unique(settings_cohort_diagnostics$matched_sample)
     if(all(matched_sample != 0)){
       matched_sample <- formatC(matched_sample, format = "f", digits = 0, big.mark = ",")
       msgMatchedSample <- glue::glue("Matched cohorts were created based on a subsample of ", paste(matched_sample, collapse = " and ")," participants from the {typeCohort} cohorts.")
     }
+  }
+
+  if("summarise_large_scale_characteristics" %in% settings_cohort_diagnostics$result_type) {
+    selected$summarise_large_scale_characteristics_variable_level <- selected$summarise_large_scale_characteristics_variable_level[1]
+    selected$compare_large_scale_characteristics_variable_level <- selected$compare_large_scale_characteristics_variable_level[1]
+    selected$compare_large_scale_characteristics_table_name     <- "condition_occurrence"
+    selected$compare_large_scale_characteristics_cohort_1  <- "sampled"
+    selected$compare_large_scale_characteristics_cohort_2  <- "matched"
+    selected$compare_large_scale_characteristics_cohort_compare <- values$compare_large_scale_characteristics_cohort_compare[1]
+  }
+
+  if("survival_probability" %in% settings_cohort_diagnostics$result_type){
+    selected$survival_probability_cohort_name <- c(paste0(gsub("_matched|sampled", "", selected$survival_probability_cohort_name[1]),"_sampled"),
+                                                   paste0(gsub("_matched|sampled", "", selected$survival_probability_cohort_name[1]),"_matched"))
+
   }
 }
 
@@ -300,111 +313,15 @@ if(length(phenotyper_version)>1){
   phenotyper_version <- paste0(phenotyper_version, collapse = "; ")
 }
 
-# Load clinical description ----
-if(!is.null(values$shared_cohort_names)){
-docs <- purrr::imap(
-  rlang::set_names(values$shared_cohort_names),
-  \(x, name) {
-    path <- file.path("data", "raw", "clinical_descriptions", paste0(name, ".docx"))
-    if (!file.exists(path)) return(NULL)
-    path
-  })
-} else {
-  docs <- list()
-}
-
-# Check for other docx files in the folder
-other <- list.files(path = file.path("data","raw","clinical_descriptions"), pattern = "\\.docx$")
-other <- gsub(".docx","",other)
-other <- setdiff(other, names(docs))
-if(length(other)) {
-  cli::cli_warn("A docx file ({other}) was found in 'data/raw/clinical_descriptions' that does not match any cohort name. This file will be ignored. Please note that clinical description documents must be named exactly the same as their corresponding cohort.")
-}
-
-# Read clinical descriptions
-clinical_descriptions <- list()
-for(i in seq_along(docs)){
-  name <- names(docs)[[i]]
-
-  if(length(docs[[i]]) == 0){
-    clinical_descriptions[[name]] <- dplyr::tibble(
-      "phenotype" = name,
-      "author" = NA_character_,
-      "key_sources" = NA_character_,
-      "date" = NA_character_,
-      "background" = list("item" = ""),
-      "phenotyping_plan" = list("item" = "")
-    )
-  }else{
-    path_docx <- here::here(docs[[i]])
-
-    text <- parse_docx_runs(path_docx, folder = "clinical_descriptions")
-
-    clinical_descriptions[[name]] <- tibble::tibble(
-      "phenotype" = find_info_in_the_line(text, "Phenotype name:"),
-      "author" = find_info_in_the_line(text, "author:"),
-      "date" = find_info_in_the_line(text, "Date:"),
-      "key_sources" = find_info_in_the_paragraph(text, start = "Information source", end = "Introduction", addStyle = FALSE, removeFirstTitle = TRUE),
-      "background" = list("item" = find_info_in_the_paragraph(text, start = "Introduction", end = "Phenotyping plan", addStyle = TRUE, removeFirstTitle = FALSE)),
-      "phenotyping_plan" = list("item" = find_info_in_the_paragraph(text, start = "Phenotyping plan", end = NULL, addStyle = TRUE, removeFirstTitle = FALSE))
-    )
-  }
-}
-
-clinical_descriptions <- dplyr::bind_rows(clinical_descriptions, .id = "phenotype")
-
-# Load database description ----
-docs <- purrr::imap(
-  rlang::set_names(values$shared_cdm_names),
-  \(x, name) {
-    path <- file.path("data", "raw", "database_descriptions", paste0(name, ".docx"))
-    if (!file.exists(path)) return(NULL)
-    path
-  })
-
-# Check for other docx files in the folder
-other <- list.files(path = file.path("data","raw","database_descriptions"), pattern = "\\.docx$")
-other <- gsub(".docx","",other)
-other <- setdiff(other, names(docs))
-if(length(other)) {
-  cli::cli_warn("A docx file ({other}) was found in 'data/raw/database_descriptions' that does not match any database name. This file will be ignored. Please note that database description documents must be named exactly the same as their corresponding database.")
-}
-
-
-# Read database descriptions
-database_descriptions <- list()
-for(i in seq_along(docs)){
-  name <- names(docs)[[i]]
-
-  if(length(docs[[i]]) == 0){
-    database_descriptions[[name]] <- dplyr::tibble(
-      "database" = name,
-      "author" = NA_character_,
-      "key_sources" = NA_character_,
-      "date" = NA_character_,
-      "description" = list("item" = "No database description for this database.")
-    )
-  }else{
-    path_docx <- here::here(docs[[i]])
-    text <- parse_docx_runs(path_docx, folder = "database_descriptions")
-
-    database_descriptions[[name]] <- dplyr::tibble(
-      "database" = find_info_in_the_line(text, "database name:"),
-      "author" = find_info_in_the_line(text, "author:"),
-      "date" = find_info_in_the_line(text, "Date:"),
-      "key_sources" = find_info_in_the_paragraph(text, start = "Information source", end = "Description", addStyle = FALSE, removeFirstTitle = TRUE),
-      "description" = list("item" = find_info_in_the_paragraph(text, start = "Description", end = NULL, addStyle = TRUE, removeFirstTitle = FALSE))
-    )
-  }
-}
-
-database_descriptions <- dplyr::bind_rows(database_descriptions, .id = "database")
-
-clinical_descriptions <- purrr::compact(clinical_descriptions)
 selected$summarise_clinical_description_cohort_name <- selected$shared_cohort_names
 choices$summarise_clinical_description_cohort_name <- choices$shared_cohort_names
 selected$summarise_database_description_cdm_name <- selected$shared_cdm_names
 choices$summarise_database_description_cdm_name <- choices$shared_cdm_names
+
+# Settings pop out----
+settingsFiltered <- purrr::map(names(settingsFiltered),
+                               \(x) tidySettings(settingsFiltered, x)) |>
+  stats::setNames(names(settingsFiltered))
 
 cli::cli_inform("Saving data for shiny")
 qs2::qs_savem(dataFiltered,
@@ -425,8 +342,10 @@ qs2::qs_savem(dataFiltered,
               expectations,
               clinical_descriptions,
               database_descriptions,
+              settingsFiltered,
               file = here::here("data", "appData.qs"))
 
 rm(result, data, expectations, dataFiltered, choices, selected, values, values_subset,
    clinical_descriptions, database_descriptions)
+
 

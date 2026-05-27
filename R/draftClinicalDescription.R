@@ -1,17 +1,18 @@
 
-#' Get clinical descriptions using an LLM
+#' Draft clinical descriptions using an LLM
 #'
 #' @param chat An ellmer chat
 #' @param name Clinical event of interest
 #' @param outputDir Folder to save clinical descriptions.
 #'
-#' @returns Creates a word document with a clinical description for each event.
+#' @returns Creates a draft clinical description for each event of interest.
 #' @export
 #'
-getClinicalDescription <- function(chat, name, outputDir){
+draftClinicalDescription <- function(chat, name, outputDir){
 
   rlang::check_installed("ellmer")
-  rlang::check_installed("officer")
+  rlang::check_installed("jsonlite")
+  rlang::check_installed("jsonvalidate")
   rlang::check_installed("fs")
 
   model_name <- chat$get_model()
@@ -39,7 +40,7 @@ getClinicalDescription <- function(chat, name, outputDir){
 
 fetchClinicalDescription <- function(chat, name){
 
-  cli::cli_inform("Getting clinical description for {name}")
+  cli::cli_inform("Getting clinical description for {name} using {chat$get_model()}")
 
   systemPrompt <- "You are a factual assistant helping a user working with real-world health care data. Assume the user has medical knowledge equivalent to a well-informed member of the public. Your goal is to write a clinical definition to assess the reliability of study cohorts identified in real-world data.
 
@@ -95,82 +96,143 @@ fetchClinicalDescription <- function(chat, name){
     type = type_my_df,
     echo = "none")
 
-  description <- paste(
-    "### Introduction/ synonyms",
-    chat_output$introduction_synonyms,
-    "### Clinical presentation/ symptoms",
-    chat_output$clinical_presentation_and_symptoms,
-    "### Epidemiology",
-    chat_output$epidemiology,
-    "### Assessment/ diagnosis",
-    chat_output$assessment_diagnosis,
-    "### Therapeutic plan/ treatment",
-    chat_output$therapeutic_plan_treatment,
-    "### Complications and prognosis",
-    chat_output$complications_prognosis,
-    "### Disqualifiers/ differential diagnoses",
-    chat_output$disqualifiers,
-    sep = "\n\n"
-  )
-
-  return(description)
+  return(chat_output)
 
 }
 
 exportClinicalDescription <- function(clinicalDescription, modelName, outputDir) {
 
-  for (i in seq_along(clinicalDescription)) {
+    for (i in seq_along(clinicalDescription)) {
+      name <- names(clinicalDescription)[i]
+      file_safe_name <- fs::path_sanitize(name)
+      path <- file.path(outputDir, paste0(file_safe_name, ".json"))
 
-    name <- names(clinicalDescription)[i]
-    file_safe_name <- fs::path_sanitize(name)
-    path <- file.path(outputDir, paste0(file_safe_name, ".docx"))
+      cli::cli_inform("Exporting clinical description for: '{name}'")
 
+      structured_list <- list(
+        metadata = list(
+          phenotype_name = name,
+          version = "1.0",
+          created_by = paste0(modelName, " (via PhenotypeR::draftClinicalDescription())"),
+          created_date = as.Date(Sys.Date()),
+          last_edited_by = "N/A",
+          last_edited_date = as.Date(Sys.Date()),
+          source_of_information = modelName
+        ),
+        clinical_profile = list(
+          introduction_synonyms = clinicalDescription[[i]]$introduction_synonyms,
+          clinical_presentation_and_symptoms = clinicalDescription[[i]]$clinical_presentation_and_symptoms,
+          assessment_diagnosis = clinicalDescription[[i]]$assessment_diagnosis,
+          therapeutic_plan_treatment = clinicalDescription[[i]]$therapeutic_plan_treatment,
+          complications_prognosis = clinicalDescription[[i]]$complications_prognosis,
+          disqualifiers = clinicalDescription[[i]]$disqualifiers,
+          epidemiology = clinicalDescription[[i]]$epidemiology
+        )
+      )
 
-    cli::cli_inform("Exporting word document for clinical description of {name}")
+      jsonlite::write_json(
+        structured_list,
+        path = path,
+        auto_unbox = TRUE,
+        pretty = TRUE
+      )
 
-    text <- clinicalDescription[[i]]
-
-    paragraphs <- strsplit(text, split = "\n\n") |> unlist()
-
-    template <- system.file("shiny/data/raw/clinical_descriptions/template/template_minimal.docx",
-                            package = "PhenotypeR")
-    if(!is.null(template) && file.exists(template)){
-      doc <-  officer::read_docx(path = template)
-    } else {
-      doc <- officer::read_docx()
-    }
-    italics_format <- officer::fp_text(italic = TRUE)
-
-    doc <- officer::body_add_par(doc,
-                                 value = paste0("Clinical description for ", name),
-                                 style = "Title")
-    doc <- officer::body_add_par(doc, value = "", style = "Normal")
-
-    created_on <- officer::ftext(text =  paste0("Created on ", Sys.Date()),
-                                 prop = italics_format)
-    doc <- officer::body_add_fpar(doc,
-                                  value = officer::fpar(created_on))
-    doc <- officer::body_add_par(doc, value = "", style = "Normal")
-
-    created_by <- officer::ftext(text =  paste0("Description generated by using ", modelName, " (via PhenotypeR::getClinicalDescription())"),
-                                     prop = italics_format)
-    doc <- officer::body_add_fpar(doc,
-                                  value = officer::fpar(created_by))
-
-    doc <- officer::body_add_par(doc, value = "", style = "Normal")
-
-    for (j in seq_along(paragraphs)) {
-      working_paragraph <- paragraphs[[j]]
-      working_paragraph <- trimws(working_paragraph)
-      if (grepl("^###\\s", working_paragraph)) {
-        clean_heading <- sub("^###\\s*", "", working_paragraph)
-        doc <- officer::body_add_par(doc, value = clean_heading, style = "heading 1")
-      } else {
-        doc <- officer::body_add_par(doc, value = working_paragraph, style = "Normal")
-      }
+      cli::cli_alert_success("Exported as {path}")
     }
 
-    print(doc, target = path)
-  }
-  cli::cli_alert_success("Exported as {path}")
 }
+
+#' Import clinical descriptions
+#'
+#' @param path Either a directory containing clinical descriptions or a path to
+#' a specific clinical description
+#'
+#' @returns A list of clinical descriptions
+#' @export
+importClinicalDescription <- function(path){
+
+  rlang::check_installed("jsonlite")
+  rlang::check_installed("jsonvalidate")
+
+  omopgenerics::assertCharacter(path, length = 1, call = call)
+  if (!file.exists(path)) {
+    cli::cli_abort("{.path {path}} does not exist")
+  }
+
+  if (file.info(path)$isdir) {
+    path <- list.files(path = path, full.names = TRUE)
+  }
+  path <- path[tools::file_ext(path) == "json"]
+  names(path) <- as.list(tools::file_path_sans_ext(basename(path)))
+
+  if(length(path) == 0){
+    cli::cli_warn("No clinical descriptions found")
+    return(list())
+  }
+
+  descriptions <- list()
+  for(i in seq_along(path)){
+  working_file <- path[[i]]
+  cli::cli_inform("Importing clinical description from: '{working_file}'")
+  validate <- jsonvalidate::json_validate(
+    working_file,
+    clinicalDescriptionSpecification(),
+    verbose = TRUE,
+    error = TRUE)
+  working_json <- jsonlite::read_json(working_file)
+  working_phenotype <- working_json$metadata$phenotype_name
+  descriptions[[working_phenotype]] <- working_json
+  cli::cli_alert_success("Imported clinical description: '{working_phenotype}'")
+  }
+
+  return(descriptions)
+
+}
+
+#' Import database descriptions
+#'
+#' @param path Either a directory containing database descriptions or a path to
+#' a specific database description
+#'
+#' @returns A list of database descriptions
+#' @export
+importDatabaseDescription <- function(path){
+
+  rlang::check_installed("jsonlite")
+  rlang::check_installed("jsonvalidate")
+
+  omopgenerics::assertCharacter(path, length = 1, call = call)
+  if (!file.exists(path)) {
+    cli::cli_abort("{.path {path}} does not exist")
+  }
+
+  if (file.info(path)$isdir) {
+    path <- list.files(path = path, full.names = TRUE)
+  }
+  path <- path[tools::file_ext(path) == "json"]
+  names(path) <- as.list(tools::file_path_sans_ext(basename(path)))
+
+  if(length(path) == 0){
+    cli::cli_warn("No database descriptions found")
+    return(list())
+  }
+
+  descriptions <- list()
+  for(i in seq_along(path)){
+    working_file <- path[[i]]
+    cli::cli_inform("Importing database description from: '{working_file}'")
+    validate <- jsonvalidate::json_validate(
+      working_file,
+      dataSourceDescriptionSpecification(),
+      verbose = TRUE,
+      error = TRUE)
+    working_json <- jsonlite::read_json(working_file)
+    working_database <- working_json$administrative_details$data_source_acronym
+    descriptions[[working_database]] <- working_json
+    cli::cli_alert_success("Imported database description: '{working_database}'")
+  }
+
+  return(descriptions)
+
+}
+

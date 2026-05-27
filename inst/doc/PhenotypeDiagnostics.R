@@ -72,6 +72,13 @@ eval = NOT_CRAN
 #                                 cohortDiagnostics = list("cohortSurvival" = TRUE),
 #                                 populationDiagnostics = list())
 
+## -----------------------------------------------------------------------------
+# options("PhenotypeR_summariseLargeScaleCharacteristics_window" = list(c(0, 0)))
+
+## -----------------------------------------------------------------------------
+# options("PhenotypeR_summariseLargeScaleCharacteristics_eventInWindow"   = c("condition_occurrence"))
+# options("PhenotypeR_summariseLargeScaleCharacteristics_episodeInWindow" = c("drug_exposure"))
+
 ## ----eval=FALSE---------------------------------------------------------------
 # exportSummarisedResult(diagnostics, path = here::here(), minCellCount = 5)
 
